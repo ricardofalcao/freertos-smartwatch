@@ -1,5 +1,4 @@
-#ifndef _APP_CLOCK_H
-#define _APP_CLOCK_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -17,5 +16,3 @@ class App_Clock : public App {
         void onClose() override;   
 
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef _APP_H
-#define _APP_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -34,5 +33,3 @@ class App {
 
         
 };
-
-#endif
