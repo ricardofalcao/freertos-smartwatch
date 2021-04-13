@@ -8,13 +8,12 @@
 #endif
 
 
-App::App(String _name, String _description, int _priority) {
+App::App(String _name, String _description) {
     name = _name;
     description = _description;
-    priority = _priority;
 }
 
-void run_app_task(void *pvParameters)
+void _run_app_task(void *pvParameters)
 {
   App * c = (App *) pvParameters;
   
@@ -28,13 +27,13 @@ void run_app_task(void *pvParameters)
 
 void App::open() {
     xTaskCreatePinnedToCore(
-        run_app_task,
+        _run_app_task,
         name.c_str(),
-        1024,
+        stack_depth,
         this,
-        1,
+        priority,
         &task_handle,
-        ARDUINO_RUNNING_CORE
+        target_core
     );
 }
 

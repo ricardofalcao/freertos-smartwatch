@@ -3,20 +3,22 @@
 
 #include <Arduino.h>
 
-#define APP_NOTIFICATION_FLAG_CLOSE 0x01
-
 class App {
     public:
         String name;
         String description;
-        int priority;
+
         bool running = false;
 
-    private:
+    protected:
+        unsigned int priority = 1;
+        uint32_t stack_depth = 1024;
+        int target_core = 1;
+
         TaskHandle_t task_handle;
 
     public:
-        App(String name, String description, int priority);
+        App(String name, String description);
 
         void open();
         bool close();
