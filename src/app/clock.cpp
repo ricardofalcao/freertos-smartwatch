@@ -1,5 +1,6 @@
 #include "app/clock.h"
 
+#include "graphics.h"
 
 App_Clock::App_Clock() : App("Clock", "Shows the current time") {
     priority = 1;
@@ -12,6 +13,7 @@ void App_Clock::onOpen() {
 
 void App_Clock::onTick() {
     Serial.println("[Clock] Tick");
+    graphics.drawRectangle(0, 0, 10, 10, TFT_RED);
     vTaskDelay(1000 / portTICK_RATE_MS);
 }
 
