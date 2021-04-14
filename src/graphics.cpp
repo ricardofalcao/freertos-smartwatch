@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include "tft.h"
 
 GOperation_t receive_buffer;
 
@@ -15,8 +16,6 @@ void graphics_task(void * pvParameters) {
 
 Graphics::Graphics() {
     operation_queue = xQueueCreate(GRAPHICS_OPERATION_QUEUE_SIZE, sizeof(GOperation_t));
-    
-    tft.init();
 }
 
 void Graphics::begin() {
@@ -33,65 +32,67 @@ void Graphics::begin() {
 
 void Graphics::onTick() {
     if (xQueueReceive(operation_queue, &receive_buffer, portMAX_DELAY)) {
-        switch(receive_buffer.type) {
-            case DRAW_RECTANGLE: {
-                Rectangle_t * rect = (Rectangle_t *) receive_buffer.pvData;
-                tft.drawRect(rect->x, rect->y, rect->width, rect->height, rect->color);
-                break;
+        if (xSemaphoreTake(spi_mutex, portMAX_DELAY) == pdTRUE) {
+            switch(receive_buffer.type) {
+                case DRAW_RECTANGLE: {
+                    Rectangle_t * rect = (Rectangle_t *) receive_buffer.pvData;
+                    tft.drawRect(rect->x, rect->y, rect->width, rect->height, rect->color);
+                    Serial.printf("Drawing %d %d %d %d %d\n", rect->x, rect->y, rect->width, rect->height, rect->color);
+                    break;
+                }
+
+                case FILL_RECTANGLE: {
+                    Rectangle_t * rect = (Rectangle_t *) receive_buffer.pvData;
+                    tft.fillRect(rect->x, rect->y, rect->width, rect->height, rect->color);
+                    break;
+                }
+
+                //
+
+                case DRAW_CIRCLE: {
+                    Circle_t * circle = (Circle_t *) receive_buffer.pvData;
+                    tft.drawCircle(circle->x, circle->y, circle->radius, circle->color);
+                    break;
+                }
+
+                case FILL_CIRCLE: {
+                    Circle_t * circle = (Circle_t *) receive_buffer.pvData;
+                    tft.fillCircle(circle->x, circle->y, circle->radius, circle->color);
+                    break;
+                }
+
+                //
+
+                case DRAW_TRIANGLE: {
+                    Triangle_t * tri = (Triangle_t *) receive_buffer.pvData;
+                    tft.drawTriangle(tri->x1, tri->y1, tri->x2, tri->y2, tri->x3, tri->y3, tri->color);
+                    break;
+                }
+
+                case FILL_TRIANGLE: {
+                    Triangle_t * tri = (Triangle_t *) receive_buffer.pvData;
+                    tft.fillTriangle(tri->x1, tri->y1, tri->x2, tri->y2, tri->x3, tri->y3, tri->color);
+                    break;
+                }
+
+                //
+
+                case DRAW_LINE: {
+                    Line_t * line = (Line_t *) receive_buffer.pvData;
+                    tft.drawLine(line->xstart, line->ystart, line->xend, line->yend, line->color);
+                    break;
+                }
+
+                case DRAW_PIXEL: {
+                    Pixel_t * pixel = (Pixel_t *) receive_buffer.pvData;
+                    tft.drawPixel(pixel->x, pixel->y, pixel->color);
+                    break;
+                }
             }
 
-            case FILL_RECTANGLE: {
-                Rectangle_t * rect = (Rectangle_t *) receive_buffer.pvData;
-                tft.fillRect(rect->x, rect->y, rect->width, rect->height, rect->color);
-                break;
-            }
-
-            //
-
-            case DRAW_CIRCLE: {
-                Circle_t * circle = (Circle_t *) receive_buffer.pvData;
-                tft.drawCircle(circle->x, circle->y, circle->radius, circle->color);
-                break;
-            }
-
-            case FILL_CIRCLE: {
-                Circle_t * circle = (Circle_t *) receive_buffer.pvData;
-                tft.fillCircle(circle->x, circle->y, circle->radius, circle->color);
-                break;
-            }
-
-            //
-
-            case DRAW_TRIANGLE: {
-                Triangle_t * tri = (Triangle_t *) receive_buffer.pvData;
-                tft.drawTriangle(tri->x1, tri->y1, tri->x2, tri->y2, tri->x3, tri->y3, tri->color);
-                break;
-            }
-
-            case FILL_TRIANGLE: {
-                Triangle_t * tri = (Triangle_t *) receive_buffer.pvData;
-                tft.fillTriangle(tri->x1, tri->y1, tri->x2, tri->y2, tri->x3, tri->y3, tri->color);
-                break;
-            }
-
-            //
-
-            case DRAW_LINE: {
-                Line_t * line = (Line_t *) receive_buffer.pvData;
-                tft.drawLine(line->xstart, line->ystart, line->xend, line->yend, line->color);
-                break;
-            }
-
-            case DRAW_PIXEL: {
-                Pixel_t * pixel = (Pixel_t *) receive_buffer.pvData;
-                tft.drawPixel(pixel->x, pixel->y, pixel->color);
-                break;
-            }
-
-
+            xSemaphoreGive(spi_mutex);
+            vPortFree(receive_buffer.pvData);
         }
-
-        vPortFree(receive_buffer.pvData);
     }
 }
 

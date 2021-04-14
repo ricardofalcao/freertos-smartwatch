@@ -2,7 +2,7 @@
 
 
 App_Alert::App_Alert() : App("Alert", "Schedules and event") {
-    priority = 1;
+    priority = 3;
     stack_depth = 1024;
 }
 

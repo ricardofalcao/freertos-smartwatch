@@ -90,7 +90,6 @@ typedef struct {
 
 class Graphics {
     private:
-        TFT_eSPI tft;
         QueueHandle_t operation_queue;
 
     public:
