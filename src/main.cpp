@@ -8,12 +8,15 @@
 
 #include "app/clock.h"
 #include "app/alert.h"
+#include "app/tictactoe.h"
 
 Touch touch;
 Graphics graphics;
 
 App_Clock clock_app;
 App_Alert alert_app;
+
+App_TicTacToe tictactoe_app;
 
 void setup() {
   Serial.begin(115200);
@@ -36,8 +39,10 @@ void setup() {
   touch.begin();
   graphics.begin();
 
-  clock_app.open();
+  //clock_app.open();
   //alert_app.open();
+  tictactoe_app.open();
+
 }
 
 void loop() {
