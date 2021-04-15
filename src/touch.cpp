@@ -102,3 +102,39 @@ TouchData Touch::getData() {
     xQueuePeek(data_queue, &data, 0);
     return data;
 }
+
+void Touch::callListeners(TouchListener * listeners, size_t listeners_length) {
+    TouchData data = getData();
+
+    for(size_t i = 0; i < listeners_length; i++) {
+        listeners[i].active = listeners[i].contains(data.x, data.y);
+    }
+}
+
+/*
+
+*/
+
+RectangleTouchListener::RectangleTouchListener(int32_t _x, int32_t _y, int32_t _width, int32_t _height) : TouchListener() {
+    x = _x;
+    y = _y;
+    width = _width;
+    height = _height;
+}
+
+bool RectangleTouchListener::contains(uint16_t _x, uint16_t _y) {
+    return (x <= _x && y <= _y) && (_x < (x + width) && y < (y + height));
+}
+
+CircleTouchListener::CircleTouchListener(int32_t _x, int32_t _y, int32_t _radius) : TouchListener() {
+    x = _x;
+    y = _y;
+    radius = _radius;
+}
+
+bool CircleTouchListener::contains(uint16_t _x, uint16_t _y) {
+    int32_t dx = _x - x;
+    int32_t dy = _y - y;
+
+    return (dx * dx + dy*dy) <= (radius * radius);
+}
