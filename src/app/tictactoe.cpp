@@ -2,11 +2,11 @@
 
 #include "graphics.h"
 
-#define MARGIN_X 35
-#define MARGIN_Y 35
+#define MARGIN_X        35
+#define MARGIN_Y        35
 
-#define MICRO_MARGIN_X 10
-#define MICRO_MARGIN_Y 10
+#define MICRO_MARGIN_X  10
+#define MICRO_MARGIN_Y  10
 
 #define BOARD_WIDTH     (TFT_WIDTH - (MARGIN_X * 2))
 #define BOARD_HEIGHT    (BOARD_WIDTH)
