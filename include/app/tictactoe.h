@@ -5,11 +5,10 @@
 #include "touch.h"
 #include "app/app.h"
 
-#define TOUCH_LISTENERS 9
-
 class App_TicTacToe : public App {
     private:
-        TouchListener touch_listeners[TOUCH_LISTENERS];
+        bool ended = false;
+        bool empty = true;
 
     public:
         App_TicTacToe();
@@ -19,5 +18,10 @@ class App_TicTacToe : public App {
         void onTick() override;   
 
         void onClose() override;   
+
+    private:
+        bool check_winner();
+
+        bool check_click_reset(TouchData data);
 
 };

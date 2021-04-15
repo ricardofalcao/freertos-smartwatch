@@ -13,6 +13,32 @@ struct TouchData {
 
 */
 
+
+struct RectangleTouchListener {
+    int32_t x;
+    int32_t y;
+    int32_t width;
+    int32_t height;
+
+    RectangleTouchListener(int32_t x = 0, int32_t y = 0, int32_t width = 0, int32_t height = 0);
+
+    bool contains(TouchData data);
+};
+
+class CircleTouchListener {
+    int32_t x;
+    int32_t y;
+    int32_t radius;
+
+    CircleTouchListener(int32_t x, int32_t y, int32_t radius);
+
+    bool contains(TouchData data);
+};
+
+/*
+
+*/
+
 class Touch {
     private:
         QueueHandle_t data_queue;
@@ -28,49 +54,8 @@ class Touch {
 
         TouchData getData();
 
-        void callListeners(TouchListener * listeners, size_t listeners_length);
+        TouchData waitData();
 
 };
 
 extern Touch touch;
-
-/*
-
-*/
-
-
-class TouchListener {
-    public:
-        bool active;
-
-    public:
-        TouchListener();
-
-        virtual bool contains(uint16_t x, uint16_t y)
-        { };
-};
-
-class RectangleTouchListener : public TouchListener {
-    public:
-        int32_t x;
-        int32_t y;
-        int32_t width;
-        int32_t height;
-
-    public:
-        RectangleTouchListener(int32_t x, int32_t y, int32_t width, int32_t height);
-
-        bool contains(uint16_t x, uint16_t y) override;
-};
-
-class CircleTouchListener : public TouchListener {
-    public:
-        int32_t x;
-        int32_t y;
-        int32_t radius;
-
-    public:
-        CircleTouchListener(int32_t x, int32_t y, int32_t radius);
-
-        bool contains(uint16_t x, uint16_t y) override;
-};

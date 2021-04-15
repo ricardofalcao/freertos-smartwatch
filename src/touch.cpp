@@ -74,7 +74,7 @@ void Touch::begin() {
       "Touch",
       4096,
       this,
-      2,
+      10,
       NULL,
       0
   );
@@ -86,12 +86,16 @@ void Touch::onTick() {
         data.pressed = tft.getTouch(&data.x, &data.y);
 
 #ifdef TOUCH_DEBUG
-        Serial.printf("%d %d\n", data.x, data.y);
+        Serial.printf("%d %d %d\n", data.x, data.y, data.pressed);
 #endif
 
         xSemaphoreGive(spi_mutex);
 
-        xQueueOverwrite(data_queue, &data);
+        xQueueReset(data_queue);
+
+        if (data.pressed) {
+            xQueueSendToFront(data_queue, &data, 0);
+        }
 
         vTaskDelay(100 / portTICK_RATE_MS);
     }
@@ -103,38 +107,36 @@ TouchData Touch::getData() {
     return data;
 }
 
-void Touch::callListeners(TouchListener * listeners, size_t listeners_length) {
-    TouchData data = getData();
-
-    for(size_t i = 0; i < listeners_length; i++) {
-        listeners[i].active = listeners[i].contains(data.x, data.y);
-    }
+TouchData Touch::waitData() {
+    TouchData data;
+    xQueuePeek(data_queue, &data, portMAX_DELAY);
+    return data;
 }
 
 /*
 
 */
 
-RectangleTouchListener::RectangleTouchListener(int32_t _x, int32_t _y, int32_t _width, int32_t _height) : TouchListener() {
+RectangleTouchListener::RectangleTouchListener(int32_t _x, int32_t _y, int32_t _width, int32_t _height) {
     x = _x;
     y = _y;
     width = _width;
     height = _height;
 }
 
-bool RectangleTouchListener::contains(uint16_t _x, uint16_t _y) {
-    return (x <= _x && y <= _y) && (_x < (x + width) && y < (y + height));
+bool RectangleTouchListener::contains(TouchData data) {
+    return (x <= data.x && y <= data.y) && (data.x < (x + width) && data.y < (y + height));
 }
 
-CircleTouchListener::CircleTouchListener(int32_t _x, int32_t _y, int32_t _radius) : TouchListener() {
+CircleTouchListener::CircleTouchListener(int32_t _x, int32_t _y, int32_t _radius) {
     x = _x;
     y = _y;
     radius = _radius;
 }
 
-bool CircleTouchListener::contains(uint16_t _x, uint16_t _y) {
-    int32_t dx = _x - x;
-    int32_t dy = _y - y;
+bool CircleTouchListener::contains(TouchData data) {
+    int32_t dx = data.x - x;
+    int32_t dy = data.y - y;
 
     return (dx * dx + dy*dy) <= (radius * radius);
 }

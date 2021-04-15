@@ -46,8 +46,8 @@ void setup() {
   touch.calibrate();
   tft.fillScreen(TFT_WHITE);
 
-  esp_Wconnect(WIFI_NETWORK, WIFI_PASS, 10000);
-        esp_Wsync_time();
+  //esp_Wconnect(WIFI_NETWORK, WIFI_PASS, 10000);
+  //esp_Wsync_time();
 
   touch.begin();
   graphics.begin();

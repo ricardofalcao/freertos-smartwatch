@@ -14,6 +14,13 @@
 #define CELL_WIDTH      (int) (BOARD_WIDTH / 3.0)
 #define CELL_HEIGHT     (int) (BOARD_HEIGHT / 3.0)
 
+#define PLACE_X         1
+#define PLACE_O         2
+
+#define CELL_TOUCH_LISTENERS 9
+#define CELL_TOUCH_LISTENER
+
+#define STATE_DRAW      3
 
 /*
     place array IDs:
@@ -29,24 +36,62 @@
     Draw          : 3  
     
 */
+    
+int winPos[8][3] = {
+    {0, 1, 2},
+    {3, 4, 5},
+    {6, 7, 8},
+
+    {0, 3, 6},
+    {1, 4, 7},
+    {2, 5, 8},
+
+    {0, 4, 8},
+    {2, 4, 6}
+};
 
 int places[9];
+RectangleTouchListener cell_touch_listeners[CELL_TOUCH_LISTENERS];
 
-void _printWinningLine(int8_t pos) {
-    if(pos < 4) graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT/2 + CELL_HEIGHT*(pos-1), MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT/2 + CELL_HEIGHT*(pos-1), TFT_BLACK);
-    if(pos >= 4 && pos < 7) graphics.drawLine(MARGIN_X + CELL_WIDTH/2 + CELL_WIDTH*(pos-4), MARGIN_Y, MARGIN_X + CELL_WIDTH/2 + CELL_WIDTH*(pos-4), MARGIN_Y + BOARD_HEIGHT, TFT_BLACK);
-    if(pos == 7)graphics.drawLine(MARGIN_X, MARGIN_Y, MARGIN_X + CELL_WIDTH, MARGIN_Y + CELL_HEIGHT, TFT_BLACK);
-    if(pos == 8)graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT, MARGIN_X + CELL_WIDTH, MARGIN_Y, TFT_BLACK);   
+RectangleTouchListener reset_touch_listener;
+
+/*
+    Graphics
+*/
+
+void _print_winning_line(int8_t layout) {
+    Serial.printf("Layout: %d\n", layout);
+
+    if(layout < 3) {
+        graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT*layout + CELL_HEIGHT/2, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT*layout + CELL_HEIGHT/2, TFT_ORANGE, 6);
+        return;
+    }
+
+    if(layout < 6) {
+        graphics.drawLine(MARGIN_X + CELL_WIDTH/2 + CELL_WIDTH*(layout-3), MARGIN_Y, MARGIN_X + CELL_WIDTH/2 + CELL_WIDTH*(layout-3), MARGIN_Y + BOARD_HEIGHT, TFT_ORANGE, 6);
+        return;
+    }
+
+    if(layout == 6) {
+        graphics.drawLine(MARGIN_X, MARGIN_Y, MARGIN_X + BOARD_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_ORANGE, 6);
+        return;
+    }
+
+    graphics.drawLine(MARGIN_X, MARGIN_Y + BOARD_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y, TFT_ORANGE, 6);   
 }
 
-void _printGrid() {
+void _clear_grid() {
+    graphics.fillRectangle(MARGIN_X - 10, MARGIN_Y - 10, BOARD_WIDTH + 10, BOARD_HEIGHT + 10, TFT_WHITE);
+}
+
+void _print_grid() {
     graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT, TFT_BLACK, 5);
     graphics.drawLine(MARGIN_X, MARGIN_Y + 2 * CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + 2 * CELL_HEIGHT, TFT_BLACK, 5);
     graphics.drawLine(MARGIN_X + CELL_WIDTH, MARGIN_Y, MARGIN_X + CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
     graphics.drawLine(MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y, MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
 }
 
-void _printX(int8_t cell) {
+void _print_x(int8_t cell) {
 
     int line = (int)floor(cell / 3.0f);
     int column = (cell % 3);
@@ -60,7 +105,7 @@ void _printX(int8_t cell) {
 
 }
 
-void _printO(int8_t cell) {
+void _print_o(int8_t cell) {
 
     int line = (int)floor(cell / 3.0f);
     int column = (cell % 3);
@@ -72,25 +117,51 @@ void _printO(int8_t cell) {
 
 }
 
-void Erase_Cell(int8_t cell) {
+void _erase_cell(int8_t cell) {
     int line = (int)floor(cell / 3.0f);
     int column = (cell % 3);
 
     int X = MARGIN_X + column*CELL_WIDTH + MICRO_MARGIN_X;
     int Y = MARGIN_Y + line*CELL_HEIGHT + MICRO_MARGIN_Y;
 
-    graphics.fillRectangle(X, Y, X + CELL_WIDTH - 2 * MICRO_MARGIN_X, Y + CELL_HEIGHT - 2 * MICRO_MARGIN_Y, TFT_WHITE);
+    graphics.fillRectangle(X, Y, CELL_WIDTH - 2 * MICRO_MARGIN_X, CELL_HEIGHT - 2 * MICRO_MARGIN_Y, TFT_WHITE);
 }
 
-void placeX(int32_t cell) {
-    places[cell] = 1;
+/*
+    Data structures
+*/
+
+void _place_x(int32_t cell) {
+    places[cell] = PLACE_X;
 }
 
-void placeO(int32_t cell) {
-    places[cell] = 2;
+void _place_o(int32_t cell) {
+    places[cell] = PLACE_O;
 }
 
-int checkWinner()
+/*
+    Listeners
+*/
+
+int _check_click_cells(TouchData data) {
+    for(int i = 0; i < 9; i++) {
+        if (places[i] != 0) {
+            continue;
+        }
+
+        if (cell_touch_listeners[i].contains(data)) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+/*
+
+*/
+
+int _get_winner(uint8_t * layout)
 {
     bool draw_check = true;
 
@@ -101,101 +172,170 @@ int checkWinner()
         }
     }
 
-    if(draw_check) return 3;  
-    
-    if (places[0] != 0 && places[0] == places[1] && places[1] == places[2]) return places[0]*10 + 1; 
+    if(draw_check) {
+        return 3;
+    }  
 
-    if (places[3] != 0 && places[3] == places[4] && places[4] == places[5]) return places[3]*10 + 2;
+    for(int i = 0; i < 8; i++) {
+        int player = places[winPos[i][0]];
+        if (player == 0) {
+            continue;
+        }
 
-    if (places[6] != 0 && places[6] == places[7] && places[6] == places[8]) return places[6]*10 + 3;
+        bool valid = true;
+        for(int j = 1; j < 3; j++) {
+            if (places[winPos[i][j]] != player) {
+                valid = false;
+                break;
+            }
+        }
 
-    if (places[0] != 0 && places[0] == places[3] && places[3] == places[6]) return places[1]*10 + 4;
-
-    if (places[1] != 0 && places[1] == places[4] && places[1] == places[7]) return places[2]*10 + 5;
-
-    if (places[2] != 0 && places[2] == places[5] && places[2] == places[8]) return places[0]*10 + 6;
-
-    if (places[0] != 0 && places[0] == places[4] && places[0] == places[8]) return places[0]*10 + 7;
-
-    if (places[2] != 0 && places[2] == places[4] && places[2] == places[6]) return places[2]*10 + 8;
+        if (valid) {
+            *layout = i;
+            return player;
+        }
+    }
 
     return 0;
-    
-
 }
+
+/*
+
+*/
 
 App_TicTacToe::App_TicTacToe() : App("TicTacToe", "Let's play a game") {
     priority = 3;
-    stack_depth = 2048;
+    stack_depth = 4096;
 }
 
 void App_TicTacToe::onOpen() {
     Serial.println("[TicTacToe] OPEN");
 
+    for(uint8_t i = 0; i < 9; i++) {
+        int line = (int)floor(i / 3.0f);
+        int column = (i % 3);
 
-}
+        int X = MARGIN_X + column*CELL_WIDTH;
+        int Y = MARGIN_Y + line*CELL_HEIGHT;
 
-void App_TicTacToe::onTick() {
-
-    Serial.println("[TicTacToe] Tick");
-
-    int play = 0;
-
-    for(int i=0; i<9;i++) Erase_Cell(i);       
-    
-    while(true) {
-        printf("Player 1 make your Move: ");
-        scanf("%d", &play);
-
-        placeX(play);
-        _printX(play);
-
-        if (checkWinner() != 0)
-        {
-            if (checkWinner() == 3) printf("It's a draw!");
-            else {
-                if(checkWinner() > 10 && checkWinner() < 19 ) { //player 1 wins
-                    printf("Player 1 wins!");
-                    _printWinningLine(checkWinner() - 10);
-                }
-                else{                                           //player 2 wins
-                    printf("Player 1 wins!");
-                    _printWinningLine(checkWinner() - 20);
-                }
-            break;
-            }
-        }
-    
-        printf("Player 2 make your Move: ");
-        scanf("%d", &play);
-
-        placeO(play);
-        _printO(play);
-
-        if (checkWinner() != 0)
-        {
-            if (checkWinner() == 3) printf("It's a draw!");
-            else {
-                if(checkWinner() > 10 && checkWinner() < 19 ) { //player 1 wins
-                    printf("Player 1 wins!");
-                    _printWinningLine(checkWinner() - 10);
-                }
-                else{                                           //player 2 wins
-                    printf("Player 1 wins!");
-                    _printWinningLine(checkWinner() - 20);
-                }
-            break;
-            }
-        }
-
+        cell_touch_listeners[i].x = X;
+        cell_touch_listeners[i].y = Y;
+        cell_touch_listeners[i].width = CELL_WIDTH;
+        cell_touch_listeners[i].height = CELL_HEIGHT;
     }
 
+    _print_grid();
 
+    for(int i = 0; i < 9;i++) {
+        _erase_cell(i);   
+    }
 
+    graphics.fillRectangle(10, TFT_HEIGHT - 40 - 10, TFT_WIDTH - 2*10, 40, TFT_PURPLE);
+    reset_touch_listener.x = 10;
+    reset_touch_listener.y = TFT_HEIGHT - 40 - 10;
+    reset_touch_listener.width = TFT_WIDTH - 2*10;
+    reset_touch_listener.height = 40;
+}
+void App_TicTacToe::onTick() {
+    if (ended) {
+        TouchData data = touch.waitData();
+        check_click_reset(data);
+        return;
+    }
+
+    int play;
+
+    do {
+        TouchData data = touch.waitData();
+
+        if (check_click_reset(data)) {
+            return;
+        }
+
+        play = _check_click_cells(data);
+    } while(play == -1);
+
+    _place_x(play);
+    empty = false;
+    _print_x(play);
+
+    if (check_winner()) {
+        return;
+    }
+    
+    do {
+        TouchData data = touch.waitData();
+
+        if (check_click_reset(data)) {
+            return;
+        }
+
+        play = _check_click_cells(data);
+    } while(play == -1);
+
+    _place_o(play);
+    empty = false;
+    _print_o(play);
+
+    if (check_winner()) {
+        return;
+    }
 }
 
 void App_TicTacToe::onClose() {
     Serial.println("[TicTacToe] Closed");
 }
 
+/*
+
+*/
+
+bool App_TicTacToe::check_winner() {
+    uint8_t layout;
+    int win = _get_winner(&layout);
+
+    switch(win) {
+        case STATE_DRAW: {
+            Serial.println("It's a draw!");
+            return true;
+        }
+
+        case 2: {
+            ended = true;
+            Serial.println("Player 2 wins!");
+            _print_winning_line(layout);
+            return true;
+        }
+        
+        case 1: {
+            ended = true;
+            Serial.println("Player 1 wins!");
+            _print_winning_line(layout);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool App_TicTacToe::check_click_reset(TouchData data) {
+    if (empty) {
+        return false;
+    }
+
+    if (reset_touch_listener.contains(data)) {
+        for(int i = 0; i < 9; i++) {
+            places[i] = 0;
+        }
+
+        empty = true;
+        ended = false;
+
+        _clear_grid();
+        _print_grid();
+        return true;
+    }
+
+    return false;
+}
 
