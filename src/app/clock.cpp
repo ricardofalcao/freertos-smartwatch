@@ -1,35 +1,37 @@
 #include "app/clock.h"
 
+#include "esp_wifi.h"
+#include "time.h"
+
 #include "touch.h"
 #include "graphics.h"
 
 App_Clock::App_Clock() : App("Clock", "Shows the current time") {
     priority = 3;
-    stack_depth = 1024;
+    stack_depth = 10240;
 }
 
 void App_Clock::onOpen() {
     Serial.println("[Clock] OPEN");
 
-    graphics.drawCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 100, TFT_BLACK);
-    graphics.drawCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 99, TFT_BLACK);
-    graphics.drawCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 98, TFT_BLACK);
-    graphics.drawCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 97, TFT_BLACK);
-
+    graphics.drawCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 99, TFT_BLACK, 5);
     graphics.fillCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 3, TFT_BLACK);
 }
 
-void _draw_line(uint8_t seconds, uint32_t color) {
-    float angle = (seconds % 60) * 360 / 60;
-    float size = 95;
+void _draw_line(float angle, float size, uint32_t color) {
 
-    int32_t x = size * cos(-angle);
-    int32_t y = size * sin(-angle);
+    int32_t x = size * cos(angle);
+    int32_t y = size * sin(angle);
 
     graphics.drawLine(TFT_WIDTH / 2, TFT_HEIGHT / 2, TFT_WIDTH / 2 + x, TFT_HEIGHT / 2 + y, color);
 }
 
 void App_Clock::onTick() {
+    old_time = current_time;
+    if(!getLocalTime(&current_time)){
+        esp_Wsync_time();
+    }
+
     TouchData touchData = touch.getData();
 
     if (touchData.pressed) {
@@ -49,12 +51,27 @@ void App_Clock::onTick() {
         graphics.fillCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 96, TFT_WHITE);
     }
 
-    _draw_line(seconds - 1, TFT_WHITE);
-    graphics.fillCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 3, TFT_BLACK);
-    _draw_line(seconds, TFT_BLACK);
+    float angle_s = old_time.tm_sec * 0.1047 - 1.5708;
+    _draw_line(angle_s, 96, TFT_WHITE);
 
-    seconds++;
-    vTaskDelay(100 / portTICK_RATE_MS);
+    float angle_m = old_time.tm_min * 0.1047 - 1.5708;
+    _draw_line(angle_m, 70, TFT_WHITE);
+
+    float angle_h = ((old_time.tm_hour % 12) + old_time.tm_min / 60.0) * 0.5236 - 1.5708;
+    _draw_line(angle_h, 50, TFT_WHITE);
+
+    angle_s = current_time.tm_sec * 0.1047 - 1.5708;
+    _draw_line(angle_s, 96, TFT_BLACK);
+
+    angle_m = current_time.tm_min * 0.1047 - 1.5708;
+    _draw_line(angle_m, 70, TFT_BLACK);
+
+    angle_h = ((current_time.tm_hour % 12) + current_time.tm_min / 60.0) * 0.5236 - 1.5708;
+    _draw_line(angle_h, 50, TFT_BLACK);
+
+    graphics.fillCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 3, TFT_BLACK);
+
+    vTaskDelay(1000 / portTICK_RATE_MS);
 }
 
 void App_Clock::onClose() {

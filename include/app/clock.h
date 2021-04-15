@@ -6,7 +6,8 @@
 
 class App_Clock : public App {
     private:
-        uint8_t seconds = 0;
+        tm current_time;
+        tm old_time;
 
     public:
         App_Clock();

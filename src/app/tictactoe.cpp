@@ -15,10 +15,10 @@
 #define CELL_HEIGHT     (int) (BOARD_HEIGHT / 3.0)
 
 void _printGrid() {
-    graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT, TFT_BLACK);
-    graphics.drawLine(MARGIN_X, MARGIN_Y + 2 * CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + 2 * CELL_HEIGHT, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + CELL_WIDTH, MARGIN_Y, MARGIN_X + CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y, MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK);
+    graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT, TFT_BLACK, 5);
+    graphics.drawLine(MARGIN_X, MARGIN_Y + 2 * CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + 2 * CELL_HEIGHT, TFT_BLACK, 5);
+    graphics.drawLine(MARGIN_X + CELL_WIDTH, MARGIN_Y, MARGIN_X + CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
+    graphics.drawLine(MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y, MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
 }
 
 void _printX(int8_t cell) {
@@ -32,8 +32,8 @@ void _printX(int8_t cell) {
     Serial.printf("%d %d %d\n", MARGIN_X, MICRO_MARGIN_X, CELL_WIDTH);
     Serial.printf("Line: %d, Col: %d, X: %d, Y: %d, X2: %d, Y2: %d\n", line, column, X, Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y);
 
-    graphics.drawLine(X, Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, TFT_RED);
-    graphics.drawLine(X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y, TFT_RED);
+    graphics.drawLine(X, Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, TFT_RED, 5);
+    graphics.drawLine(X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y, TFT_RED, 5);
 
 }
 
@@ -45,7 +45,7 @@ void _printO(int8_t cell) {
     int X = MARGIN_X + column*CELL_WIDTH + CELL_WIDTH/2;
     int Y = MARGIN_Y + line*CELL_HEIGHT + CELL_HEIGHT/2;
 
-    graphics.drawCircle(X,Y, CELL_WIDTH/2 - MICRO_MARGIN_X, TFT_SKYBLUE);
+    graphics.drawCircle(X,Y, CELL_WIDTH/2 - MICRO_MARGIN_X, TFT_SKYBLUE, 5);
 
 }
 
