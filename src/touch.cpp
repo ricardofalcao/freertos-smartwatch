@@ -3,6 +3,8 @@
 
 #include <FS.h>
 
+//#define TOUCH_DEBUG
+
 #define ALWAYS_CALIBRATE    false
 #define CALIBRATION_FILE    "/TouchCal"
 
@@ -70,7 +72,7 @@ void Touch::begin() {
     xTaskCreatePinnedToCore(
       touch_task,
       "Touch",
-      1024,
+      4096,
       this,
       2,
       NULL,
@@ -82,6 +84,11 @@ void Touch::onTick() {
     if (xSemaphoreTake(spi_mutex, portMAX_DELAY) == pdTRUE) {
         TouchData data;
         data.pressed = tft.getTouch(&data.x, &data.y);
+
+#ifdef TOUCH_DEBUG
+        Serial.printf("%d %d\n", data.x, data.y);
+#endif
+
         xSemaphoreGive(spi_mutex);
 
         xQueueOverwrite(data_queue, &data);

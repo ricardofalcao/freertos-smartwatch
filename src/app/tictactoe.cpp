@@ -40,22 +40,10 @@ void _printWinningLine(int8_t pos) {
 }
 
 void _printGrid() {
-    graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT, TFT_BLACK);
-    graphics.drawLine(MARGIN_X, MARGIN_Y + 2 * CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + 2 * CELL_HEIGHT, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + CELL_WIDTH, MARGIN_Y, MARGIN_X + CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y, MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK);
-
-    //next pixel
-    graphics.drawLine(MARGIN_X + 1, MARGIN_Y + CELL_HEIGHT + 1, MARGIN_X + BOARD_WIDTH + 1, MARGIN_Y + CELL_HEIGHT + 1, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + 1, MARGIN_Y + 2 * CELL_HEIGHT + 1, MARGIN_X + BOARD_WIDTH + 1, MARGIN_Y + 2 * CELL_HEIGHT + 1, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + CELL_WIDTH + 1, MARGIN_Y + 1, MARGIN_X + CELL_WIDTH + 1, MARGIN_Y + BOARD_HEIGHT + 1, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + 2 * CELL_WIDTH + 1, MARGIN_Y + 1, MARGIN_X + 2 * CELL_WIDTH + 1, MARGIN_Y + BOARD_HEIGHT + 1, TFT_BLACK);
-
-    //previous pixel
-    graphics.drawLine(MARGIN_X - 1, MARGIN_Y + CELL_HEIGHT - 1, MARGIN_X + BOARD_WIDTH - 1, MARGIN_Y + CELL_HEIGHT - 1, TFT_BLACK);
-    graphics.drawLine(MARGIN_X - 1, MARGIN_Y + 2 * CELL_HEIGHT - 1, MARGIN_X + BOARD_WIDTH - 1, MARGIN_Y + 2 * CELL_HEIGHT - 1, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + CELL_WIDTH + 1, MARGIN_Y - 1, MARGIN_X + CELL_WIDTH - 1, MARGIN_Y + BOARD_HEIGHT - 1, TFT_BLACK);
-    graphics.drawLine(MARGIN_X + 2 * CELL_WIDTH - 1, MARGIN_Y - 1, MARGIN_X + 2 * CELL_WIDTH - 1, MARGIN_Y + BOARD_HEIGHT - 1, TFT_BLACK);
+    graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT, TFT_BLACK, 5);
+    graphics.drawLine(MARGIN_X, MARGIN_Y + 2 * CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + 2 * CELL_HEIGHT, TFT_BLACK, 5);
+    graphics.drawLine(MARGIN_X + CELL_WIDTH, MARGIN_Y, MARGIN_X + CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
+    graphics.drawLine(MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y, MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
 }
 
 void _printX(int8_t cell) {
@@ -66,19 +54,10 @@ void _printX(int8_t cell) {
     int X = MARGIN_X + column*CELL_WIDTH + MICRO_MARGIN_X;
     int Y = MARGIN_Y + line*CELL_HEIGHT + MICRO_MARGIN_Y;
 
-    Serial.printf("%d %d %d\n", MARGIN_X, MICRO_MARGIN_X, CELL_WIDTH);
-    Serial.printf("Line: %d, Col: %d, X: %d, Y: %d, X2: %d, Y2: %d\n", line, column, X, Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y);
+    graphics.drawLine(X, Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, TFT_RED, 5);
+    graphics.drawLine(X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y, TFT_RED, 5);
 
-    graphics.drawLine(X, Y, X + CELL_WIDTH - 2 * MICRO_MARGIN_X, Y + CELL_HEIGHT - 2 * MICRO_MARGIN_Y, TFT_RED);
-    graphics.drawLine(X, Y + CELL_HEIGHT - 2 * MICRO_MARGIN_Y, X + CELL_WIDTH - 2 * MICRO_MARGIN_X, Y, TFT_RED);
 
-    //next pixel
-    graphics.drawLine(X + 1, Y + 1, X + CELL_WIDTH - 2 * MICRO_MARGIN_X + 1, Y + CELL_HEIGHT - 2 * MICRO_MARGIN_Y + 1, TFT_RED);
-    graphics.drawLine(X + 1, Y + CELL_HEIGHT - 2 * MICRO_MARGIN_Y + 1, X + CELL_WIDTH - 2 * MICRO_MARGIN_X + 1, Y + 1, TFT_RED);
-
-    //previous pixel
-    graphics.drawLine(X - 1, Y - 1, X + CELL_WIDTH - 2 * MICRO_MARGIN_X - 1, Y + CELL_HEIGHT - 2 * MICRO_MARGIN_Y - 1, TFT_RED);
-    graphics.drawLine(X - 1, Y - CELL_HEIGHT - 2 * MICRO_MARGIN_Y - 1, X + CELL_WIDTH - 2 * MICRO_MARGIN_X - 1, Y - 1, TFT_RED);
 }
 
 void _printO(int8_t cell) {
@@ -89,10 +68,8 @@ void _printO(int8_t cell) {
     int X = MARGIN_X + column*CELL_WIDTH + CELL_WIDTH/2;
     int Y = MARGIN_Y + line*CELL_HEIGHT + CELL_HEIGHT/2;
 
-    graphics.drawCircle(X, Y, CELL_WIDTH / 2 - MICRO_MARGIN_X, TFT_SKYBLUE);
-    graphics.drawCircle(X, Y, CELL_WIDTH / 2 - MICRO_MARGIN_X + 1, TFT_SKYBLUE); //next pixel
-    graphics.drawCircle(X, Y, CELL_WIDTH / 2 - MICRO_MARGIN_X - 1, TFT_SKYBLUE); //previous pixel
-    
+    graphics.drawCircle(X, Y, CELL_WIDTH/2 - MICRO_MARGIN_X, TFT_SKYBLUE, 5);
+
 }
 
 void Erase_Cell(int8_t cell) {
@@ -143,6 +120,7 @@ int checkWinner()
     if (places[2] != 0 && places[2] == places[4] && places[2] == places[6]) return places[2]*10 + 8;
 
     return 0;
+    
 
 }
 

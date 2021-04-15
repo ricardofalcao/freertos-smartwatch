@@ -36,7 +36,11 @@ void Graphics::onTick() {
             switch(receive_buffer.type) {
                 case DRAW_RECTANGLE: {
                     Rectangle_t * rect = (Rectangle_t *) receive_buffer.pvData;
-                    tft.drawRect(rect->x, rect->y, rect->width, rect->height, rect->color);
+                    
+                    for(int8_t i = -rect->thickness / 2; i < rect->thickness / 2; i++) {
+                        tft.drawRect(rect->x + i, rect->y + i, rect->width - i, rect->height - i, rect->color);
+                    }
+
                     Serial.printf("Drawing %d %d %d %d %d\n", rect->x, rect->y, rect->width, rect->height, rect->color);
                     break;
                 }
@@ -51,7 +55,11 @@ void Graphics::onTick() {
 
                 case DRAW_CIRCLE: {
                     Circle_t * circle = (Circle_t *) receive_buffer.pvData;
-                    tft.drawCircle(circle->x, circle->y, circle->radius, circle->color);
+
+                    for(int8_t i = -circle->thickness / 2; i < circle->thickness / 2 + circle->thickness % 2; i++) {
+                        tft.drawCircle(circle->x, circle->y, circle->radius + i, circle->color);
+                    }
+
                     break;
                 }
 
@@ -79,7 +87,18 @@ void Graphics::onTick() {
 
                 case DRAW_LINE: {
                     Line_t * line = (Line_t *) receive_buffer.pvData;
-                    tft.drawLine(line->xstart, line->ystart, line->xend, line->yend, line->color);
+                    int32_t dx = line->xend - line->xstart;
+                    int32_t dy = line->yend - line->ystart;
+
+                    float mag = sqrt(dx*dx + dy*dy);
+
+                    float p_dx = dy / mag;
+                    float p_dy = -dx / mag;
+
+                    for(int8_t i = -line->thickness / 2; i < line->thickness / 2; i++) {
+                        tft.drawLine(line->xstart + p_dx*i, line->ystart + p_dy*i, line->xend + p_dx*i, line->yend + p_dy*i, line->color);
+                    }
+
                     break;
                 }
 
@@ -100,26 +119,28 @@ void Graphics::onTick() {
 
 */
 
-Rectangle_t * _rectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color) {
+Rectangle_t * _rectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color, uint8_t thickness) {
     Rectangle_t * rectangle = (Rectangle_t *) pvPortMalloc(sizeof(Rectangle_t));
     rectangle->x = x;
     rectangle->y = y;
     rectangle->width = width;
     rectangle->height = height;
     rectangle->color = color;
+    rectangle->thickness = thickness;
     return rectangle;
 }
 
-Circle_t * _circle(int32_t x, int32_t y, int32_t radius, uint32_t color) {
+Circle_t * _circle(int32_t x, int32_t y, int32_t radius, uint32_t color, uint8_t thickness) {
     Circle_t * circle = (Circle_t *) pvPortMalloc(sizeof(Circle_t));
     circle->x = x;
     circle->y = y;
     circle->radius = radius;
     circle->color = color;
+    circle->thickness = thickness;
     return circle;
 }
 
-Triangle_t * _triangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color) {
+Triangle_t * _triangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color, uint8_t thickness) {
     Triangle_t * triangle = (Triangle_t *) pvPortMalloc(sizeof(Triangle_t));
     triangle->x1 = x1;
     triangle->y1 = y1;
@@ -128,16 +149,18 @@ Triangle_t * _triangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x
     triangle->x3 = x3;
     triangle->y3 = y3;
     triangle->color = color;
+    triangle->thickness = thickness;
     return triangle;
 }
 
-Line_t * _line(int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color) {
+Line_t * _line(int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color, uint8_t thickness) {
     Line_t * line = (Line_t *) pvPortMalloc(sizeof(Line_t));
     line->xstart = xstart;
     line->ystart = ystart;
     line->xend = xend;
     line->yend = yend;
     line->color = color;
+    line->thickness = thickness;
     return line;
 }
 
@@ -151,10 +174,10 @@ Pixel_t * _pixel(int32_t x, int32_t y, uint32_t color) {
 
 //
 
-void Graphics::drawRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color) {
+void Graphics::drawRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color, uint8_t thickness) {
     const GOperation_t operation = {
         .type = DRAW_RECTANGLE,
-        .pvData = (void *) _rectangle(x, y, width, height, color)
+        .pvData = (void *) _rectangle(x, y, width, height, color, thickness)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
@@ -163,7 +186,7 @@ void Graphics::drawRectangle(int32_t x, int32_t y, int32_t width, int32_t height
 void Graphics::fillRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color) {
     const GOperation_t operation = {
         .type = FILL_RECTANGLE,
-        .pvData = (void *) _rectangle(x, y, width, height, color)
+        .pvData = (void *) _rectangle(x, y, width, height, color, 0)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
@@ -171,10 +194,10 @@ void Graphics::fillRectangle(int32_t x, int32_t y, int32_t width, int32_t height
 
 //
 
-void Graphics::drawCircle(int32_t x, int32_t y, int32_t radius, uint32_t color) {
+void Graphics::drawCircle(int32_t x, int32_t y, int32_t radius, uint32_t color, uint8_t thickness) {
     const GOperation_t operation = {
         .type = DRAW_CIRCLE,
-        .pvData = (void *) _circle(x, y, radius, color)
+        .pvData = (void *) _circle(x, y, radius, color, thickness)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
@@ -183,7 +206,7 @@ void Graphics::drawCircle(int32_t x, int32_t y, int32_t radius, uint32_t color) 
 void Graphics::fillCircle(int32_t x, int32_t y, int32_t radius, uint32_t color) {
     const GOperation_t operation = {
         .type = FILL_CIRCLE,
-        .pvData = (void *) _circle(x, y, radius, color)
+        .pvData = (void *) _circle(x, y, radius, color, 0)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
@@ -191,10 +214,10 @@ void Graphics::fillCircle(int32_t x, int32_t y, int32_t radius, uint32_t color) 
 
 //
 
-void Graphics::drawTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color) {
+void Graphics::drawTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color, uint8_t thickness) {
     const GOperation_t operation = {
         .type = DRAW_TRIANGLE,
-        .pvData = (void *) _triangle(x1, y1, x2, y2, x3, y3, color)
+        .pvData = (void *) _triangle(x1, y1, x2, y2, x3, y3, color, thickness)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
@@ -203,16 +226,16 @@ void Graphics::drawTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int3
 void Graphics::fillTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color) {
     const GOperation_t operation = {
         .type = FILL_TRIANGLE,
-        .pvData = (void *) _triangle(x1, y1, x2, y2, x3, y3, color)
+        .pvData = (void *) _triangle(x1, y1, x2, y2, x3, y3, color, 0)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
 }
 
-void Graphics::drawLine(int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color) {
+void Graphics::drawLine(int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color, uint8_t thickness) {
     const GOperation_t operation = {
         .type = DRAW_LINE,
-        .pvData = (void *) _line(xstart, ystart, xend, yend, color)
+        .pvData = (void *) _line(xstart, ystart, xend, yend, color, thickness)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
