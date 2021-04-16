@@ -91,9 +91,10 @@ void Touch::onTick() {
 
         xSemaphoreGive(spi_mutex);
 
-        xQueueReset(data_queue);
+        TouchData oldData;
+        xQueueReceive(data_queue, &oldData, 0);
 
-        if (data.pressed) {
+        if (oldData.pressed != data.pressed || oldData.x != data.x || oldData.y != data.y) {
             xQueueSendToFront(data_queue, &data, 0);
         }
 
