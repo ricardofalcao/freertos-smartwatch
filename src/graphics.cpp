@@ -54,6 +54,23 @@ typedef struct {
 
 } Pixel_t;
 
+typedef struct {
+
+    int32_t x;
+    int32_t y;
+    const char * str;
+    uint8_t datum;
+    uint32_t color;
+    uint8_t font_size;
+
+} String_t;
+
+typedef struct {
+
+    uint32_t color;
+
+} Screen_t;
+
 /*
 
 */
@@ -164,6 +181,25 @@ void Graphics::onTick() {
                     tft.drawPixel(pixel->x, pixel->y, pixel->color);
                     break;
                 }
+
+                case DRAW_STRING: {
+                    String_t * text = (String_t *) receive_buffer.pvData;
+
+                    //tft.loadFont("NotoSans-Regular20");
+                    tft.setTextColor(text->color);
+                    tft.setTextSize(text->font_size);
+                    tft.setTextDatum(text->datum);
+                    tft.drawString(text->str, text->x, text->y);
+                    //tft.unloadFont();
+
+                    break;
+                }
+
+                case FILL_SCREEN: {
+                    Screen_t * screen = (Screen_t *) receive_buffer.pvData;
+                    tft.fillScreen(screen->color);
+                    break;
+                }
             }
 
             xSemaphoreGive(spi_mutex);
@@ -227,6 +263,23 @@ Pixel_t * _pixel(int32_t x, int32_t y, uint32_t color) {
     pixel->y = y;
     pixel->color = color;
     return pixel;
+}
+
+String_t * _text(int32_t x, int32_t y, const char * str, uint8_t datum, uint32_t color, uint8_t font_size) {
+    String_t * text = (String_t *) pvPortMalloc(sizeof(String_t));
+    text->x = x;
+    text->y = y;
+    text->str = str;
+    text->datum = datum;
+    text->color = color;
+    text->font_size = font_size;
+    return text;
+}
+
+Screen_t * _screen(uint32_t color) {
+    Screen_t * screen = (Screen_t *) pvPortMalloc(sizeof(Screen_t));
+    screen->color = color;
+    return screen;
 }
 
 //
@@ -302,6 +355,24 @@ void Graphics::drawPixel(int32_t x, int32_t y, uint32_t color) {
     const GOperation_t operation = {
         .type = DRAW_PIXEL,
         .pvData = (void *) _pixel(x, y, color)
+    };
+
+    xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
+}
+
+void Graphics::drawString(int32_t x, int32_t y, const char * string, uint32_t color, uint8_t font_size, uint8_t datum) {
+    const GOperation_t operation = {
+        .type = DRAW_STRING,
+        .pvData = (void *) _text(x, y, string, datum, color, font_size)
+    };
+
+    xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
+}
+
+void Graphics::fillScreen(uint32_t color) {
+    const GOperation_t operation = {
+        .type = FILL_SCREEN,
+        .pvData = (void *) _screen(color)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);

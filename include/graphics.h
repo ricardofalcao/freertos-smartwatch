@@ -17,7 +17,11 @@ typedef enum {
     FILL_TRIANGLE,
 
     DRAW_LINE,
-    DRAW_PIXEL
+    DRAW_PIXEL,
+
+    DRAW_STRING,
+
+    FILL_SCREEN,
 
 } GOperationType_t;
 
@@ -67,6 +71,14 @@ class Graphics {
         void drawLine(int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color, uint8_t thickness = 1);
 
         void drawPixel(int32_t x, int32_t y, uint32_t color);
+
+        //
+
+        void drawString(int32_t x, int32_t y, const char * string, uint32_t color, uint8_t font_size = 4, uint8_t datum = TL_DATUM);
+
+        //
+
+        void fillScreen(uint32_t color);
 
 };
 

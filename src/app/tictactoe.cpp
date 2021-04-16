@@ -209,7 +209,7 @@ App_TicTacToe::App_TicTacToe() : App("TicTacToe", "Let's play a game") {
 }
 
 void App_TicTacToe::onOpen() {
-    Serial.println("[TicTacToe] OPEN");
+    graphics.fillScreen(TFT_WHITE);
 
     for(uint8_t i = 0; i < 9; i++) {
         int line = (int)floor(i / 3.0f);
@@ -227,14 +227,18 @@ void App_TicTacToe::onOpen() {
     _print_grid();
 
     for(int i = 0; i < 9;i++) {
-        _erase_cell(i);   
+        _erase_cell(i);
     }
 
     graphics.fillRectangle(10, TFT_HEIGHT - 40 - 10, TFT_WIDTH - 2*10, 40, TFT_PURPLE);
+    graphics.drawString(TFT_WIDTH / 2, TFT_HEIGHT - 20 - 10, "RESET", TFT_WHITE, 3, MC_DATUM);
+
     reset_touch_listener.x = 10;
     reset_touch_listener.y = TFT_HEIGHT - 40 - 10;
     reset_touch_listener.width = TFT_WIDTH - 2*10;
     reset_touch_listener.height = 40;
+
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 void App_TicTacToe::onTick() {
     if (ended) {
@@ -283,7 +287,6 @@ void App_TicTacToe::onTick() {
 }
 
 void App_TicTacToe::onClose() {
-    Serial.println("[TicTacToe] Closed");
 }
 
 /*

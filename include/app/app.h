@@ -6,6 +6,7 @@ class App {
     public:
         String name;
         String description;
+        uint32_t color;
 
         bool running = false;
 
@@ -26,6 +27,7 @@ class App {
 
         void open();
         bool close();
+        void startTouchTask();
 
         virtual void onOpen() 
         { };

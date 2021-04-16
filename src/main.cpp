@@ -11,6 +11,7 @@
 #include "graphics.h"
 #include "esp_wifi.h"
 
+#include "app/drawer.h"
 #include "app/clock.h"
 #include "app/alert.h"
 #include "app/tictactoe.h"
@@ -21,6 +22,8 @@
 
 Touch touch;
 Graphics graphics;
+
+App_Drawer drawer_app;
 
 App_Clock clock_app;
 App_Alert alert_app;
@@ -33,30 +36,31 @@ void setup() {
 
   Serial.begin(115200);
 
-  Serial.println("[Main] Initializing");
+  Serial.println("[Main] Initializing SPIFFS");
   // check file system exists
-  //SPIFFS.begin(true);
+  SPIFFS.begin(true);
 
   spi_mutex = xSemaphoreCreateMutex();
   Serial.println("[Main] Initializing TFT");
   tft.init();
 
   Serial.println("[Main] Calibration Touch");
-  //touch.calibrate();
-  tft.fillScreen(TFT_WHITE);
+  touch.calibrate();
 
   //esp_Wconnect(WIFI_NETWORK, WIFI_PASS, 10000);
   //esp_Wsync_time();
 
   Serial.println("[Main] Initializing Touch");
-  //touch.begin();
+  touch.begin();
   Serial.println("[Main] Initializing Graphics");
   graphics.begin();
 
-  //clock_app.open();
-  //alert_app.open();
-  //tictactoe_app.open();
-  metronome_app.open();
+  drawer_app.addApp(&clock_app);
+  drawer_app.addApp(&alert_app);
+  drawer_app.addApp(&tictactoe_app);
+  drawer_app.addApp(&metronome_app);
+  
+  drawer_app.open();
 }
 
 void loop() {

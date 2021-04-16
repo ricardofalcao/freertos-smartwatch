@@ -20,11 +20,11 @@
 
 App_Metronome::App_Metronome() : App("Metronome", "Time Marker") {
     priority = 3;
-    stack_depth = 1024;
+    stack_depth = 4096;
 }
  
 int bpm = 100;
-int compass_type = 2;
+int compass_type = 3;
 void _print_button_up() {
     //triangle chape
     graphics.fillTriangle(MARGIN_X, MARGIN_Y - TRIANGLE_HIGH_HEIGHT, MARGIN_X - TRIANGLE_SIDE / 2, MARGIN_Y + TRIANGLE_LOW_HEIGHT, MARGIN_X + TRIANGLE_SIDE / 2, MARGIN_Y +  TRIANGLE_LOW_HEIGHT, TFT_BLACK);
@@ -42,20 +42,25 @@ void _print_button_down() {
 
 void beep_output(note_t note, uint8_t octave) {
     
-    //ledcWriteNote(0, note, octave);
+    ledcWriteNote(0, note, octave);
     vTaskDelay(DURATION_MS / portTICK_PERIOD_MS);
-    //ledcWrite(0, 0);
+    ledcWrite(0, 0);
 }
 
 void App_Metronome::onOpen() {
-    Serial.println("[Metronome] OPEN");
     ledcAttachPin(OUTPUT_PIN, 0);
+    
+    graphics.fillScreen(TFT_WHITE);
     _print_button_up();
+
+    char buffer[16];
+    sprintf(buffer, "%d BPM", bpm);
+
+    graphics.drawString(TFT_WIDTH / 2, TFT_HEIGHT / 2, "TESTE", TFT_BLACK, 4, MC_DATUM);
     _print_button_down();
 }
 
 void App_Metronome::onTick() {
-
     beep_output(NOTE_A, 5);
 
     for(int i=0;i<compass_type;i++) {
@@ -71,7 +76,6 @@ void App_Metronome::onTouchTick() {
 }
 
 void App_Metronome::onClose() {
-    Serial.println("[Metronome] Closed");
     ledcDetachPin(OUTPUT_PIN);
     
 }

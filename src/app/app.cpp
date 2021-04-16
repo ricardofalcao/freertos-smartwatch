@@ -11,6 +11,7 @@
 App::App(String _name, String _description) {
     name = _name;
     description = _description;
+    color = rand();
 }
 
 void _run_app_task(void *pvParameters)
@@ -19,6 +20,7 @@ void _run_app_task(void *pvParameters)
   
   c->running = true;
   c->onOpen();
+  c->startTouchTask();
 
   while(true) {
     c->onTick();
@@ -39,6 +41,7 @@ void _run_app_touch_task(void *pvParameters)
 */
 
 void App::open() {
+    Serial.printf("[App] Start '%s' main task\n", name.c_str());
     xTaskCreatePinnedToCore(
         _run_app_task,
         name.c_str(),
@@ -48,19 +51,6 @@ void App::open() {
         &task_handle,
         target_core
     );
-
-    char touch_name[32];
-    sprintf(touch_name, "%s-TOUCH", name.c_str());
-
-    xTaskCreatePinnedToCore(
-        _run_app_touch_task,
-        touch_name,
-        touch_stack_depth,
-        this,
-        touch_priority,
-        &touch_task_handle,
-        target_core
-    );
 }
 
 bool App::close() {
@@ -68,9 +58,23 @@ bool App::close() {
         return false;
     }
 
+    Serial.printf("[App] Closing '%s'\n", name.c_str());
     this->running = false;
     this->onClose();
     vTaskDelete(touch_task_handle);
     vTaskDelete(task_handle);
     return true;
+}
+
+void App::startTouchTask() {
+  Serial.printf("[App] Start '%s' touch task\n", name.c_str());
+  xTaskCreatePinnedToCore(
+      _run_app_touch_task,
+      (name + "-TOUCH").c_str(),
+      touch_stack_depth,
+      this,
+      touch_priority,
+      &touch_task_handle,
+      target_core
+  );
 }

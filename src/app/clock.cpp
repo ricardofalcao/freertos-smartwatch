@@ -12,8 +12,7 @@ App_Clock::App_Clock() : App("Clock", "Shows the current time") {
 }
 
 void App_Clock::onOpen() {
-    Serial.println("[Clock] OPEN");
-
+    graphics.fillScreen(TFT_WHITE);
     graphics.drawCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 99, TFT_BLACK, 5);
     graphics.fillCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 3, TFT_BLACK);
 }
@@ -75,5 +74,4 @@ void App_Clock::onTick() {
 }
 
 void App_Clock::onClose() {
-    Serial.println("[Clock] Closed");
 }
