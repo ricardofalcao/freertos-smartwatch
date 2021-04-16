@@ -14,6 +14,8 @@ class App_Metronome : public App {
 
         void onTick() override;   
 
+        void onTouchTick() override;   
+
         void onClose() override;   
 
 

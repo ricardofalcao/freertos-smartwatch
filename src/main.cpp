@@ -14,6 +14,7 @@
 #include "app/clock.h"
 #include "app/alert.h"
 #include "app/tictactoe.h"
+#include "app/metronome.h"
 
 #define WIFI_NETWORK "Vodafone-284C30"
 #define WIFI_PASS "tYUREqcuVn"
@@ -23,6 +24,7 @@ Graphics graphics;
 
 App_Clock clock_app;
 App_Alert alert_app;
+App_Metronome metronome_app;
 
 App_TicTacToe tictactoe_app;
 
@@ -32,30 +34,29 @@ void setup() {
   Serial.begin(115200);
 
   Serial.println("[Main] Initializing");
-  
   // check file system exists
-  if (!SPIFFS.begin()) {
-      Serial.println("[MAIN] Formating file system...");
-      SPIFFS.format();
-      SPIFFS.begin();
-  }
+  //SPIFFS.begin(true);
 
   spi_mutex = xSemaphoreCreateMutex();
+  Serial.println("[Main] Initializing TFT");
   tft.init();
 
-  touch.calibrate();
+  Serial.println("[Main] Calibration Touch");
+  //touch.calibrate();
   tft.fillScreen(TFT_WHITE);
 
   //esp_Wconnect(WIFI_NETWORK, WIFI_PASS, 10000);
   //esp_Wsync_time();
 
-  touch.begin();
+  Serial.println("[Main] Initializing Touch");
+  //touch.begin();
+  Serial.println("[Main] Initializing Graphics");
   graphics.begin();
 
   //clock_app.open();
   //alert_app.open();
-  tictactoe_app.open();
-
+  //tictactoe_app.open();
+  metronome_app.open();
 }
 
 void loop() {

@@ -25,6 +25,19 @@ void _run_app_task(void *pvParameters)
   }
 }
 
+void _run_app_touch_task(void *pvParameters)
+{
+  App * c = (App *) pvParameters;
+
+  while(true) {
+    c->onTouchTick();
+  }
+}
+
+/*
+
+*/
+
 void App::open() {
     xTaskCreatePinnedToCore(
         _run_app_task,
@@ -33,6 +46,19 @@ void App::open() {
         this,
         priority,
         &task_handle,
+        target_core
+    );
+
+    char touch_name[32];
+    sprintf(touch_name, "%s-TOUCH", name.c_str());
+
+    xTaskCreatePinnedToCore(
+        _run_app_touch_task,
+        touch_name,
+        touch_stack_depth,
+        this,
+        touch_priority,
+        &touch_task_handle,
         target_core
     );
 }
@@ -44,6 +70,7 @@ bool App::close() {
 
     this->running = false;
     this->onClose();
+    vTaskDelete(touch_task_handle);
     vTaskDelete(task_handle);
     return true;
 }
