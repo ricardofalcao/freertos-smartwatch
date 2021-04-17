@@ -230,6 +230,7 @@ void App_TicTacToe::onOpen() {
         _erase_cell(i);
     }
 
+    graphics.drawString(TFT_WIDTH / 2, MARGIN_Y/2, "Tic Tac Toe", TFT_BLACK, 3, MC_DATUM);
     graphics.fillRectangle(10, TFT_HEIGHT - 40 - 10, TFT_WIDTH - 2*10, 40, TFT_PURPLE);
     graphics.drawString(TFT_WIDTH / 2, TFT_HEIGHT - 20 - 10, "RESET", TFT_WHITE, 3, MC_DATUM);
 
@@ -249,6 +250,9 @@ void App_TicTacToe::onTick() {
 
     int play;
 
+    graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
+    graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "Player 1 your turn!", TFT_BLACK, 3, MC_DATUM);
+
     do {
         TouchData data = touch.waitData();
 
@@ -266,7 +270,10 @@ void App_TicTacToe::onTick() {
     if (check_winner()) {
         return;
     }
-    
+
+    graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
+    graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "Player 2 your turn!", TFT_BLACK, 3, MC_DATUM);
+
     do {
         TouchData data = touch.waitData();
 
@@ -299,21 +306,27 @@ bool App_TicTacToe::check_winner() {
 
     switch(win) {
         case STATE_DRAW: {
-            Serial.println("It's a draw!");
+            //Serial.println("It's a draw!");
+            graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
+            graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "It's a draw!", TFT_BLACK, 3, MC_DATUM);
             return true;
         }
 
         case 2: {
             ended = true;
-            Serial.println("Player 2 wins!");
+            //Serial.println("Player 2 wins!");
             _print_winning_line(layout);
+            graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
+            graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "Player 2 wins!", TFT_BLACK, 3, MC_DATUM);
             return true;
         }
         
         case 1: {
             ended = true;
-            Serial.println("Player 1 wins!");
+            //Serial.println("Player 1 wins!");
             _print_winning_line(layout);
+            graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
+            graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "Player 1 wins!", TFT_BLACK, 3, MC_DATUM);
             return true;
         }
     }
