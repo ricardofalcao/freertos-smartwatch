@@ -127,6 +127,10 @@ void _erase_cell(int8_t cell) {
     graphics.fillRectangle(X, Y, CELL_WIDTH - 2 * MICRO_MARGIN_X, CELL_HEIGHT - 2 * MICRO_MARGIN_Y, TFT_WHITE);
 }
 
+void _show_message(const char * message) {
+    graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
+    graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , message, TFT_BLACK, 3, MC_DATUM);
+}
 /*
     Data structures
 */
@@ -250,8 +254,7 @@ void App_TicTacToe::onTick() {
 
     int play;
 
-    graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
-    graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "Player 1 your turn!", TFT_BLACK, 3, MC_DATUM);
+    _show_message("Player 1 your turn!");
 
     do {
         TouchData data = touch.waitData();
@@ -271,8 +274,7 @@ void App_TicTacToe::onTick() {
         return;
     }
 
-    graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
-    graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "Player 2 your turn!", TFT_BLACK, 3, MC_DATUM);
+    _show_message("Player 2 your turn!");
 
     do {
         TouchData data = touch.waitData();
@@ -307,8 +309,7 @@ bool App_TicTacToe::check_winner() {
     switch(win) {
         case STATE_DRAW: {
             //Serial.println("It's a draw!");
-            graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
-            graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "It's a draw!", TFT_BLACK, 3, MC_DATUM);
+            _show_message("It's a draw");
             return true;
         }
 
@@ -316,8 +317,7 @@ bool App_TicTacToe::check_winner() {
             ended = true;
             //Serial.println("Player 2 wins!");
             _print_winning_line(layout);
-            graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
-            graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "Player 2 wins!", TFT_BLACK, 3, MC_DATUM);
+            _show_message("Player 2 wins!");
             return true;
         }
         
@@ -325,8 +325,7 @@ bool App_TicTacToe::check_winner() {
             ended = true;
             //Serial.println("Player 1 wins!");
             _print_winning_line(layout);
-            graphics.fillRectangle(0,MARGIN_Y + BOARD_HEIGHT, TFT_WIDTH, 40,TFT_WHITE);
-            graphics.drawString(TFT_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 35 , "Player 1 wins!", TFT_BLACK, 3, MC_DATUM);
+            _show_message("Player 1 wins!");
             return true;
         }
     }
