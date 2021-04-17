@@ -18,6 +18,14 @@
 #define INNER_TRIANGLE_LOW_HEIGHT     (int) (INNER_TRIANGLE_SIDE * 0.2886751345948129f)
 #define INNER_TRIANGLE_HIGH_HEIGHT    (int) (INNER_TRIANGLE_SIDE * 0.5773502691896257f)
 
+#define CELL_TOUCH_LISTENERS 2
+
+#define MAX_BPM 300
+#define MIN_BPM 10
+
+
+RectangleTouchListener button_touch_listeners[CELL_TOUCH_LISTENERS];
+
 App_Metronome::App_Metronome() : App("Metronome", "Time Marker") {
     priority = 3;
     stack_depth = 4096;
@@ -40,6 +48,18 @@ void _print_button_down() {
     graphics.fillTriangle(MARGIN_X, BOARD_HEIGHT - MARGIN_Y + INNER_TRIANGLE_HIGH_HEIGHT, MARGIN_X - INNER_TRIANGLE_SIDE / 2, BOARD_HEIGHT - MARGIN_Y - INNER_TRIANGLE_LOW_HEIGHT, MARGIN_X + INNER_TRIANGLE_SIDE / 2, BOARD_HEIGHT - MARGIN_Y - INNER_TRIANGLE_LOW_HEIGHT, TFT_WHITE);
 }
 
+int _check_click_button(TouchData data) {
+
+    for(int i = 0; i < CELL_TOUCH_LISTENERS; i++) {
+        
+        if (button_touch_listeners[i].contains(data)) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 void beep_output(note_t note, uint8_t octave) {
     
     ledcWriteNote(0, note, octave);
@@ -56,12 +76,19 @@ void App_Metronome::onOpen() {
     char buffer[16];
     sprintf(buffer, "%d BPM", bpm);
 
-    graphics.drawString(TFT_WIDTH / 2, TFT_HEIGHT / 2, "TESTE", TFT_BLACK, 4, MC_DATUM);
+    graphics.drawString(TFT_WIDTH / 2, TFT_HEIGHT / 2, buffer, TFT_BLACK, 4, MC_DATUM);
     _print_button_down();
 }
 
 void App_Metronome::onTick() {
     beep_output(NOTE_A, 5);
+
+    for(uint8_t i = 0; i < CELL_TOUCH_LISTENERS; i++) {
+        button_touch_listeners[i].x = MARGIN_X - TRIANGLE_SIDE/2;
+        button_touch_listeners[i].y = MARGIN_Y - TRIANGLE_HIGH_HEIGHT + i*(BOARD_HEIGHT - 3*MARGIN_Y);
+        button_touch_listeners[i].width = TRIANGLE_SIDE;
+        button_touch_listeners[i].height = TRIANGLE_HIGH_HEIGHT + TRIANGLE_LOW_HEIGHT;
+    }
 
     for(int i=0;i<compass_type;i++) {
         vTaskDelay((60*1000/bpm - DURATION_MS) / portTICK_PERIOD_MS);
@@ -72,7 +99,47 @@ void App_Metronome::onTick() {
 }
 
 void App_Metronome::onTouchTick() {
+    TouchData data = touch.waitData();
+    unsigned long start = millis();
 
+    int pressed_button = _check_click_button(data);
+
+    switch (pressed_button)
+    {
+    case 0:
+        while (touch.getData().pressed)
+        {
+            if (millis() - start > 2000)
+            {
+                bpm = min(bpm + 5, MAX_BPM);
+                vTaskDelay(400 / portTICK_PERIOD_MS);
+            }
+            else
+            {
+                bpm = min(bpm + 1, MAX_BPM);
+                vTaskDelay(200 / portTICK_PERIOD_MS);
+            }
+        }
+        break;
+
+    case 1:
+        while (touch.getData().pressed)
+        {
+            if (millis() - start > 2000)
+            {
+                bpm = max(bpm - 5, MIN_BPM);
+                vTaskDelay(400 / portTICK_PERIOD_MS);
+            }
+            else
+            {
+                bpm = max(bpm - 1, MIN_BPM);
+                vTaskDelay(200 / portTICK_PERIOD_MS);
+            }
+        }
+        break;
+
+        default: break;
+    }
 }
 
 void App_Metronome::onClose() {
