@@ -3,6 +3,8 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
 
+#define TOUCH_SAMPLE_RATE_MS    100
+
 struct TouchData {
     uint16_t x = 0;
     uint16_t y = 0;

@@ -2,12 +2,25 @@
 
 #include <Arduino.h>
 
+#include "tft.h"
+#include "graphics.h"
+
+#define STATUSBAR_HEIGHT   20
+
 class App {
     public:
         String name;
         String description;
         uint32_t color;
 
+        GViewport_t viewport = {
+            .x = 0,
+            .y = STATUSBAR_HEIGHT,
+            .width = TFT_WIDTH,
+            .height = TFT_HEIGHT - STATUSBAR_HEIGHT
+        };
+
+        bool minimized = false;
         bool running = false;
 
     protected:
@@ -25,9 +38,15 @@ class App {
     public:
         App(String name, String description);
 
-        void open();
+        void open(bool minimized);
+
         bool close();
+
         void startTouchTask();
+
+        /*
+
+        */
 
         virtual void onOpen() 
         { };

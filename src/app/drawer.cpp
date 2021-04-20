@@ -36,9 +36,9 @@ void App_Drawer::onTouchTick() {
             }
             
             App * app = apps[target];
-            app->open();
+            app->open(false);
             this->close();
-            break;
+            return;
         }
     }
 }

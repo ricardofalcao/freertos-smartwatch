@@ -98,7 +98,7 @@ void Touch::onTick() {
             xQueueSendToFront(data_queue, &data, 0);
         }
 
-        vTaskDelay(100 / portTICK_RATE_MS);
+        vTaskDelay(TOUCH_SAMPLE_RATE_MS / portTICK_RATE_MS);
     }
 }
 

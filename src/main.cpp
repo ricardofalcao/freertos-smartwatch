@@ -60,7 +60,7 @@ void setup() {
   drawer_app.addApp(&tictactoe_app);
   drawer_app.addApp(&metronome_app);
   
-  drawer_app.open();
+  drawer_app.open(false);
 }
 
 void loop() {

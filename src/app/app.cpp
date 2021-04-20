@@ -23,6 +23,7 @@ void _run_app_task(void *pvParameters)
   c->startTouchTask();
 
   while(true) {
+    graphics.setViewport(c->viewport);
     c->onTick();
   }
 }
@@ -40,8 +41,10 @@ void _run_app_touch_task(void *pvParameters)
 
 */
 
-void App::open() {
+void App::open(bool _minimized) {
     Serial.printf("[App] Start '%s' main task\n", name.c_str());
+    minimized = _minimized;
+    
     xTaskCreatePinnedToCore(
         _run_app_task,
         name.c_str(),

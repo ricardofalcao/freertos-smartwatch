@@ -27,7 +27,21 @@ typedef enum {
 
 typedef struct {
 
+    int32_t x;
+    
+    int32_t y;
+    
+    int32_t width;
+
+    int32_t height;
+
+} GViewport_t;
+
+typedef struct {
+
     GOperationType_t type;
+
+    GViewport_t viewport;
 
     void * pvData;
 
@@ -41,10 +55,14 @@ class Graphics {
     private:
         QueueHandle_t operation_queue;
 
+        GViewport_t current_viewport;
+
     public:
         Graphics();
 
         void begin();
+
+        void setViewport(GViewport_t viewport);
 
         void onTick();
 
