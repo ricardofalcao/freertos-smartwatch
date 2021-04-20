@@ -1,6 +1,7 @@
 #include "app/tictactoe.h"
 
 #include "graphics.h"
+#include "lang/lang.h"
 
 #define MARGIN_X        35
 #define MARGIN_Y        35
@@ -60,7 +61,7 @@ RectangleTouchListener reset_touch_listener;
 */
 
 void _print_winning_line(int8_t layout) {
-    Serial.printf("Layout: %d\n", layout);
+    //Serial.printf("Layout: %d\n", layout);
 
     if(layout < 3) {
         graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT*layout + CELL_HEIGHT/2, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT*layout + CELL_HEIGHT/2, TFT_ORANGE, 6);
@@ -255,6 +256,7 @@ void App_TicTacToe::onTick() {
     int play;
 
     _show_message("Player 1 your turn!");
+    //_show_message(lang.get(MSG_HELLO));
 
     do {
         TouchData data = touch.waitData();

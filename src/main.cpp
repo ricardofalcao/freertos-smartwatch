@@ -17,11 +17,14 @@
 #include "app/tictactoe.h"
 #include "app/metronome.h"
 
+#include "lang/lang.h"
+
 #define WIFI_NETWORK "Vodafone-284C30"
 #define WIFI_PASS "tYUREqcuVn"
 
 Touch touch;
 Graphics graphics;
+Lang lang;
 
 App_Drawer drawer_app;
 
