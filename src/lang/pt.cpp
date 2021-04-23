@@ -20,7 +20,7 @@ PROGMEM const char BPM[] = "BPM";
 
 //Clock Text
 PROGMEM const char Clock_name[] = "Relógio";
-PROGMEM const char Metronomer_description[] = "Mostra o tempo atual";
+PROGMEM const char Clock_description[] = "Mostra o tempo atual";
 
 //Alarm Text
 PROGMEM const char Alarm_name[] = "Alarme";
@@ -55,7 +55,7 @@ PROGMEM const char * const messages [] = {
 
     //Clock
     Clock_name,
-    Metronomer_description,
+    Clock_description,
     
     //Alarm
     Alarm_name,

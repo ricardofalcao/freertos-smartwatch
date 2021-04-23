@@ -27,7 +27,7 @@ struct RectangleTouchListener {
     bool contains(TouchData data);
 };
 
-class CircleTouchListener {
+struct CircleTouchListener {
     int32_t x;
     int32_t y;
     int32_t radius;

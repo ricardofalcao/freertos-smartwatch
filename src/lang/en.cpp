@@ -55,7 +55,7 @@ PROGMEM const char * const messages [] = {
 
     //Clock
     Clock_name,
-    Metronomer_description,
+    Clock_description,
     
     //Alarm
     Alarm_name,

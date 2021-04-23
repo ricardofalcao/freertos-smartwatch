@@ -55,7 +55,7 @@ PROGMEM const char * const messages [] = {
 
     //Clock
     Clock_name,
-    Metronomer_description,
+    Clock_description,
     
     //Alarm
     Alarm_name,
@@ -71,6 +71,6 @@ PROGMEM const char * const messages [] = {
 
 };
 
-PROGMEM const Language_t LANG_EN = {
+PROGMEM const Language_t LANG_DE = {
     messages
 };
