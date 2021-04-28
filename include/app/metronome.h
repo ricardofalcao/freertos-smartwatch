@@ -18,5 +18,8 @@ class App_Metronome : public App {
 
         void onClose() override;   
 
-
+    private:
+        void print_button_up();
+        
+        void print_button_down();
 };

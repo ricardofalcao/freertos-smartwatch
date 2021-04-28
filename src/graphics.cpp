@@ -77,6 +77,8 @@ typedef struct {
 
 GOperation_t receive_buffer;
 
+GViewport_t _viewport;
+
 void graphics_task(void * pvParameters) {
     Graphics * g = (Graphics *) pvParameters;
     while(true) {
@@ -104,14 +106,11 @@ void Graphics::begin() {
   );
 }
 
-void Graphics::setViewport(GViewport_t viewport) {
-    current_viewport = viewport;
-}
-
 void Graphics::onTick() {
     if (xQueueReceive(operation_queue, &receive_buffer, portMAX_DELAY)) {
         if (xSemaphoreTake(spi_mutex, portMAX_DELAY) == pdTRUE) {
             tft.setViewport(receive_buffer.viewport.x, receive_buffer.viewport.y, receive_buffer.viewport.width, receive_buffer.viewport.height);
+            Serial.printf("GV %d %d %d %d\n", receive_buffer.viewport.x, receive_buffer.viewport.y, receive_buffer.viewport.width, receive_buffer.viewport.height);
 
             switch(receive_buffer.type) {
                 case DRAW_RECTANGLE: {
@@ -290,20 +289,20 @@ Screen_t * _screen(uint32_t color) {
 
 //
 
-void Graphics::drawRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color, uint8_t thickness) {
+void Graphics::drawRectangle(GViewport_t _viewport, int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color, uint8_t thickness) {
     const GOperation_t operation = {
         .type = DRAW_RECTANGLE,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _rectangle(x, y, width, height, color, thickness)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
 }
 
-void Graphics::fillRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color) {
+void Graphics::fillRectangle(GViewport_t _viewport, int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color) {
     const GOperation_t operation = {
         .type = FILL_RECTANGLE,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _rectangle(x, y, width, height, color, 0)
     };
 
@@ -312,20 +311,20 @@ void Graphics::fillRectangle(int32_t x, int32_t y, int32_t width, int32_t height
 
 //
 
-void Graphics::drawCircle(int32_t x, int32_t y, int32_t radius, uint32_t color, uint8_t thickness) {
+void Graphics::drawCircle(GViewport_t _viewport, int32_t x, int32_t y, int32_t radius, uint32_t color, uint8_t thickness) {
     const GOperation_t operation = {
         .type = DRAW_CIRCLE,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _circle(x, y, radius, color, thickness)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
 }
 
-void Graphics::fillCircle(int32_t x, int32_t y, int32_t radius, uint32_t color) {
+void Graphics::fillCircle(GViewport_t _viewport, int32_t x, int32_t y, int32_t radius, uint32_t color) {
     const GOperation_t operation = {
         .type = FILL_CIRCLE,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _circle(x, y, radius, color, 0)
     };
 
@@ -334,60 +333,60 @@ void Graphics::fillCircle(int32_t x, int32_t y, int32_t radius, uint32_t color) 
 
 //
 
-void Graphics::drawTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color, uint8_t thickness) {
+void Graphics::drawTriangle(GViewport_t _viewport, int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color, uint8_t thickness) {
     const GOperation_t operation = {
         .type = DRAW_TRIANGLE,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _triangle(x1, y1, x2, y2, x3, y3, color, thickness)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
 }
 
-void Graphics::fillTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color) {
+void Graphics::fillTriangle(GViewport_t _viewport, int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color) {
     const GOperation_t operation = {
         .type = FILL_TRIANGLE,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _triangle(x1, y1, x2, y2, x3, y3, color, 0)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
 }
 
-void Graphics::drawLine(int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color, uint8_t thickness) {
+void Graphics::drawLine(GViewport_t _viewport, int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color, uint8_t thickness) {
     const GOperation_t operation = {
         .type = DRAW_LINE,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _line(xstart, ystart, xend, yend, color, thickness)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
 }
 
-void Graphics::drawPixel(int32_t x, int32_t y, uint32_t color) {
+void Graphics::drawPixel(GViewport_t _viewport, int32_t x, int32_t y, uint32_t color) {
     const GOperation_t operation = {
         .type = DRAW_PIXEL,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _pixel(x, y, color)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
 }
 
-void Graphics::drawString(int32_t x, int32_t y, const char * string, uint32_t color, uint8_t font_size, uint8_t datum) {
+void Graphics::drawString(GViewport_t _viewport, int32_t x, int32_t y, const char * string, uint32_t color, uint8_t font_size, uint8_t datum) {
     const GOperation_t operation = {
         .type = DRAW_STRING,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _text(x, y, string, datum, color, font_size)
     };
 
     xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
 }
 
-void Graphics::fillScreen(uint32_t color) {
+void Graphics::fillScreen(GViewport_t _viewport, uint32_t color) {
     const GOperation_t operation = {
         .type = FILL_SCREEN,
-        .viewport = current_viewport,
+        .viewport = _viewport,
         .pvData = (void *) _screen(color)
     };
 

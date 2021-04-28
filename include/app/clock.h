@@ -18,4 +18,7 @@ class App_Clock : public App {
 
         void onClose() override;   
 
+    private:
+        void draw_line(float angle, float size, uint32_t color);
+
 };

@@ -23,7 +23,6 @@ void _run_app_task(void *pvParameters)
   c->startTouchTask();
 
   while(true) {
-    graphics.setViewport(c->viewport);
     c->onTick();
   }
 }

@@ -51,7 +51,7 @@ void App_Drawer::onClose() {
 */
 
 void App_Drawer::setup() {
-    graphics.fillScreen(TFT_WHITE);
+    graphics.fillScreen(viewport, TFT_WHITE);
     
     uint8_t start = page * APPS_PER_PAGE;
     uint8_t end = min(start + APPS_PER_PAGE - 1, apps_length);
@@ -79,7 +79,7 @@ void App_Drawer::setup() {
         int32_t x = APPS_MARGIN_X + col * (APP_WIDTH + APPS_SPACING_X);
         int32_t y = APPS_MARGIN_Y + row * (APP_HEIGHT + APPS_SPACING_Y);
 
-        graphics.fillRectangle(x, y, APP_WIDTH, APP_HEIGHT, app->color);
-        graphics.drawString(x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
+        graphics.fillRectangle(viewport, x, y, APP_WIDTH, APP_HEIGHT, app->color);
+        graphics.drawString(viewport, x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
     }
 }
