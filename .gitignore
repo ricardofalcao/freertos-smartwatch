@@ -2,6 +2,8 @@
 .vscode
 .idea
 
+misra-rules.txt
+
 cmake-build-debug
 cmake-build-esp32dev
 
