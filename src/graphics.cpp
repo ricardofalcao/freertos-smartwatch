@@ -128,6 +128,85 @@ void Graphics::onTick() {
     }
 }
 
+void _draw_thick_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t wd, uint32_t color) {
+    int32_t dx = abs(x1-x0), sx = x0 < x1 ? 1 : -1; 
+    int32_t dy = abs(y1-y0), sy = y0 < y1 ? 1 : -1; 
+    int32_t err = dx-dy, e2, x2, y2;
+
+    float ed = dx+dy == 0 ? 1 : sqrt((float)dx*dx+(float)dy*dy);
+    
+    for (wd = (wd+1)/2; ; ) {                                   /* pixel loop */
+        tft.drawPixel(x0,y0, color);
+        e2 = err; x2 = x0;
+
+        if (2*e2 >= -dx) {                                           /* x step */
+            for (e2 += dy, y2 = y0; e2 < ed*wd && (y1 != y2 || dx > dy); e2 += dx)
+                tft.drawPixel(x0, y2 += sy, color);
+            if (x0 == x1) break;
+            e2 = err; err -= dy; x0 += sx; 
+        } 
+        if (2*e2 <= dy) {                                            /* y step */
+            for (e2 = dx-e2; e2 < ed*wd && (x1 != x2 || dx < dy); e2 += dy)
+                tft.drawPixel(x2 += sx, y0, color);
+            if (y0 == y1) break;
+            err += dx; y0 += sy; 
+        }
+    }
+}
+
+void _xLine(int32_t x1, int32_t x2, int32_t y, uint32_t color)
+{
+    while (x1 <= x2) tft.drawPixel(x1++, y, color);
+}
+
+void _yLine(int32_t x, int32_t y1, int32_t y2, uint32_t color)
+{
+    while (y1 <= y2) tft.drawPixel(x, y1++, color);
+}
+
+void _draw_thick_circle(int32_t xc, int32_t yc, int32_t radius, uint8_t thickness, uint32_t color)
+{
+    int32_t outer = radius + thickness / 2;
+    int32_t inner = radius - thickness / 2;
+
+    int xo = outer;
+    int xi = inner;
+    int y = 0;
+    int erro = 1 - xo;
+    int erri = 1 - xi;
+
+    while(xo >= y) {
+        _xLine(xc + xi, xc + xo, yc + y,  color);
+        _yLine(xc + y,  yc + xi, yc + xo, color);
+        _xLine(xc - xo, xc - xi, yc + y,  color);
+        _yLine(xc - y,  yc + xi, yc + xo, color);
+        _xLine(xc - xo, xc - xi, yc - y,  color);
+        _yLine(xc - y,  yc - xo, yc - xi, color);
+        _xLine(xc + xi, xc + xo, yc - y,  color);
+        _yLine(xc + y,  yc - xo, yc - xi, color);
+
+        y++;
+
+        if (erro < 0) {
+            erro += 2 * y + 1;
+        } else {
+            xo--;
+            erro += 2 * (y - xo) + 1;
+        }
+
+        if (y > inner) {
+            xi = y;
+        } else {
+            if (erri < 0) {
+                erri += 2 * y + 1;
+            } else {
+                xi--;
+                erri += 2 * (y - xi) + 1;
+            }
+        }
+    }
+}
+
 void Graphics::processOperation(GOperation_t * operation) {
     tft.setViewport(operation->viewport.x, operation->viewport.y, operation->viewport.width, operation->viewport.height);
 
@@ -153,9 +232,9 @@ void Graphics::processOperation(GOperation_t * operation) {
         case DRAW_CIRCLE: {
             Circle_t * circle = (Circle_t *) operation->pvData;
 
-            for(int8_t i = -circle->thickness / 2; i < circle->thickness / 2 + circle->thickness % 2; i++) {
-                tft.drawCircle(circle->x, circle->y, circle->radius + i, circle->color);
-            }
+            tft.startWrite();
+            _draw_thick_circle(circle->x, circle->y, circle->radius, circle->thickness, circle->color);
+            tft.endWrite();
 
             break;
         }
@@ -170,7 +249,13 @@ void Graphics::processOperation(GOperation_t * operation) {
 
         case DRAW_TRIANGLE: {
             Triangle_t * tri = (Triangle_t *) operation->pvData;
-            tft.drawTriangle(tri->x1, tri->y1, tri->x2, tri->y2, tri->x3, tri->y3, tri->color);
+            
+            tft.startWrite();
+            _draw_thick_line(tri->x1, tri->y1, tri->x2, tri->y2, tri->thickness, tri->color);
+            _draw_thick_line(tri->x2, tri->y2, tri->x3, tri->y3, tri->thickness, tri->color);
+            _draw_thick_line(tri->x3, tri->y3, tri->x1, tri->y1, tri->thickness, tri->color);
+            tft.endWrite();
+            
             break;
         }
 
@@ -184,17 +269,10 @@ void Graphics::processOperation(GOperation_t * operation) {
 
         case DRAW_LINE: {
             Line_t * line = (Line_t *) operation->pvData;
-            int32_t dx = line->xend - line->xstart;
-            int32_t dy = line->yend - line->ystart;
-
-            float mag = sqrt(dx*dx + dy*dy);
-
-            float p_dx = dy / mag;
-            float p_dy = -dx / mag;
-
-            for(int8_t i = -line->thickness / 2; i < line->thickness / 2; i++) {
-                tft.drawLine(line->xstart + p_dx*i, line->ystart + p_dy*i, line->xend + p_dx*i, line->yend + p_dy*i, line->color);
-            }
+            
+            tft.startWrite();
+            _draw_thick_line(line->xstart, line->ystart, line->xend, line->yend, line->thickness, line->color);
+            tft.endWrite();
 
             break;
         }
