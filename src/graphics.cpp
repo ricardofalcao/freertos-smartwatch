@@ -156,12 +156,18 @@ void _draw_thick_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t wd
 
 void _xLine(int32_t x1, int32_t x2, int32_t y, uint32_t color)
 {
-    while (x1 <= x2) tft.drawPixel(x1++, y, color);
+    int32_t dx = tft.getViewportX();
+    int32_t dy = tft.getViewportY();
+    tft.setWindow(dx + x1, dy + y, dx + x2, dy + y);
+    tft.pushBlock(color, x2 - x1 + 1);
 }
 
 void _yLine(int32_t x, int32_t y1, int32_t y2, uint32_t color)
 {
-    while (y1 <= y2) tft.drawPixel(x, y1++, color);
+    int32_t dx = tft.getViewportX();
+    int32_t dy = tft.getViewportY();
+    tft.setWindow(dx + x, dy + y1, dx + x, dy + y2);
+    tft.pushBlock(color, y2 - y1 + 1);
 }
 
 void _draw_thick_circle(int32_t xc, int32_t yc, int32_t radius, uint8_t thickness, uint32_t color)
@@ -214,9 +220,12 @@ void Graphics::processOperation(GOperation_t * operation) {
         case DRAW_RECTANGLE: {
             Rectangle_t * rect = (Rectangle_t *) operation->pvData;
             
-            for(int8_t i = -rect->thickness / 2; i < rect->thickness / 2; i++) {
-                tft.drawRect(rect->x + i, rect->y + i, rect->width - i, rect->height - i, rect->color);
-            }
+            tft.startWrite();
+            _draw_thick_line(rect->x, rect->y, rect->x + rect->width - 1, rect->y, rect->thickness, rect->color);
+            _draw_thick_line(rect->x, rect->y, rect->x, rect->y + rect->height - 1, rect->thickness, rect->color);
+            _draw_thick_line(rect->x, rect->y + rect->height - 1, rect->x + rect->width - 1, rect->y + rect->height - 1, rect->thickness, rect->color);
+            _draw_thick_line(rect->x + rect->width - 1, rect->y, rect->x + rect->width - 1, rect->y + rect->height - 1, rect->thickness, rect->color);
+            tft.endWrite();
 
             break;
         }
