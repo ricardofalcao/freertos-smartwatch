@@ -6,6 +6,8 @@
 
 
 class App_Pong : public App {
+    private:
+        int botx = 0, tick = 0;
 
     public:
         App_Pong();
@@ -17,17 +19,11 @@ class App_Pong : public App {
         void onClose() override;   
     
     private:
-        void print_top_bar(int place_x);
+        void print_top_bar(int place_x, uint32_t color);
 
-        void print_bottom_bar(int place_x);
+        void print_bottom_bar(int place_x, uint32_t color);
 
-        void print_dashed();
+        void print_dashed(uint32_t color);
 
-        void print_ball(int x_center, int y_center);
-
-        void erase_top_bar(int place_x);
-
-        void erase_bottom_bar(int place_x);
-
-        void erase_ball(int x_center, int y_center);
+        void print_ball(int x_center, int y_center, uint32_t color);
 };
