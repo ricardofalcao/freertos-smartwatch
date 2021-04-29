@@ -19,10 +19,13 @@ void _run_app_task(void *pvParameters)
   App * c = (App *) pvParameters;
   
   c->running = true;
+  graphics.setViewport(c->viewport);
+
   c->onOpen();
   c->startTouchTask();
 
   while(true) {
+    graphics.setViewport(c->viewport);
     c->onTick();
   }
 }
@@ -32,6 +35,7 @@ void _run_app_touch_task(void *pvParameters)
   App * c = (App *) pvParameters;
 
   while(true) {
+    graphics.setViewport(c->viewport);
     c->onTouchTick();
   }
 }

@@ -38,4 +38,6 @@ class App_TicTacToe : public App {
 
         void show_message(const char * message);
 
+        int check_click_cells(TouchData data);
+
 };

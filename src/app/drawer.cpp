@@ -9,7 +9,10 @@
 
 App_Drawer::App_Drawer() : App("Drawer", "Shows all installed apps") {
     priority = 3;
-    stack_depth = 10240;
+    stack_depth = 4096;
+    touch_stack_depth = 4096;
+
+    app_open_queue = xQueueCreate(1, sizeof(App *));
 }
 
 void App_Drawer::addApp(App * app) {
@@ -21,13 +24,20 @@ void App_Drawer::onOpen() {
 }
 
 void App_Drawer::onTick() {
+    App * app;
+    xQueueReceive(app_open_queue, &app, portMAX_DELAY);
+
+    if (app) {
+        app->open(false);
+        this->close();
+    }
 }
 
 void App_Drawer::onTouchTick() {
     TouchData data = touch.waitData();
 
     for(uint8_t i = 0; i < APPS_PER_PAGE; i++) {
-        if(app_touch_listeners[i].contains(data)) {
+        if(app_touch_listeners[i].contains(viewport, data)) {
             uint8_t start = page * APPS_PER_PAGE;
             uint8_t target = start + i;
 
@@ -36,11 +46,12 @@ void App_Drawer::onTouchTick() {
             }
             
             App * app = apps[target];
-            app->open(false);
-            this->close();
-            return;
+            xQueueOverwrite(app_open_queue, &app);
+            break;
         }
     }
+
+    vTaskDelay(250 / portTICK_PERIOD_MS);
 }
 
 void App_Drawer::onClose() {
@@ -51,7 +62,8 @@ void App_Drawer::onClose() {
 */
 
 void App_Drawer::setup() {
-    graphics.fillScreen(viewport, TFT_WHITE);
+    graphics.beginBatch();
+    graphics.fillScreen(TFT_WHITE);
     
     uint8_t start = page * APPS_PER_PAGE;
     uint8_t end = min(start + APPS_PER_PAGE - 1, apps_length);
@@ -79,7 +91,9 @@ void App_Drawer::setup() {
         int32_t x = APPS_MARGIN_X + col * (APP_WIDTH + APPS_SPACING_X);
         int32_t y = APPS_MARGIN_Y + row * (APP_HEIGHT + APPS_SPACING_Y);
 
-        graphics.fillRectangle(viewport, x, y, APP_WIDTH, APP_HEIGHT, app->color);
-        graphics.drawString(viewport, x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
+        graphics.fillRectangle(x, y, APP_WIDTH, APP_HEIGHT, app->color);
+        graphics.drawString(x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
     }
+
+    graphics.endBatch();
 }

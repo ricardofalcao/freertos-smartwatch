@@ -9,7 +9,7 @@
 #include "tft.h"
 #include "touch.h"
 #include "graphics.h"
-#include "esp_wifi.h"
+#include "wifi.h"
 
 #include "app/drawer.h"
 #include "app/clock.h"
@@ -34,9 +34,32 @@ App_Metronome metronome_app;
 
 App_TicTacToe tictactoe_app;
 
-void setup() {
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+void wifi_task(void * pvParameters)  {
+  while(true) {
+    if (WiFi.status() == WL_CONNECTED) {
+      vTaskDelay(10000 / portTICK_PERIOD_MS);
+      continue;
+    }
 
+    Serial.printf("[WiFi] Connecting to WiFi\n");
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_NETWORK, WIFI_PASS);
+
+    unsigned long startAttemptTime = millis();
+
+    while (WiFi.status() != WL_CONNECTED && (millis() - startAttemptTime) < 20000){
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("[WiFi] Connected!");
+      esp_Wsync_time();
+      continue;
+    }
+  }
+}
+
+void setup() {
   Serial.begin(115200);
 
   Serial.println("[Main] Initializing SPIFFS");
@@ -50,8 +73,15 @@ void setup() {
   Serial.println("[Main] Calibration Touch");
   touch.calibrate();
 
-  //esp_Wconnect(WIFI_NETWORK, WIFI_PASS, 10000);
-  //esp_Wsync_time();
+  /*xTaskCreatePinnedToCore(
+      wifi_task,
+      "WiFi",
+      4096,
+      NULL,
+      1,
+      NULL,
+      0
+  );*/
 
   Serial.println("[Main] Initializing Touch");
   touch.begin();

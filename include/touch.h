@@ -3,6 +3,8 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
 
+#include "graphics.h"
+
 #define TOUCH_SAMPLE_RATE_MS    100
 
 struct TouchData {
@@ -24,7 +26,7 @@ struct RectangleTouchListener {
 
     RectangleTouchListener(int32_t x = 0, int32_t y = 0, int32_t width = 0, int32_t height = 0);
 
-    bool contains(TouchData data);
+    bool contains(GViewport_t viewport, TouchData data);
 };
 
 struct CircleTouchListener {
@@ -34,7 +36,7 @@ struct CircleTouchListener {
 
     CircleTouchListener(int32_t x, int32_t y, int32_t radius);
 
-    bool contains(TouchData data);
+    bool contains(GViewport_t viewport, TouchData data);
 };
 
 /*

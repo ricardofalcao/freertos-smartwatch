@@ -92,10 +92,10 @@ void Touch::onTick() {
         xSemaphoreGive(spi_mutex);
 
         TouchData oldData;
-        xQueueReceive(data_queue, &oldData, 0);
+        xQueuePeek(data_queue, &oldData, 0);
 
         if (oldData.pressed != data.pressed || oldData.x != data.x || oldData.y != data.y) {
-            xQueueSendToFront(data_queue, &data, 0);
+            xQueueOverwrite(data_queue, &data);
         }
 
         vTaskDelay(TOUCH_SAMPLE_RATE_MS / portTICK_RATE_MS);
@@ -125,8 +125,11 @@ RectangleTouchListener::RectangleTouchListener(int32_t _x, int32_t _y, int32_t _
     height = _height;
 }
 
-bool RectangleTouchListener::contains(TouchData data) {
-    return (x <= data.x && y <= data.y) && (data.x < (x + width) && data.y < (y + height));
+bool RectangleTouchListener::contains(GViewport_t viewport, TouchData data) {
+    int32_t _x = x + viewport.x;
+    int32_t _y = y + viewport.y;
+
+    return (_x <= data.x && _y <= data.y) && (data.x < (_x + width) && data.y < (_y + height));
 }
 
 CircleTouchListener::CircleTouchListener(int32_t _x, int32_t _y, int32_t _radius) {
@@ -135,9 +138,12 @@ CircleTouchListener::CircleTouchListener(int32_t _x, int32_t _y, int32_t _radius
     radius = _radius;
 }
 
-bool CircleTouchListener::contains(TouchData data) {
-    int32_t dx = data.x - x;
-    int32_t dy = data.y - y;
+bool CircleTouchListener::contains(GViewport_t viewport, TouchData data) {
+    int32_t _x = x + viewport.x;
+    int32_t _y = y + viewport.y;
+
+    int32_t dx = data.x - _x;
+    int32_t dy = data.y - _y;
 
     return (dx * dx + dy*dy) <= (radius * radius);
 }

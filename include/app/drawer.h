@@ -27,6 +27,8 @@ class App_Drawer : public App {
 
         uint8_t page = 0;
 
+        QueueHandle_t app_open_queue;
+
     public:
         App_Drawer();
 

@@ -2,8 +2,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h> 
 #include <WiFi.h> 
-//#include <WiFi101.h> 
-#include "esp_wifi.h"
+#include "wifi.h"
 #include "app/weather.h"
 
 
@@ -65,9 +64,6 @@ App_weather::App_weather() : App("Weather", "Checks weather through API") {
 
 
 void App_weather::onOpen() {
-  if(!esp_Wcheck()){
-      esp_Wconnect(WIFI_NETWORK,WIFI_PASS,0);
-  }
    getWeather();
 
 }
