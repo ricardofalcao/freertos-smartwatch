@@ -87,6 +87,7 @@ typedef struct {
 
 void graphics_task(void * pvParameters) {
     Graphics * g = (Graphics *) pvParameters;
+
     while(true) {
         g->onTick();
     }
@@ -121,6 +122,7 @@ void Graphics::onTick() {
     if (xQueueReceive(operation_queue, &receive_buffer, portMAX_DELAY)) {
         if (xSemaphoreTake(spi_mutex, portMAX_DELAY) == pdTRUE) {
             processOperation(&receive_buffer);
+
             xSemaphoreGive(spi_mutex);
         }
     }
@@ -259,6 +261,10 @@ void Graphics::endBatch() {
     }
 
     batching = false;
+
+    if (batch_queue_length == 0) {
+        return;
+    }
 
     Batch_t * batch = (Batch_t *) pvPortMalloc(sizeof(Batch_t));
     batch->batch_size = batch_queue_length;

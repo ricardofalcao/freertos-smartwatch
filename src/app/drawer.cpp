@@ -9,7 +9,7 @@
 
 App_Drawer::App_Drawer() : App("Drawer", "Shows all installed apps") {
     priority = 3;
-    stack_depth = 4096;
+    stack_depth = 10240;
     touch_stack_depth = 4096;
 
     app_open_queue = xQueueCreate(1, sizeof(App *));
@@ -66,7 +66,7 @@ void App_Drawer::setup() {
     graphics.fillScreen(TFT_WHITE);
     
     uint8_t start = page * APPS_PER_PAGE;
-    uint8_t end = min(start + APPS_PER_PAGE - 1, apps_length);
+    uint8_t end = min(start + APPS_PER_PAGE - 1, apps_length - 1);
 
     for(uint8_t i = 0; i < APPS_PER_PAGE; i++) {
         int32_t row = (i / 2);
@@ -83,6 +83,7 @@ void App_Drawer::setup() {
 
     for(uint8_t i = start; i <= end; i++) {
         App * app = apps[i];
+
         uint8_t cell_index = i - start;
 
         int32_t row = (cell_index / 2);

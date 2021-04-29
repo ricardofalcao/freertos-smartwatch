@@ -90,6 +90,9 @@ void setup() {
   Serial.println("[Main] Initializing Graphics");
   graphics.begin();
 
+  graphics.setViewport({ 0, 0, TFT_WIDTH, TFT_HEIGHT });
+  graphics.fillScreen(TFT_BLACK);
+
   drawer_app.addApp(&clock_app);
   drawer_app.addApp(&alert_app);
   drawer_app.addApp(&tictactoe_app);

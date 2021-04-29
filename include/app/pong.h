@@ -7,7 +7,7 @@
 
 class App_Pong : public App {
     private:
-        int botx = 0, tick = 0;
+        int botx = 0, playerx = 0, tick = 0;
 
     public:
         App_Pong();
