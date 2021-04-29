@@ -15,6 +15,7 @@
 #include "app/clock.h"
 #include "app/alert.h"
 #include "app/tictactoe.h"
+#include "app/pong.h"
 #include "app/metronome.h"
 
 #include "lang/lang.h"
@@ -33,6 +34,7 @@ App_Alert alert_app;
 App_Metronome metronome_app;
 
 App_TicTacToe tictactoe_app;
+App_Pong pong_app;
 
 void wifi_task(void * pvParameters)  {
   while(true) {
@@ -92,6 +94,7 @@ void setup() {
   drawer_app.addApp(&alert_app);
   drawer_app.addApp(&tictactoe_app);
   drawer_app.addApp(&metronome_app);
+  drawer_app.addApp(&pong_app);
   
   drawer_app.open(false);
 }

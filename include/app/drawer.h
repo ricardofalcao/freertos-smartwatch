@@ -7,7 +7,7 @@
 
 #define DRAWER_MAX_APPS     16
 
-#define DRAWER_ROWS         2
+#define DRAWER_ROWS         3
 #define DRAWER_COLUMNS      2
 
 #define APPS_PER_PAGE       DRAWER_ROWS * DRAWER_COLUMNS
