@@ -11,6 +11,7 @@
 #define BOARD_HEIGHT            tft.height()
 
 #define MARGIN_Y                35
+#define MARGIN_X                35
 
 #define BAR_LENGTH              50
 #define BAR_HALF_LENGTH         (BAR_LENGTH / 2)
@@ -22,8 +23,10 @@
 #define DASHED_BARS_LENGTH      10
 
 #define BALL_RADIUS             9
+ 
 
-
+int bot_score = 0;
+int player_score = 0;
 /*
     Graphics
 */
@@ -38,7 +41,7 @@ void App_Pong::print_bottom_bar(int place_x, uint32_t color) {
     graphics.fillRectangle(place_x - BAR_HALF_LENGTH, BOARD_HEIGHT - MARGIN_Y - BAR_HEIGHT, BAR_LENGTH, BAR_HEIGHT, color);
 }
 
-void App_Pong::print_dashed(uint32_t color) {
+void App_Pong::print_field_lines(uint32_t color) {
     int numberOfLines = (BOARD_WIDTH - DASHED_BARS_LENGTH) / (DASHED_BARS_LENGTH + SPACE_BETWEEN_BARS);
 
     for(int i = 0; i < numberOfLines; i++) {
@@ -46,11 +49,38 @@ void App_Pong::print_dashed(uint32_t color) {
 
         graphics.drawLine(x, BOARD_HEIGHT / 2, x + DASHED_BARS_LENGTH, BOARD_HEIGHT / 2, color, 2);
     }
+    
+    graphics.drawLine(1, 1, 1, BOARD_HEIGHT, color, 8);
+    graphics.drawLine(BOARD_WIDTH, 1, BOARD_WIDTH, BOARD_HEIGHT, color, 8);
+
+}
+
+void App_Pong::print_score(uint32_t color) {
+
+    graphics.beginBatch();
+    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 - MARGIN_Y, _bot_score, color, 5, MC_DATUM);
+
+    sprintf(_bot_score, "%d", bot_score);
+    graphics.drawString(tft.width() / 2, tft.height() / 2, _bot_score, color, 4, MC_DATUM);
+    graphics.endBatch();
+
+
+    graphics.beginBatch();
+    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 + MARGIN_Y, _player_score, color, 5, MC_DATUM);
+
+    sprintf(_player_score, "%d", player_score);
+    graphics.drawString(tft.width() / 2, tft.height() / 2, _bot_score, color, 4, MC_DATUM);
+    graphics.endBatch();
+
 }
 
 void App_Pong::print_ball(int x_center, int y_center, uint32_t color) {
     graphics.fillCircle(x_center, y_center, BALL_RADIUS, color);
 }
+
+/*
+    main
+*/
 
 App_Pong::App_Pong() : App("Pong", "Let's Play") {
     priority = 3;
@@ -62,7 +92,9 @@ void App_Pong::onOpen() {
     Serial.println("[Pong] OPEN");
 
     graphics.fillScreen(BACKGROUND_COLOR);
-    print_dashed(GAME_COLOR);
+    print_field_lines(GAME_COLOR);
+
+    print_score(GAME_COLOR);
 }
 
 void App_Pong::onTick() {
@@ -77,13 +109,25 @@ void App_Pong::onTick() {
         botx = nbotx;
         print_top_bar(botx, GAME_COLOR);
     }
-
+  
     TouchData data = touch.getData();
     int nplayerx = data.x;
+    int min_placex_bar = BAR_HALF_LENGTH;
+    int max_placex_bar = BOARD_WIDTH - BAR_HALF_LENGTH;
 
     if (nplayerx != playerx) {
         print_bottom_bar(playerx, BACKGROUND_COLOR);
+
         playerx = nplayerx;
+
+        if(data.x < min_placex_bar) {
+            playerx = min_placex_bar;
+        }
+
+        if (data.x > max_placex_bar) {
+            playerx = max_placex_bar;
+        }
+
         print_bottom_bar(playerx, GAME_COLOR);
     }
 

@@ -8,6 +8,8 @@
 class App_Pong : public App {
     private:
         int botx = 0, playerx = 0, tick = 0;
+        char _bot_score[3];
+        char _player_score[3];
 
     public:
         App_Pong();
@@ -23,7 +25,9 @@ class App_Pong : public App {
 
         void print_bottom_bar(int place_x, uint32_t color);
 
-        void print_dashed(uint32_t color);
+        void print_field_lines(uint32_t color);
 
         void print_ball(int x_center, int y_center, uint32_t color);
+
+        void print_score(uint32_t color);
 };
