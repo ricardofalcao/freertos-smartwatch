@@ -1,9 +1,9 @@
-#include <SPI.h> 
-#include <Arduino.h>
+#include "app/weather.h"
+ 
 #include <ArduinoJson.h> 
+
 #include <WiFi.h> 
 #include "wifi.h"
-#include "app/weather.h"
 
 
 #define WIFI_NETWORK "Vodafone-284C30"

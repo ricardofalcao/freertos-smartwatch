@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sdkconfig.h"
 #include <Arduino.h>
 
 #include "app/app.h"

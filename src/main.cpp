@@ -1,3 +1,4 @@
+#include "sdkconfig.h"
 #include <Arduino.h>
 
 #include <FS.h>
@@ -107,4 +108,5 @@ void setup() {
 }
 
 void loop() {
+  vTaskDelay(portMAX_DELAY);
 }

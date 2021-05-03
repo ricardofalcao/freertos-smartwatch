@@ -126,6 +126,8 @@ void Graphics::onTick() {
             xSemaphoreGive(spi_mutex);
         }
     }
+
+    vTaskDelay(20 / portTICK_PERIOD_MS);
 }
 
 void _draw_thick_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t wd, uint32_t color) {

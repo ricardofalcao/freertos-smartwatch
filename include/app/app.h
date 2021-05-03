@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sdkconfig.h"
 #include <Arduino.h>
 
 #include "tft.h"
@@ -52,10 +53,14 @@ class App {
         { };
 
         virtual void onTick() 
-        { };
+        { 
+            vTaskDelay(portMAX_DELAY);
+        };
 
         virtual void onTouchTick() 
-        { };
+        { 
+            vTaskDelay(portMAX_DELAY);
+        };
 
         virtual void onClose() 
         { };
