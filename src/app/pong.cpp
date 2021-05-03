@@ -58,18 +58,11 @@ void App_Pong::print_field_lines(uint32_t color) {
 void App_Pong::print_score(uint32_t color) {
 
     graphics.beginBatch();
-    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 - MARGIN_Y, _bot_score, color, 5, MC_DATUM);
-
     sprintf(_bot_score, "%d", bot_score);
-    graphics.drawString(tft.width() / 2, tft.height() / 2, _bot_score, color, 4, MC_DATUM);
-    graphics.endBatch();
-
-
-    graphics.beginBatch();
-    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 + MARGIN_Y, _player_score, color, 5, MC_DATUM);
-
+    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 - MARGIN_Y, _bot_score, color, 5, MC_DATUM);
+    
     sprintf(_player_score, "%d", player_score);
-    graphics.drawString(tft.width() / 2, tft.height() / 2, _bot_score, color, 4, MC_DATUM);
+    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 + MARGIN_Y, _player_score, color, 5, MC_DATUM);
     graphics.endBatch();
 
 }
@@ -97,6 +90,11 @@ void App_Pong::onOpen() {
     print_score(GAME_COLOR);
 }
 
+float lerp(float a, float b, float x)
+{ 
+  return a + x * (b - a);
+}
+
 void App_Pong::onTick() {
     tick++;
 
@@ -111,24 +109,16 @@ void App_Pong::onTick() {
     }
   
     TouchData data = touch.getData();
-    int nplayerx = data.x;
-    int min_placex_bar = BAR_HALF_LENGTH;
-    int max_placex_bar = BOARD_WIDTH - BAR_HALF_LENGTH;
+    if (data.pressed) {
+        int nplayerx = constrain(data.x, BAR_HALF_LENGTH + 5, BOARD_WIDTH - BAR_HALF_LENGTH - 5);
 
-    if (nplayerx != playerx) {
-        print_bottom_bar(playerx, BACKGROUND_COLOR);
+        if (nplayerx != playerx) {
+            print_bottom_bar(playerx, BACKGROUND_COLOR);
 
-        playerx = nplayerx;
+            playerx = ceil(lerp(playerx, nplayerx, 0.2));
 
-        if(data.x < min_placex_bar) {
-            playerx = min_placex_bar;
+            print_bottom_bar(playerx, GAME_COLOR);
         }
-
-        if (data.x > max_placex_bar) {
-            playerx = max_placex_bar;
-        }
-
-        print_bottom_bar(playerx, GAME_COLOR);
     }
 
     graphics.endBatch();
