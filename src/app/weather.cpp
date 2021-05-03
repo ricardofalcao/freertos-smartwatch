@@ -41,7 +41,7 @@ void getWeather() {
    Serial.println("parsingValues"); 
    //create a json buffer where to store the json data 
    StaticJsonDocument<1024>  jsonBuffer; 
-  auto error= deserializeJson(jsonBuffer, line);
+  auto error= deserializeJson(jsonBuffer, line.c_str());
    if (error) { 
      Serial.println("parseObject() failed"); 
      return; 

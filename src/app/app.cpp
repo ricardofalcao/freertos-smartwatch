@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "app/app.h"
 
 #if CONFIG_FREERTOS_UNICORE

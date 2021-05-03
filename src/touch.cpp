@@ -2,6 +2,7 @@
 #include "tft.h"
 
 #include <FS.h>
+#include <SPIFFS.h>
 
 //#define TOUCH_DEBUG
 

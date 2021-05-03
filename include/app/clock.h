@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 
+#include "time.h"
 #include "app/app.h"
 
 class App_Clock : public App {

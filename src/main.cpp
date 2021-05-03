@@ -1,6 +1,8 @@
 #include <Arduino.h>
 
 #include <FS.h>
+#include <SPIFFS.h>
+
 #include <WiFi.h>
 
 #include "soc/soc.h"
@@ -12,6 +14,7 @@
 #include "wifi.h"
 
 #include "app/drawer.h"
+#include "app/monitor.h"
 #include "app/clock.h"
 #include "app/alert.h"
 #include "app/tictactoe.h"
@@ -30,6 +33,7 @@ Lang lang;
 App_Drawer drawer_app;
 
 App_Clock clock_app;
+App_Monitor monitor_app;
 App_Alert alert_app;
 App_Metronome metronome_app;
 
@@ -94,7 +98,7 @@ void setup() {
   graphics.fillScreen(TFT_BLACK);
 
   drawer_app.addApp(&clock_app);
-  drawer_app.addApp(&alert_app);
+  drawer_app.addApp(&monitor_app);
   drawer_app.addApp(&tictactoe_app);
   drawer_app.addApp(&metronome_app);
   drawer_app.addApp(&pong_app);
