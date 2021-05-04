@@ -14,14 +14,15 @@
 #include "app/drawer.h"
 #include "app/clock.h"
 #include "app/alert.h"
+#include "app/weather.h"
 #include "app/tictactoe.h"
 #include "app/pong.h"
 #include "app/metronome.h"
 
 #include "lang/lang.h"
 
-#define WIFI_NETWORK "Vodafone-284C30"
-#define WIFI_PASS "tYUREqcuVn"
+#define WIFI_NETWORK "HUAWEI Mate 10 Pro"
+#define WIFI_PASS "nuno1999"
 
 Touch touch;
 Graphics graphics;
@@ -32,6 +33,7 @@ App_Drawer drawer_app;
 App_Clock clock_app;
 App_Alert alert_app;
 App_Metronome metronome_app;
+App_weather weather_app;
 
 App_TicTacToe tictactoe_app;
 App_Pong pong_app;
@@ -75,7 +77,7 @@ void setup() {
   Serial.println("[Main] Calibration Touch");
   touch.calibrate();
 
-  /*xTaskCreatePinnedToCore(
+  xTaskCreatePinnedToCore(
       wifi_task,
       "WiFi",
       4096,
@@ -83,7 +85,7 @@ void setup() {
       1,
       NULL,
       0
-  );*/
+  );
 
   Serial.println("[Main] Initializing Touch");
   touch.begin();
@@ -98,6 +100,7 @@ void setup() {
   drawer_app.addApp(&tictactoe_app);
   drawer_app.addApp(&metronome_app);
   drawer_app.addApp(&pong_app);
+  drawer_app.addApp(&weather_app);
   
   drawer_app.open(false);
 }
