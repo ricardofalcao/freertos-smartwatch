@@ -1,11 +1,12 @@
 #pragma once
+#include "sdkconfig.h"
 
 #include <Arduino.h>
 #include <TFT_eSPI.h>
 
 #include "graphics.h"
 
-#define TOUCH_SAMPLE_RATE_MS    100
+#define TOUCH_SAMPLE_RATE_HZ    100
 
 struct TouchData {
     uint16_t x = 0;

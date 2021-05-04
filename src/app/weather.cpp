@@ -1,10 +1,8 @@
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <WiFi.h>
-#include <HTTPClient.h>
-
-#include "wifi.h"
 #include "app/weather.h"
+ 
+#include <ArduinoJson.h> 
+
+#include <WiFi.h> 
 
 #define WIFI_NETWORK "Vodafone-284C30"
 #define WIFI_PASS "tYUREqcuVn"

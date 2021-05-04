@@ -98,8 +98,6 @@ float lerp(float a, float b, float x)
 void App_Pong::onTick() {
     tick++;
 
-    graphics.beginBatch();
-
     int nbotx = ((int) (sin(0.05 * tick) * (BOARD_WIDTH / 2 - BAR_LENGTH))) + BOARD_WIDTH / 2;
 
     if (nbotx != botx) {
@@ -120,8 +118,6 @@ void App_Pong::onTick() {
             print_bottom_bar(playerx, GAME_COLOR);
         }
     }
-
-    graphics.endBatch();
 
     vTaskDelay(10 / portTICK_PERIOD_MS);
 }

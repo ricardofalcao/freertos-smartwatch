@@ -3,24 +3,26 @@
 #include "sdkconfig.h"
 #include <Arduino.h>
 
-#include "time.h"
+#include "touch.h"
 #include "app/app.h"
 
-class App_Clock : public App {
+#define MONITOR_TASKS_LENGTH 16
+
+class App_Monitor : public App {
     private:
-        tm current_time;
-        tm old_time;
+        TaskStatus_t statuses[MONITOR_TASKS_LENGTH];
 
     public:
-        App_Clock();
+        App_Monitor();
 
         void onOpen() override;   
 
         void onTick() override;   
 
+        void onTouchTick() override;   
+
         void onClose() override;   
 
     private:
-        void draw_line(float angle, float size, uint32_t color);
-
+        void fillTasks();
 };

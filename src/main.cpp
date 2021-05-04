@@ -1,6 +1,9 @@
+#include "sdkconfig.h"
 #include <Arduino.h>
 
 #include <FS.h>
+#include <SPIFFS.h>
+
 #include <WiFi.h>
 
 #include "soc/soc.h"
@@ -12,6 +15,7 @@
 #include "wifi.h"
 
 #include "app/drawer.h"
+#include "app/monitor.h"
 #include "app/clock.h"
 #include "app/alert.h"
 #include "app/weather.h"
@@ -31,6 +35,7 @@ Lang lang;
 App_Drawer drawer_app;
 
 App_Clock clock_app;
+App_Monitor monitor_app;
 App_Alert alert_app;
 App_Metronome metronome_app;
 App_weather weather_app;
@@ -74,8 +79,8 @@ void setup() {
   Serial.println("[Main] Initializing TFT");
   tft.init();
 
-  Serial.println("[Main] Calibration Touch");
-  touch.calibrate();
+  /*
+
 
   xTaskCreatePinnedToCore(
       wifi_task,
@@ -87,6 +92,14 @@ void setup() {
       0
   );
 
+  */
+
+  Serial.println("[Main] Calibration Touch");
+  touch.calibrate();
+
+  Serial.println("[Main] Calibration Touch");
+  touch.calibrate();
+
   Serial.println("[Main] Initializing Touch");
   touch.begin();
   Serial.println("[Main] Initializing Graphics");
@@ -96,7 +109,7 @@ void setup() {
   graphics.fillScreen(TFT_BLACK);
 
   drawer_app.addApp(&clock_app);
-  drawer_app.addApp(&alert_app);
+  drawer_app.addApp(&monitor_app);
   drawer_app.addApp(&tictactoe_app);
   drawer_app.addApp(&metronome_app);
   drawer_app.addApp(&pong_app);
@@ -106,4 +119,5 @@ void setup() {
 }
 
 void loop() {
+  vTaskDelete(NULL);
 }
