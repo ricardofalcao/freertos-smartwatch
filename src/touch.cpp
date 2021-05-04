@@ -75,7 +75,7 @@ void Touch::begin() {
       "Touch",
       4096,
       this,
-      10,
+      tskIDLE_PRIORITY + 2,
       NULL,
       0
   );
@@ -99,7 +99,7 @@ void Touch::onTick() {
             xQueueOverwrite(data_queue, &data);
         }
 
-        vTaskDelay(TOUCH_SAMPLE_RATE_MS / portTICK_RATE_MS);
+        vTaskDelay(1000 / TOUCH_SAMPLE_RATE_HZ / portTICK_RATE_MS);
     }
 }
 

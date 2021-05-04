@@ -77,9 +77,6 @@ void setup() {
   Serial.println("[Main] Initializing TFT");
   tft.init();
 
-  Serial.println("[Main] Calibration Touch");
-  touch.calibrate();
-
   /*xTaskCreatePinnedToCore(
       wifi_task,
       "WiFi",
@@ -89,6 +86,9 @@ void setup() {
       NULL,
       0
   );*/
+
+  Serial.println("[Main] Calibration Touch");
+  touch.calibrate();
 
   Serial.println("[Main] Initializing Touch");
   touch.begin();
@@ -108,5 +108,5 @@ void setup() {
 }
 
 void loop() {
-  vTaskDelay(portMAX_DELAY);
+  vTaskDelete(NULL);
 }

@@ -52,7 +52,7 @@ void App::open(bool _minimized) {
         name.c_str(),
         stack_depth,
         this,
-        priority,
+        tskIDLE_PRIORITY + priority,
         &task_handle,
         target_core
     );
@@ -78,7 +78,7 @@ void App::startTouchTask() {
       (name + "-TOUCH").c_str(),
       touch_stack_depth,
       this,
-      touch_priority,
+      tskIDLE_PRIORITY + touch_priority,
       &touch_task_handle,
       target_core
   );

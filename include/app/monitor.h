@@ -6,7 +6,12 @@
 #include "touch.h"
 #include "app/app.h"
 
+#define MONITOR_TASKS_LENGTH 16
+
 class App_Monitor : public App {
+    private:
+        TaskStatus_t statuses[MONITOR_TASKS_LENGTH];
+
     public:
         App_Monitor();
 
