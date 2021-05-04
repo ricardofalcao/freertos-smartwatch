@@ -3,6 +3,7 @@
 #include <ArduinoJson.h> 
 
 #include <WiFi.h> 
+#include <HTTPClient.h>
 
 #define WIFI_NETWORK "Vodafone-284C30"
 #define WIFI_PASS "tYUREqcuVn"
