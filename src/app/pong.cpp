@@ -31,14 +31,33 @@ int player_score = 0;
     Graphics
 */
 
-void App_Pong::print_top_bar(int place_x, uint32_t color) {
+void App_Pong::print_top_bar(int previous_x, int new_x) {
+    if (new_x == previous_x) {
+        return;
+    }
+
+    if (new_x > previous_x) {
+        graphics.fillRectangle(previous_x - BAR_HALF_LENGTH, MARGIN_Y, new_x - previous_x, BAR_HEIGHT, BACKGROUND_COLOR);
+    } else {
+        graphics.fillRectangle(new_x + BAR_HALF_LENGTH, MARGIN_Y, previous_x - new_x, BAR_HEIGHT, BACKGROUND_COLOR);
+    }
+
     //place_x means the center of the bar 
-    graphics.fillRectangle(place_x - BAR_HALF_LENGTH, MARGIN_Y, BAR_LENGTH, BAR_HEIGHT, color);
+    graphics.fillRectangle(new_x - BAR_HALF_LENGTH, MARGIN_Y, BAR_LENGTH, BAR_HEIGHT, GAME_COLOR);
 }
 
-void App_Pong::print_bottom_bar(int place_x, uint32_t color) {
+void App_Pong::print_bottom_bar(int previous_x, int new_x) {
+    if (new_x == previous_x) {
+        return;
+    }
+
+    if (new_x > previous_x) {
+        graphics.fillRectangle(previous_x - BAR_HALF_LENGTH, BOARD_HEIGHT - MARGIN_Y - BAR_HEIGHT, new_x - previous_x, BAR_HEIGHT, BACKGROUND_COLOR);
+    } else {
+        graphics.fillRectangle(new_x + BAR_HALF_LENGTH, BOARD_HEIGHT - MARGIN_Y - BAR_HEIGHT, previous_x - new_x, BAR_HEIGHT, BACKGROUND_COLOR);
+    }
     //place_x means the center of the bar 
-    graphics.fillRectangle(place_x - BAR_HALF_LENGTH, BOARD_HEIGHT - MARGIN_Y - BAR_HEIGHT, BAR_LENGTH, BAR_HEIGHT, color);
+    graphics.fillRectangle(new_x - BAR_HALF_LENGTH, BOARD_HEIGHT - MARGIN_Y - BAR_HEIGHT, BAR_LENGTH, BAR_HEIGHT, GAME_COLOR);
 }
 
 void App_Pong::print_field_lines(uint32_t color) {
@@ -100,24 +119,27 @@ void App_Pong::onTick() {
 
     int nbotx = ((int) (sin(0.05 * tick) * (BOARD_WIDTH / 2 - BAR_LENGTH))) + BOARD_WIDTH / 2;
 
+    graphics.beginBatch();
     if (nbotx != botx) {
-        print_top_bar(botx, BACKGROUND_COLOR);
+        print_top_bar(botx, nbotx);
         botx = nbotx;
-        print_top_bar(botx, GAME_COLOR);
     }
   
     TouchData data = touch.getData();
+
     if (data.pressed) {
         int nplayerx = constrain(data.x, BAR_HALF_LENGTH + 5, BOARD_WIDTH - BAR_HALF_LENGTH - 5);
 
-        if (nplayerx != playerx) {
-            print_bottom_bar(playerx, BACKGROUND_COLOR);
-
-            playerx = ceil(lerp(playerx, nplayerx, 0.2));
-
-            print_bottom_bar(playerx, GAME_COLOR);
+        if (playerx != nplayerx) {
+            tplayerx = nplayerx;
         }
     }
+
+    int iiplayerx = ceil(lerp(playerx, tplayerx, 0.3));
+    print_bottom_bar(playerx, iiplayerx);
+    playerx = iiplayerx;
+
+    graphics.endBatch();
 
     vTaskDelay(10 / portTICK_PERIOD_MS);
 }

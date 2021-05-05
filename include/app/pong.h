@@ -9,7 +9,7 @@
 class App_Pong : public App {
     private:
         int tick = 0;
-        int playerx = tft.width() / 2;
+        int playerx = tft.width() / 2, tplayerx = tft.width() / 2;
         int botx = tft.width() / 2;
         char _bot_score[3];
         char _player_score[3];
@@ -24,9 +24,9 @@ class App_Pong : public App {
         void onClose() override;   
     
     private:
-        void print_top_bar(int place_x, uint32_t color);
+        void print_top_bar(int previous_x, int new_x);
 
-        void print_bottom_bar(int place_x, uint32_t color);
+        void print_bottom_bar(int previous_x, int new_x);
 
         void print_field_lines(uint32_t color);
 

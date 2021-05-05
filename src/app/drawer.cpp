@@ -4,8 +4,9 @@
 #include "touch.h"
 #include "graphics.h"
 
-#define APP_WIDTH       ((TFT_WIDTH - 2*APPS_MARGIN_X - APPS_SPACING_X * (DRAWER_COLUMNS - 1)) / DRAWER_COLUMNS)
-#define APP_HEIGHT      APP_WIDTH
+#define APP_WIDTH           ((TFT_WIDTH - 2*APPS_MARGIN_X - APPS_SPACING_X * (DRAWER_COLUMNS - 1)) / DRAWER_COLUMNS)
+#define APP_HEIGHT          APP_WIDTH
+#define APP_BORDER_RADIUS   (APP_WIDTH / 4)
 
 App_Drawer::App_Drawer() : App("Drawer", "Shows all installed apps") {
     priority = 3;
@@ -92,7 +93,7 @@ void App_Drawer::setup() {
         int32_t x = APPS_MARGIN_X + col * (APP_WIDTH + APPS_SPACING_X);
         int32_t y = APPS_MARGIN_Y + row * (APP_HEIGHT + APPS_SPACING_Y);
 
-        graphics.fillRoundedRectangle(x, y, APP_WIDTH, APP_HEIGHT, APP_WIDTH / 4, app->color);
+        graphics.fillRoundedRectangle(x, y, APP_WIDTH, APP_HEIGHT, APP_BORDER_RADIUS, app->color);
         graphics.drawString(x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
     }
 
