@@ -18,6 +18,18 @@ typedef struct {
 
     int32_t x;
     int32_t y;
+    int32_t width;
+    int32_t height;
+    int32_t radius;
+    uint32_t color;
+    uint8_t thickness;
+
+} RoundedRectangle_t;
+
+typedef struct {
+
+    int32_t x;
+    int32_t y;
     int32_t radius;
     uint32_t color;
     uint8_t thickness;
@@ -105,7 +117,7 @@ void Graphics::begin() {
     xTaskCreatePinnedToCore(
       graphics_task,
       "Graphics",
-      10240,
+      10240 * 4,
       this,
       tskIDLE_PRIORITY + 1,
       NULL,
@@ -121,7 +133,10 @@ void Graphics::onTick() {
     GOperation_t receive_buffer;
     if (xQueueReceive(operation_queue, &receive_buffer, portMAX_DELAY)) {
         if (xSemaphoreTake(spi_mutex, portMAX_DELAY) == pdTRUE) {
+
+            tft.startWrite();
             processOperation(&receive_buffer);
+            tft.endWrite();
 
             xSemaphoreGive(spi_mutex);
         }
@@ -220,12 +235,10 @@ void Graphics::processOperation(GOperation_t * operation) {
         case DRAW_RECTANGLE: {
             Rectangle_t * rect = (Rectangle_t *) operation->pvData;
             
-            tft.startWrite();
             _draw_thick_line(rect->x, rect->y, rect->x + rect->width - 1, rect->y, rect->thickness, rect->color);
             _draw_thick_line(rect->x, rect->y, rect->x, rect->y + rect->height - 1, rect->thickness, rect->color);
             _draw_thick_line(rect->x, rect->y + rect->height - 1, rect->x + rect->width - 1, rect->y + rect->height - 1, rect->thickness, rect->color);
             _draw_thick_line(rect->x + rect->width - 1, rect->y, rect->x + rect->width - 1, rect->y + rect->height - 1, rect->thickness, rect->color);
-            tft.endWrite();
 
             break;
         }
@@ -237,13 +250,29 @@ void Graphics::processOperation(GOperation_t * operation) {
         }
 
         //
+        case DRAW_ROUNDED_RECTANGLE: {
+            RoundedRectangle_t * rect = (RoundedRectangle_t *) operation->pvData;
+            
+            _draw_thick_line(rect->x, rect->y, rect->x + rect->width - 1, rect->y, rect->thickness, rect->color);
+            _draw_thick_line(rect->x, rect->y, rect->x, rect->y + rect->height - 1, rect->thickness, rect->color);
+            _draw_thick_line(rect->x, rect->y + rect->height - 1, rect->x + rect->width - 1, rect->y + rect->height - 1, rect->thickness, rect->color);
+            _draw_thick_line(rect->x + rect->width - 1, rect->y, rect->x + rect->width - 1, rect->y + rect->height - 1, rect->thickness, rect->color);
+
+            break;
+        }
+
+        case FILL_ROUNDED_RECTANGLE: {
+            RoundedRectangle_t * rect = (RoundedRectangle_t *) operation->pvData;
+            tft.fillRoundRect(rect->x, rect->y, rect->width, rect->height, rect->radius, rect->color);
+            break;
+        }
+
+        //
 
         case DRAW_CIRCLE: {
             Circle_t * circle = (Circle_t *) operation->pvData;
 
-            tft.startWrite();
             _draw_thick_circle(circle->x, circle->y, circle->radius, circle->thickness, circle->color);
-            tft.endWrite();
 
             break;
         }
@@ -259,11 +288,9 @@ void Graphics::processOperation(GOperation_t * operation) {
         case DRAW_TRIANGLE: {
             Triangle_t * tri = (Triangle_t *) operation->pvData;
             
-            tft.startWrite();
             _draw_thick_line(tri->x1, tri->y1, tri->x2, tri->y2, tri->thickness, tri->color);
             _draw_thick_line(tri->x2, tri->y2, tri->x3, tri->y3, tri->thickness, tri->color);
             _draw_thick_line(tri->x3, tri->y3, tri->x1, tri->y1, tri->thickness, tri->color);
-            tft.endWrite();
             
             break;
         }
@@ -279,9 +306,7 @@ void Graphics::processOperation(GOperation_t * operation) {
         case DRAW_LINE: {
             Line_t * line = (Line_t *) operation->pvData;
             
-            tft.startWrite();
             _draw_thick_line(line->xstart, line->ystart, line->xend, line->yend, line->thickness, line->color);
-            tft.endWrite();
 
             break;
         }
@@ -296,12 +321,10 @@ void Graphics::processOperation(GOperation_t * operation) {
             String_t * text = (String_t *) operation->pvData;
 
             if (text->str) {
-                //tft.loadFont("NotoSans-Regular20");
                 tft.setTextColor(text->color);
                 tft.setTextSize(text->font_size);
                 tft.setTextDatum(text->datum);
                 tft.drawString(text->str, text->x, text->y);
-                //tft.unloadFont();
 
                 vPortFree(text->str);
             }
@@ -319,11 +342,9 @@ void Graphics::processOperation(GOperation_t * operation) {
             Batch_t * batch = (Batch_t *) operation->pvData;
             GOperation_t * operations = (GOperation_t *) batch->pvData;
 
-            tft.startWrite();
             for(size_t i = 0; i < batch->batch_size; i++) {
                 processOperation(&operations[i]);
             }
-            tft.endWrite();
 
             vPortFree(operations);
             break;
@@ -383,6 +404,18 @@ Rectangle_t * _rectangle(int32_t x, int32_t y, int32_t width, int32_t height, ui
     rectangle->y = y;
     rectangle->width = width;
     rectangle->height = height;
+    rectangle->color = color;
+    rectangle->thickness = thickness;
+    return rectangle;
+}
+
+RoundedRectangle_t * _rounded_rectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color, uint8_t thickness) {
+    RoundedRectangle_t * rectangle = (RoundedRectangle_t *) pvPortMalloc(sizeof(RoundedRectangle_t));
+    rectangle->x = x;
+    rectangle->y = y;
+    rectangle->width = width;
+    rectangle->height = height;
+    rectangle->radius = radius;
     rectangle->color = color;
     rectangle->thickness = thickness;
     return rectangle;
@@ -489,6 +522,29 @@ void Graphics::fillRectangle(int32_t x, int32_t y, int32_t width, int32_t height
     operation->type = FILL_RECTANGLE;
     operation->viewport = viewport_buffer;
     operation->pvData = (void *) _rectangle(x, y, width, height, color, 0);
+
+    enqueueOperationBuffer();
+}
+
+//
+
+void Graphics::drawRoundedRectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color, uint8_t thickness) {
+    
+    GOperation_t * operation = getOperationBuffer();
+    
+    operation->type = DRAW_ROUNDED_RECTANGLE;
+    operation->viewport = viewport_buffer;
+    operation->pvData = (void *) _rounded_rectangle(x, y, width, height, radius, color, thickness);
+
+    enqueueOperationBuffer();
+}
+
+void Graphics::fillRoundedRectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color) {
+    GOperation_t * operation = getOperationBuffer();
+    
+    operation->type = FILL_ROUNDED_RECTANGLE;
+    operation->viewport = viewport_buffer;
+    operation->pvData = (void *) _rounded_rectangle(x, y, width, height, radius, color, 0);
 
     enqueueOperationBuffer();
 }

@@ -92,7 +92,7 @@ void App_Drawer::setup() {
         int32_t x = APPS_MARGIN_X + col * (APP_WIDTH + APPS_SPACING_X);
         int32_t y = APPS_MARGIN_Y + row * (APP_HEIGHT + APPS_SPACING_Y);
 
-        graphics.fillRectangle(x, y, APP_WIDTH, APP_HEIGHT, app->color);
+        graphics.fillRoundedRectangle(x, y, APP_WIDTH, APP_HEIGHT, APP_WIDTH / 4, app->color);
         graphics.drawString(x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
     }
 

@@ -12,6 +12,9 @@ typedef enum {
     DRAW_RECTANGLE = 0,
     FILL_RECTANGLE,
 
+    DRAW_ROUNDED_RECTANGLE,
+    FILL_ROUNDED_RECTANGLE,
+
     DRAW_CIRCLE,
     FILL_CIRCLE,
 
@@ -89,6 +92,12 @@ class Graphics {
         void drawRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color, uint8_t thickness = 1);
 
         void fillRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color);
+
+        //
+
+        void drawRoundedRectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color, uint8_t thickness = 1);
+
+        void fillRoundedRectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color);
         
         //
 
