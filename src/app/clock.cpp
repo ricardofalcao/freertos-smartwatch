@@ -6,7 +6,7 @@
 #include "touch.h"
 #include "graphics.h"
 
-App_Clock::App_Clock() : App("Clock", "Shows the current time") {
+App_Clock::App_Clock() : App("Clocké", "Shows the current time") {
     priority = 3;
     stack_depth = 10240;
 }

@@ -1,5 +1,7 @@
 #include "app/app.h"
 
+#include "touch.h"
+
 #if CONFIG_FREERTOS_UNICORE
 #define ARDUINO_RUNNING_CORE 0
 #else
@@ -52,7 +54,7 @@ void App::open(bool _minimized) {
         name.c_str(),
         stack_depth,
         this,
-        tskIDLE_PRIORITY + priority,
+        tskIDLE_PRIORITY + 5 + priority,
         &task_handle,
         target_core
     );
@@ -78,7 +80,7 @@ void App::startTouchTask() {
       (name + "-TOUCH").c_str(),
       touch_stack_depth,
       this,
-      tskIDLE_PRIORITY + touch_priority,
+      tskIDLE_PRIORITY + 5 + touch_priority,
       &touch_task_handle,
       target_core
   );

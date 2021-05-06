@@ -7,8 +7,8 @@
 #define BACKGROUND_COLOR        TFT_BLACK
 #define GAME_COLOR              TFT_WHITE
 
-#define BOARD_WIDTH             tft.width()
-#define BOARD_HEIGHT            tft.height()
+#define BOARD_WIDTH             VIEW_WIDTH
+#define BOARD_HEIGHT            VIEW_HEIGHT
 
 #define MARGIN_Y                35
 #define MARGIN_X                35
@@ -61,10 +61,11 @@ void App_Pong::print_bottom_bar(int previous_x, int new_x) {
 }
 
 void App_Pong::print_field_lines(uint32_t color) {
-    int numberOfLines = (BOARD_WIDTH - DASHED_BARS_LENGTH) / (DASHED_BARS_LENGTH + SPACE_BETWEEN_BARS);
+    int numberOfLines = (BOARD_WIDTH - DASHED_BARS_LENGTH) / (DASHED_BARS_LENGTH + SPACE_BETWEEN_BARS) + 1;
+    int offsetX = ((BOARD_WIDTH - DASHED_BARS_LENGTH) % (DASHED_BARS_LENGTH + SPACE_BETWEEN_BARS)) / 2;
 
     for(int i = 0; i < numberOfLines; i++) {
-        int x = i * (DASHED_BARS_LENGTH+SPACE_BETWEEN_BARS);
+        int x = offsetX + i * (DASHED_BARS_LENGTH+SPACE_BETWEEN_BARS);
 
         graphics.drawLine(x, BOARD_HEIGHT / 2, x + DASHED_BARS_LENGTH, BOARD_HEIGHT / 2, color, 2);
     }
@@ -78,10 +79,10 @@ void App_Pong::print_score(uint32_t color) {
 
     graphics.beginBatch();
     sprintf(_bot_score, "%d", bot_score);
-    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 - MARGIN_Y, _bot_score, color, 5, MC_DATUM);
+    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 - MARGIN_Y, _bot_score, color, 4, MC_DATUM);
     
     sprintf(_player_score, "%d", player_score);
-    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 + MARGIN_Y, _player_score, color, 5, MC_DATUM);
+    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 + MARGIN_Y, _player_score, color, 4, MC_DATUM);
     graphics.endBatch();
 
 }

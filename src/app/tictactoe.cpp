@@ -10,7 +10,7 @@
 #define MICRO_MARGIN_X  10
 #define MICRO_MARGIN_Y  10
 
-#define BOARD_WIDTH     (tft.width() - (MARGIN_X * 2))
+#define BOARD_WIDTH     (VIEW_WIDTH - (MARGIN_X * 2))
 #define BOARD_HEIGHT    (BOARD_WIDTH)
 
 #define CELL_WIDTH      (int) (BOARD_WIDTH / 3.0)
@@ -133,8 +133,8 @@ void App_TicTacToe::erase_cell(int8_t cell) {
 
 void App_TicTacToe::show_message(const char * message) {
     graphics.beginBatch();
-    graphics.fillRectangle(0, MARGIN_Y + BOARD_HEIGHT + 40, tft.width(), 40, TFT_WHITE);
-    graphics.drawString(tft.width() / 2, MARGIN_Y + BOARD_HEIGHT + 40 + 20 , message, TFT_BLACK, 2, MC_DATUM);
+    graphics.fillRectangle(0, MARGIN_Y + BOARD_HEIGHT + 40, VIEW_WIDTH, 40, TFT_WHITE);
+    graphics.drawString(VIEW_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 40 + 20 , message, TFT_BLACK, 2, MC_DATUM);
     graphics.endBatch();
 }
 /*
@@ -240,13 +240,13 @@ void App_TicTacToe::onOpen() {
         erase_cell(i);
     }
 
-    graphics.drawString(tft.width() / 2, MARGIN_Y / 2, "Tic Tac Toe", TFT_BLACK, 3, MC_DATUM);
-    graphics.fillRectangle(10, tft.height() - 40 - 10, tft.width() - 2*10, 40, TFT_PURPLE);
-    graphics.drawString(tft.width() / 2, tft.height() - 20 - 10, "RESET", TFT_WHITE, 3, MC_DATUM);
+    graphics.drawString(VIEW_WIDTH / 2, MARGIN_Y / 2, "Tic Tac Toe", TFT_BLACK, 3, MC_DATUM);
+    graphics.fillRectangle(10, VIEW_HEIGHT - 40 - 10, VIEW_WIDTH - 2*10, 40, TFT_PURPLE);
+    graphics.drawString(VIEW_WIDTH / 2, VIEW_HEIGHT - 20 - 10 - 2, "RESET", TFT_WHITE, 3, MC_DATUM);
 
     reset_touch_listener.x = 10;
-    reset_touch_listener.y = tft.height() - 40 - 10;
-    reset_touch_listener.width = tft.width() - 2*10;
+    reset_touch_listener.y = VIEW_HEIGHT - 40 - 10;
+    reset_touch_listener.width = VIEW_WIDTH - 2*10;
     reset_touch_listener.height = 40;
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);

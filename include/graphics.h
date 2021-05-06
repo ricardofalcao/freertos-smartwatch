@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
 
-#define GRAPHICS_OPERATION_QUEUE_SIZE   32
-#define GRAPHICS_BATCH_MAX_SIZE         16
+#define GRAPHICS_OPERATION_QUEUE_SIZE   64
+#define GRAPHICS_BATCH_MAX_SIZE         32
 
 typedef enum {
 
@@ -85,6 +85,8 @@ class Graphics {
 
         //
 
+        GViewport_t getViewport();
+
         void setViewport(GViewport_t viewport);
 
         //
@@ -135,3 +137,6 @@ class Graphics {
 };
 
 extern Graphics graphics;
+
+#define VIEW_WIDTH  graphics.getViewport().width
+#define VIEW_HEIGHT graphics.getViewport().height

@@ -3,6 +3,20 @@
 
 #include <string.h>
 
+#include "fonts/OpenSans-Regular6pt8b.h"
+#include "fonts/OpenSans-Regular9pt8b.h"
+#include "fonts/OpenSans-Regular12pt8b.h"
+#include "fonts/OpenSans-Regular18pt8b.h"
+
+#define FONTS_LENGTH 4
+
+const GFXfont * fonts[FONTS_LENGTH] PROGMEM = {
+    &OpenSans_Regular6pt8b,
+    &OpenSans_Regular9pt8b,
+    &OpenSans_Regular12pt8b,
+    &OpenSans_Regular18pt8b
+};
+
 typedef struct {
 
     int32_t x;
@@ -123,6 +137,10 @@ void Graphics::begin() {
       NULL,
       0
   );
+}
+
+GViewport_t Graphics::getViewport() {
+    return viewport_buffer;
 }
 
 void Graphics::setViewport(GViewport_t viewport) {
@@ -321,8 +339,10 @@ void Graphics::processOperation(GOperation_t * operation) {
             String_t * text = (String_t *) operation->pvData;
 
             if (text->str) {
+                tft.setFreeFont(text->font_size <= 0 || text->font_size > FONTS_LENGTH ? fonts[0] : fonts[text->font_size - 1]);
+                tft.setTextSize(1);
+
                 tft.setTextColor(text->color);
-                tft.setTextSize(text->font_size);
                 tft.setTextDatum(text->datum);
                 tft.drawString(text->str, text->x, text->y);
 

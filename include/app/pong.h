@@ -9,8 +9,8 @@
 class App_Pong : public App {
     private:
         int tick = 0;
-        int playerx = tft.width() / 2, tplayerx = tft.width() / 2;
-        int botx = tft.width() / 2;
+        int playerx = VIEW_WIDTH / 2, tplayerx = VIEW_WIDTH / 2;
+        int botx = VIEW_WIDTH / 2;
         char _bot_score[3];
         char _player_score[3];
 

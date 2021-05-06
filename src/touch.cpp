@@ -9,6 +9,9 @@
 #define ALWAYS_CALIBRATE    false
 #define CALIBRATION_FILE    "/TouchCal"
 
+#define PRESSED_BIT         0x01
+#define RELEASED_BIT        0x02
+
 void touch_task(void * pvParameters) {
     Touch * t = (Touch *) pvParameters;
     while(true) {
@@ -22,6 +25,7 @@ void touch_task(void * pvParameters) {
 
 Touch::Touch() {
     data_queue = xQueueCreate(1, sizeof(TouchData));
+    event_group = xEventGroupCreate();
 }
 
 void Touch::calibrate() {
@@ -92,12 +96,21 @@ void Touch::onTick() {
 
         xSemaphoreGive(spi_mutex);
 
-        TouchData oldData;
-        xQueuePeek(data_queue, &oldData, 0);
-
-        if (oldData.pressed != data.pressed || oldData.x != data.x || oldData.y != data.y) {
+        if (data.pressed) {
             xQueueOverwrite(data_queue, &data);
         }
+        
+        if (data.pressed && !oldData.pressed) {
+            xEventGroupClearBits(event_group, RELEASED_BIT);
+            xEventGroupSetBits(event_group, PRESSED_BIT);
+        }
+
+        if (!data.pressed && oldData.pressed) {
+            xEventGroupClearBits(event_group, PRESSED_BIT);
+            xEventGroupSetBits(event_group, RELEASED_BIT);
+        }
+
+        oldData = data;
 
         vTaskDelay(1000 / TOUCH_SAMPLE_RATE_HZ / portTICK_RATE_MS);
     }
@@ -111,6 +124,10 @@ TouchData Touch::getData() {
 
 TouchData Touch::waitData() {
     TouchData data;
+
+    xEventGroupWaitBits(event_group, PRESSED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
+    xEventGroupWaitBits(event_group, RELEASED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
+
     xQueuePeek(data_queue, &data, portMAX_DELAY);
     return data;
 }

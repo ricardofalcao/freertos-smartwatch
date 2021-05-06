@@ -6,7 +6,7 @@
 
 #include "graphics.h"
 
-#define TOUCH_SAMPLE_RATE_HZ    100
+#define TOUCH_SAMPLE_RATE_HZ    50
 
 struct TouchData {
     uint16_t x = 0;
@@ -46,7 +46,9 @@ struct CircleTouchListener {
 
 class Touch {
     private:
+        TouchData oldData;
         QueueHandle_t data_queue;
+        EventGroupHandle_t event_group;
 
     public:
         Touch();

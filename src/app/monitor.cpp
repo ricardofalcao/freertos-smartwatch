@@ -36,8 +36,8 @@ void App_Monitor::fillTasks() {
         format the raw data as human readable ASCII data. */
         for( UBaseType_t x = 0; x < MONITOR_TASKS_LENGTH; x++ )
         {
-            int32_t y = x * 10 + 10;
-            graphics.fillRectangle(10, y, 200, 10, TFT_WHITE);
+            int32_t y = x * 16 + 10;
+            graphics.fillRectangle(10, y, 200, 16, TFT_WHITE);
             if (x >= uxArraySize) {
                 break;
             }
@@ -59,10 +59,10 @@ void App_Monitor::fillTasks() {
                 sprintf(buffer, "<1 %%");
             }
             
-            graphics.drawString(130, y, buffer, color, 1, TR_DATUM);
+            graphics.drawString(160, y, buffer, color, 1, TR_DATUM);
 
             sprintf(buffer, "%d", statuses[x].usStackHighWaterMark);
-            graphics.drawString(170, y, buffer, color, 1, TR_DATUM);
+            graphics.drawString(200, y, buffer, color, 1, TR_DATUM);
         }
     }
 }

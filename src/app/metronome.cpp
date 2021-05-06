@@ -5,8 +5,8 @@
 #define DURATION_MS 200
 #define OUTPUT_PIN 22
 
-#define BOARD_WIDTH     (tft.width())
-#define BOARD_HEIGHT    (tft.height())
+#define BOARD_WIDTH     (VIEW_WIDTH)
+#define BOARD_HEIGHT    (VIEW_HEIGHT)
 
 #define MARGIN_X        (int) (BOARD_WIDTH / 2.0)
 #define MARGIN_Y        50
@@ -60,14 +60,17 @@ void App_Metronome::print_button_down() {
 
 void App_Metronome::print_bpm() {
     graphics.beginBatch();
-    graphics.drawString(tft.width() / 2, tft.height() / 2, bpm_print_buffer, TFT_WHITE, 4, MC_DATUM);
+    graphics.drawString(VIEW_WIDTH / 2, VIEW_HEIGHT / 2, bpm_print_buffer, TFT_WHITE, 4, MC_DATUM);
     
     sprintf(bpm_print_buffer, "%d BPM", bpm);
-    graphics.drawString(tft.width() / 2, tft.height() / 2, bpm_print_buffer, TFT_BLACK, 4, MC_DATUM);
+    graphics.drawString(VIEW_WIDTH / 2, VIEW_HEIGHT / 2, bpm_print_buffer, TFT_BLACK, 4, MC_DATUM);
     graphics.endBatch();
 }
 
 int App_Metronome::check_click_button(TouchData data) {
+    if (!data.pressed) {
+        return -1;
+    }
 
     for(int i = 0; i < CELL_TOUCH_LISTENERS; i++) {
         
