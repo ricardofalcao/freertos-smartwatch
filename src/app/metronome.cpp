@@ -82,7 +82,7 @@ int App_Metronome::check_click_button(TouchData data) {
     return -1;
 }
 
-void beep_output(note_t note, uint8_t octave) {
+void App_Metronome::beep_output(note_t note, uint8_t octave) {
     
     ledcWriteNote(0, note, octave);
     vTaskDelay(DURATION_MS / portTICK_PERIOD_MS);
@@ -100,15 +100,28 @@ void App_Metronome::onOpen() {
     print_button_down();
 }
 
+void App_Metronome::onResume() {
+    graphics.fillScreen(TFT_WHITE);
+    print_button_up();
+
+    print_bpm();
+
+    print_button_down();
+}
+
 void App_Metronome::onTick() {
     beep_output(NOTE_A, 5);
 
     for(int i=0;i<compass_type;i++) {
         vTaskDelay((60*1000/bpm - DURATION_MS) / portTICK_PERIOD_MS);
         beep_output(NOTE_E, 5);
+
+        if (minimized && xSemaphoreTake(minimize_signal, 0) == pdTRUE) {
+			this->minimize();
+        }
     } 
     
-    vTaskDelay((60*1000/bpm - DURATION_MS) / portTICK_PERIOD_MS);
+    vAppDelay((60*1000/bpm - DURATION_MS) / portTICK_PERIOD_MS);
 }
 
 void App_Metronome::onTouchTick() {

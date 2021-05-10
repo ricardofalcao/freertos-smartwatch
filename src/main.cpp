@@ -13,11 +13,11 @@
 #include "touch.h"
 #include "graphics.h"
 #include "wifi.h"
+#include "pins.h"
 
 #include "app/drawer.h"
 #include "app/monitor.h"
 #include "app/clock.h"
-#include "app/alert.h"
 #include "app/weather.h"
 #include "app/tictactoe.h"
 #include "app/pong.h"
@@ -25,18 +25,24 @@
 
 #include "lang/lang.h"
 
-#define WIFI_NETWORK "HUAWEI Mate 10 Pro"
-#define WIFI_PASS "nuno1999"
+#define WIFI_NETWORK "Vodafone-284C30"
+#define WIFI_PASS "tYUREqcuVn"
 
 Touch touch;
 Graphics graphics;
 Lang lang;
+Pins pins;
+
+//
+
+SemaphoreHandle_t App::minimize_signal = xSemaphoreCreateBinary();
+
+//
 
 App_Drawer drawer_app;
 
 App_Clock clock_app;
 App_Monitor monitor_app;
-App_Alert alert_app;
 App_Metronome metronome_app;
 App_weather weather_app;
 
@@ -44,6 +50,8 @@ App_TicTacToe tictactoe_app;
 App_Pong pong_app;
 
 void wifi_task(void * pvParameters)  {
+  WiFi.mode(WIFI_STA);
+
   while(true) {
     if (WiFi.status() == WL_CONNECTED) {
       vTaskDelay(10000 / portTICK_PERIOD_MS);
@@ -51,7 +59,6 @@ void wifi_task(void * pvParameters)  {
     }
 
     Serial.printf("[WiFi] Connecting to WiFi\n");
-    WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_NETWORK, WIFI_PASS);
 
     unsigned long startAttemptTime = millis();
@@ -62,7 +69,7 @@ void wifi_task(void * pvParameters)  {
 
     if (WiFi.status() == WL_CONNECTED) {
       Serial.println("[WiFi] Connected!");
-      esp_Wsync_time();
+      //esp_Wsync_time();
       continue;
     }
   }
@@ -79,8 +86,9 @@ void setup() {
   Serial.println("[Main] Initializing TFT");
   tft.init();
 
-  /*
-
+  ledcSetup(4, 5000, 8);
+  ledcAttachPin(27, 4);
+  ledcWrite(4, 0);
 
   xTaskCreatePinnedToCore(
       wifi_task,
@@ -92,8 +100,6 @@ void setup() {
       0
   );
 
-  */
-
   Serial.println("[Main] Calibration Touch");
   touch.calibrate();
 
@@ -104,6 +110,8 @@ void setup() {
   touch.begin();
   Serial.println("[Main] Initializing Graphics");
   graphics.begin();
+  Serial.println("[Main] Initializing Pins");
+  pins.begin();
 
   graphics.setViewport({ 0, 0, TFT_WIDTH, TFT_HEIGHT });
   graphics.fillScreen(TFT_BLACK);
@@ -115,7 +123,7 @@ void setup() {
   drawer_app.addApp(&pong_app);
   drawer_app.addApp(&weather_app);
   
-  drawer_app.open(false);
+  drawer_app.open();
 }
 
 void loop() {

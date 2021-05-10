@@ -24,7 +24,13 @@ class App {
         bool minimized = false;
         bool running = false;
 
+        static SemaphoreHandle_t minimize_signal;
+
+        EventGroupHandle_t resume_signal;
+
     protected:
+        bool canMinimize = true;
+
         unsigned int priority = 3;
         unsigned int touch_priority = 3;
 
@@ -39,17 +45,29 @@ class App {
     public:
         App(String name, String description);
 
-        void open(bool minimized);
+        void open();
+
+        void minimize();
+
+        void resume();
 
         bool close();
 
         void startTouchTask();
+
+        void vAppDelay(const TickType_t xTicksToDelay);
 
         /*
 
         */
 
         virtual void onOpen() 
+        { };
+
+        virtual void onResume() 
+        { };
+
+        virtual void onMinimize() 
         { };
 
         virtual void onTick() 

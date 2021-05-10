@@ -19,9 +19,6 @@
 #define PLACE_X         1
 #define PLACE_O         2
 
-#define CELL_TOUCH_LISTENERS 9
-#define CELL_TOUCH_LISTENER
-
 #define STATE_DRAW      3
 
 /*
@@ -51,11 +48,6 @@ int winPos[8][3] = {
     {0, 4, 8},
     {2, 4, 6}
 };
-
-int places[9];
-RectangleTouchListener cell_touch_listeners[CELL_TOUCH_LISTENERS];
-
-RectangleTouchListener reset_touch_listener;
 
 /*
     Graphics
@@ -141,11 +133,11 @@ void App_TicTacToe::show_message(const char * message) {
     Data structures
 */
 
-void _place_x(int32_t cell) {
+void App_TicTacToe::place_x(int8_t cell) {
     places[cell] = PLACE_X;
 }
 
-void _place_o(int32_t cell) {
+void App_TicTacToe::place_o(int8_t cell) {
     places[cell] = PLACE_O;
 }
 
@@ -153,8 +145,8 @@ void _place_o(int32_t cell) {
     Listeners
 */
 
-int App_TicTacToe::check_click_cells(TouchData data) {
-    for(int i = 0; i < 9; i++) {
+int8_t App_TicTacToe::check_click_cells(TouchData data) {
+    for(int8_t i = 0; i < 9; i++) {
         if (places[i] != 0) {
             continue;
         }
@@ -171,7 +163,7 @@ int App_TicTacToe::check_click_cells(TouchData data) {
 
 */
 
-int _get_winner(uint8_t * layout)
+uint8_t App_TicTacToe::get_winner(uint8_t * layout)
 {
     bool draw_check = true;
 
@@ -186,14 +178,14 @@ int _get_winner(uint8_t * layout)
         return 3;
     }  
 
-    for(int i = 0; i < 8; i++) {
-        int player = places[winPos[i][0]];
+    for(uint8_t i = 0; i < 8; i++) {
+        uint8_t player = places[winPos[i][0]];
         if (player == 0) {
             continue;
         }
 
         bool valid = true;
-        for(int j = 1; j < 3; j++) {
+        for(uint8_t j = 1; j < 3; j++) {
             if (places[winPos[i][j]] != player) {
                 valid = false;
                 break;
@@ -216,12 +208,25 @@ int _get_winner(uint8_t * layout)
 App_TicTacToe::App_TicTacToe() : App("TicTacToe", "Let's play a game") {
     priority = 3;
     stack_depth = 4096;
+    canMinimize = false;
+
+    cell_queue = xQueueCreate(1, sizeof(int8_t));
+    queue_set = xQueueCreateSet(1 + 1);
+
+    xQueueAddToSet(cell_queue, queue_set);
+    xQueueAddToSet(minimize_signal, queue_set);
+    
 }
 
 void App_TicTacToe::onOpen() {
+    ended = false;
+    empty = true;
+
     graphics.fillScreen(TFT_WHITE);
 
     for(uint8_t i = 0; i < 9; i++) {
+        places[i] = 0;
+        
         int line = (int)floor(i / 3.0f);
         int column = (i % 3);
 
@@ -248,32 +253,17 @@ void App_TicTacToe::onOpen() {
     reset_touch_listener.y = VIEW_HEIGHT - 40 - 10;
     reset_touch_listener.width = VIEW_WIDTH - 2*10;
     reset_touch_listener.height = 40;
-
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
+
 void App_TicTacToe::onTick() {
-    if (ended) {
-        TouchData data = touch.waitData();
-        check_click_reset(data);
+    show_message("Player 1 your turn!");
+
+    int8_t play = get_queued_cell();
+    if (play == -1) {
         return;
     }
 
-    int play;
-
-    show_message("Player 1 your turn!");
-    //_show_message(lang.get(MSG_HELLO));
-
-    do {
-        TouchData data = touch.waitData();
-
-        if (check_click_reset(data)) {
-            return;
-        }
-
-        play = check_click_cells(data);
-    } while(play == -1);
-
-    _place_x(play);
+    place_x(play);
     empty = false;
     print_x(play);
 
@@ -283,17 +273,12 @@ void App_TicTacToe::onTick() {
 
     show_message("Player 2 your turn!");
 
-    do {
-        TouchData data = touch.waitData();
+    play = get_queued_cell();
+    if (play == -1) {
+        return;
+    }
 
-        if (check_click_reset(data)) {
-            return;
-        }
-
-        play = check_click_cells(data);
-    } while(play == -1);
-
-    _place_o(play);
+    place_o(play);
     empty = false;
     print_o(play);
 
@@ -302,7 +287,39 @@ void App_TicTacToe::onTick() {
     }
 }
 
+void App_TicTacToe::onTouchTick() {
+    TouchData data = touch.waitData();
+
+    if (check_click_reset(data)) {
+        return;
+    }
+
+    if (ended) {
+        return;
+    }
+    
+    int8_t play = check_click_cells(data);
+    if (play == -1){
+        return;
+    }
+
+    xQueueOverwrite(cell_queue, (int8_t *) &play);
+}
+
 void App_TicTacToe::onClose() {
+}
+
+
+int8_t App_TicTacToe::get_queued_cell() {
+    QueueSetMemberHandle_t activated = xQueueSelectFromSet(queue_set, portMAX_DELAY);
+
+    if (activated == cell_queue) {
+        int8_t play;
+        xQueueReceive(cell_queue, &play, 0);
+        return play;
+    }
+
+    return -1;
 }
 
 /*
@@ -311,7 +328,7 @@ void App_TicTacToe::onClose() {
 
 bool App_TicTacToe::check_winner() {
     uint8_t layout;
-    int win = _get_winner(&layout);
+    int win = get_winner(&layout);
 
     switch(win) {
         case STATE_DRAW: {

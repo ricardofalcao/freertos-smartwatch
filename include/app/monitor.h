@@ -6,7 +6,7 @@
 #include "touch.h"
 #include "app/app.h"
 
-#define MONITOR_TASKS_LENGTH 16
+#define MONITOR_TASKS_LENGTH 20
 
 class App_Monitor : public App {
     private:
@@ -16,6 +16,8 @@ class App_Monitor : public App {
         App_Monitor();
 
         void onOpen() override;   
+
+        void onResume() override;   
 
         void onTick() override;   
 

@@ -47,6 +47,8 @@ class App_Drawer : public App {
 
         void onOpen() override;   
 
+        void onResume() override;   
+
         void onTick() override;   
 
         void onTouchTick() override;   
@@ -54,6 +56,8 @@ class App_Drawer : public App {
         void onClose() override;   
 
     private:
+        void click_home();
+
         void draw_page();
 
         void draw_left_arrow(int32_t color);

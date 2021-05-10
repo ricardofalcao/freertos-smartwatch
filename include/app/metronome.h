@@ -15,7 +15,9 @@ class App_Metronome : public App {
     public:
         App_Metronome();
 
-        void onOpen() override;   
+        void onOpen() override; 
+
+        void onResume() override;   
 
         void onTick() override;   
 
@@ -24,6 +26,8 @@ class App_Metronome : public App {
         void onClose() override;   
 
     private:
+        void beep_output(note_t note, uint8_t octave);
+
         int check_click_button(TouchData data);
 
         void print_button_up();

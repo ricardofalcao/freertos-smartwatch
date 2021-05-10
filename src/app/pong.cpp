@@ -98,6 +98,7 @@ void App_Pong::print_ball(int x_center, int y_center, uint32_t color) {
 App_Pong::App_Pong() : App("Pong", "Let's Play") {
     priority = 3;
     stack_depth = 4096;
+    canMinimize = false;
 }
 
  
@@ -142,7 +143,7 @@ void App_Pong::onTick() {
 
     graphics.endBatch();
 
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    vAppDelay(10 / portTICK_PERIOD_MS);
 }
 
 void App_Pong::onClose() {

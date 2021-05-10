@@ -3,6 +3,7 @@
 #include "tft.h"
 #include "touch.h"
 #include "graphics.h"
+#include "pins.h"
 
 #define APP_WIDTH           ((VIEW_WIDTH - 2*APPS_MARGIN_X - APPS_SPACING_X * (DRAWER_COLUMNS - 1)) / DRAWER_COLUMNS)
 #define APP_HEIGHT          APP_WIDTH
@@ -12,21 +13,26 @@
 #define PAGE_ARROW_CLICK_PADDING    5
 
 App_Drawer::App_Drawer() : App("Drawer", "Shows all installed apps") {
-    priority = 3;
+    priority = 2;
     stack_depth = 10240;
     touch_stack_depth = 4096;
 
-    queue_set = xQueueCreateSet(1 + 1);
+    queue_set = xQueueCreateSet(1 + 1 + 1);
 
     app_open_queue = xQueueCreate(1, sizeof(App *));
     redraw_signal = xSemaphoreCreateBinary();
 
     xQueueAddToSet(app_open_queue, queue_set);
     xQueueAddToSet(redraw_signal, queue_set);
+    xQueueAddToSet(pins.gpio0, queue_set);
 }
 
 void App_Drawer::addApp(App * app) {
     apps[apps_length++] = app;
+}
+
+void App_Drawer::click_home() {
+
 }
 
 void App_Drawer::onOpen() {
@@ -57,6 +63,11 @@ void App_Drawer::onOpen() {
     this->draw_page();
 }
 
+void App_Drawer::onResume() {
+    graphics.fillScreen(TFT_WHITE);
+    this->draw_page();
+}
+
 void App_Drawer::onTick() {
     QueueSetMemberHandle_t activated = xQueueSelectFromSet(queue_set, portMAX_DELAY);
 
@@ -68,9 +79,20 @@ void App_Drawer::onTick() {
         xQueueReceive(app_open_queue, &app, 0);
 
         if (app) {
-            app->open(false);
-            this->close();
+            app->open();
+            this->minimize();
         }
+    } else if (activated == pins.gpio0) {
+        xSemaphoreTake(pins.gpio0, 0);
+
+        if (!this->minimized) {
+            return;
+        }
+
+        xSemaphoreGive(minimize_signal);
+        vTaskDelay(250 / portTICK_PERIOD_MS);
+
+        this->open();
     }
 }
 

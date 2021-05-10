@@ -6,10 +6,20 @@
 #include "touch.h"
 #include "app/app.h"
 
+#define CELL_TOUCH_LISTENERS 9
+
 class App_TicTacToe : public App {
     private:
+        uint8_t places[9];
+
         bool ended = false;
         bool empty = true;
+
+        QueueHandle_t cell_queue;
+        QueueSetHandle_t queue_set;
+
+        RectangleTouchListener cell_touch_listeners[CELL_TOUCH_LISTENERS];
+        RectangleTouchListener reset_touch_listener;
 
     public:
         App_TicTacToe();
@@ -17,6 +27,8 @@ class App_TicTacToe : public App {
         void onOpen() override;   
 
         void onTick() override;   
+
+        void onTouchTick() override;   
 
         void onClose() override;   
 
@@ -31,6 +43,12 @@ class App_TicTacToe : public App {
 
         void print_grid();
 
+        uint8_t get_winner(uint8_t * layout);
+
+        void place_x(int8_t cell);
+
+        void place_o(int8_t cell);
+
         void print_x(int8_t cell);
 
         void print_o(int8_t cell);
@@ -39,6 +57,8 @@ class App_TicTacToe : public App {
 
         void show_message(const char * message);
 
-        int check_click_cells(TouchData data);
+        int8_t check_click_cells(TouchData data);
+
+        int8_t get_queued_cell();
 
 };

@@ -19,6 +19,10 @@ int sort_desc(const void *cmp1, const void *cmp2)
 }
 
 void App_Monitor::fillTasks() {
+    if(this->minimized) {
+        return;
+    }
+
     uint32_t ulTotalRunTime;
 
     /* Generate raw status information about each task. */
@@ -71,9 +75,13 @@ void App_Monitor::onOpen() {
     graphics.fillScreen(TFT_WHITE);
 }
 
+void App_Monitor::onResume() {
+    graphics.fillScreen(TFT_WHITE);
+}
+
 void App_Monitor::onTick() {
     fillTasks();
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    vAppDelay(1000 / portTICK_PERIOD_MS);
 }
 
 void App_Monitor::onTouchTick() {
