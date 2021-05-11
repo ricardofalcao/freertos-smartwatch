@@ -6,10 +6,11 @@
 #include "touch.h"
 #include "app/app.h"
 
-#define CELL_TOUCH_LISTENERS 2
+#define METRONOME_CELL_TOUCH_LISTENERS 2
+
 class App_Metronome : public App {
     private:
-        RectangleTouchListener button_touch_listeners[CELL_TOUCH_LISTENERS];
+        RectangleTouchListener button_touch_listeners[METRONOME_CELL_TOUCH_LISTENERS];
         char bpm_print_buffer[16];
 
     public:

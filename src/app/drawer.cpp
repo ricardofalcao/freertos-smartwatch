@@ -79,8 +79,8 @@ void App_Drawer::onTick() {
         xQueueReceive(app_open_queue, &app, 0);
 
         if (app) {
-            app->open();
             this->minimize();
+            app->open();
         }
     } else if (activated == pins.gpio0) {
         xSemaphoreTake(pins.gpio0, 0);
@@ -89,15 +89,22 @@ void App_Drawer::onTick() {
             return;
         }
 
-        xSemaphoreGive(minimize_signal);
-        vTaskDelay(250 / portTICK_PERIOD_MS);
+        for(size_t i = 0; i < APPS_REGISTRY_LENGTH; i++) {
+            App * app = APPS_REGISTRY[i];
+            if (app == this || !app->running || app->minimized) {
+                continue;
+            }
+
+            xEventGroupSync(app->event_group, EVENT_MINIMIZE, EVENT_MINIMIZE_RES, 500 / portTICK_PERIOD_MS);
+            xEventGroupClearBits(app->event_group, EVENT_MINIMIZE_RES);
+        }
 
         this->open();
     }
 }
 
 void App_Drawer::onTouchTick() {
-    TouchData data = touch.waitData();
+    TouchData data = touch.waitRelease();
 
     for(uint8_t i = 0; i < APPS_PER_PAGE; i++) {
         if(app_touch_listeners[i].contains(viewport, data)) {
@@ -160,7 +167,7 @@ void App_Drawer::draw_page() {
         int32_t x = APPS_MARGIN_X + col * (APP_WIDTH + APPS_SPACING_X);
         int32_t y = APPS_MARGIN_Y + row * (APP_HEIGHT + APPS_SPACING_Y);
 
-        graphics.fillRectangle(x - APPS_SPACING_X / 2, y + APP_HEIGHT + 6, APP_WIDTH + APPS_SPACING_X, 20, TFT_WHITE);
+        graphics.fillRectangle(x - APPS_SPACING_X / 2, y + APP_HEIGHT + 6, APP_WIDTH + APPS_SPACING_X, 30, TFT_WHITE);
         if (start + i > apps_length - 1) {
             graphics.fillRectangle(x, y, APP_WIDTH, APP_HEIGHT, TFT_WHITE);
             continue;

@@ -6,10 +6,19 @@
 #include "tft.h"
 #include "graphics.h"
 
-#define STATUSBAR_HEIGHT   20
+#define APP_REGISTRY_MAX_LENGTH     16
+
+#define EVENT_MINIMIZE      0x01
+#define EVENT_MINIMIZE_RES  0x02
+#define EVENT_RESUME        0x04
+
+#define STATUSBAR_HEIGHT   30
 
 class App {
     public:
+        static App * APPS_REGISTRY[APP_REGISTRY_MAX_LENGTH];
+        static size_t APPS_REGISTRY_LENGTH;
+
         String name;
         String description;
         uint32_t color;
@@ -23,10 +32,8 @@ class App {
 
         bool minimized = false;
         bool running = false;
-
-        static SemaphoreHandle_t minimize_signal;
-
-        EventGroupHandle_t resume_signal;
+        
+        EventGroupHandle_t event_group;
 
     protected:
         bool canMinimize = true;
@@ -72,7 +79,7 @@ class App {
 
         virtual void onTick() 
         { 
-            vTaskDelay(portMAX_DELAY);
+            vAppDelay(portMAX_DELAY);
         };
 
         virtual void onTouchTick() 

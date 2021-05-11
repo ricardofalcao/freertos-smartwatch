@@ -36,26 +36,33 @@ void App_Monitor::fillTasks() {
     {
         qsort(statuses, uxArraySize, sizeof(TaskStatus_t), sort_desc);
 
+        graphics.drawString(10, 10, "Task", TFT_BLACK, 1, TL_DATUM);
+        graphics.drawString(160, 10, "CPU", TFT_BLACK, 1, TR_DATUM);
+        graphics.drawString(200, 10, "MEM", TFT_BLACK, 1, TR_DATUM);
+
         /* For each populated position in the pxTaskStatusArray array,
         format the raw data as human readable ASCII data. */
         for( UBaseType_t x = 0; x < MONITOR_TASKS_LENGTH; x++ )
         {
-            int32_t y = x * 16 + 10;
-            graphics.fillRectangle(10, y, 200, 16, TFT_WHITE);
+            int32_t y = (x + 1) * 16 + 10;
             if (x >= uxArraySize) {
-                break;
+                graphics.fillRectangle(10, y, 200, 16, TFT_WHITE);
+                continue;
             }
-
-            uint32_t color = TFT_BLACK;
 
             /* What percentage of the total run time has the task used?
             This will always be rounded down to the nearest integer.
             ulTotalRunTimeDiv100 has already been divided by 100. */
             uint32_t ulStatsAsPercentage = statuses[ x ].ulRunTimeCounter / ulTotalRunTime;
 
-            graphics.drawString(10, y, statuses[ x ].pcTaskName, color, 1, TL_DATUM);
+            uint32_t color = ulStatsAsPercentage > 50 ? TFT_RED : ulStatsAsPercentage > 25 ? TFT_ORANGE : TFT_DARKGREY;
 
-            char buffer[8];
+            char nameBuffer[24] = {' '};
+            strcpy(nameBuffer, statuses[x].pcTaskName);
+
+            graphics.drawFilledString(10, y, nameBuffer, color, TFT_WHITE, 1, TL_DATUM);
+
+            char buffer[8] = {' '};
 
             if (ulStatsAsPercentage > 0UL) {
                 sprintf(buffer, "%d %%", ulStatsAsPercentage);
@@ -63,10 +70,11 @@ void App_Monitor::fillTasks() {
                 sprintf(buffer, "<1 %%");
             }
             
-            graphics.drawString(160, y, buffer, color, 1, TR_DATUM);
+            graphics.drawFilledString(160, y, buffer, color, TFT_WHITE, 1, TR_DATUM);
 
-            sprintf(buffer, "%d", statuses[x].usStackHighWaterMark);
-            graphics.drawString(200, y, buffer, color, 1, TR_DATUM);
+            char buffer2[8] = {' '};
+            sprintf(buffer2, "%d", statuses[x].usStackHighWaterMark);
+            graphics.drawFilledString(200, y, buffer2, color, TFT_WHITE, 1, TR_DATUM);
         }
     }
 }

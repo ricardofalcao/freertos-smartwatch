@@ -59,9 +59,11 @@ class Touch {
 
         void onTick();
 
-        TouchData getData();
+        TouchData get();
 
-        TouchData waitData();
+        TouchData waitRelease();
+
+        TouchData waitPress();
 
 };
 

@@ -21,6 +21,8 @@
 
 #define STATE_DRAW      3
 
+#define EVENT_DRAW_CELL 0x80
+
 /*
     place array IDs:
 
@@ -210,11 +212,8 @@ App_TicTacToe::App_TicTacToe() : App("TicTacToe", "Let's play a game") {
     stack_depth = 4096;
     canMinimize = false;
 
+    event_group = xEventGroupCreate();
     cell_queue = xQueueCreate(1, sizeof(int8_t));
-    queue_set = xQueueCreateSet(1 + 1);
-
-    xQueueAddToSet(cell_queue, queue_set);
-    xQueueAddToSet(minimize_signal, queue_set);
     
 }
 
@@ -288,7 +287,7 @@ void App_TicTacToe::onTick() {
 }
 
 void App_TicTacToe::onTouchTick() {
-    TouchData data = touch.waitData();
+    TouchData data = touch.waitRelease();
 
     if (check_click_reset(data)) {
         return;
@@ -311,11 +310,13 @@ void App_TicTacToe::onClose() {
 
 
 int8_t App_TicTacToe::get_queued_cell() {
-    QueueSetMemberHandle_t activated = xQueueSelectFromSet(queue_set, portMAX_DELAY);
+    EventBits_t bits = xEventGroupWaitBits(event_group, EVENT_MINIMIZE | EVENT_DRAW_CELL, pdFALSE, pdFALSE, portMAX_DELAY);
 
-    if (activated == cell_queue) {
+    if (bits & EVENT_DRAW_CELL) {
         int8_t play;
         xQueueReceive(cell_queue, &play, 0);
+        xEventGroupClearBits(event_group, EVENT_DRAW_CELL);
+        
         return play;
     }
 

@@ -127,7 +127,7 @@ void App_Pong::onTick() {
         botx = nbotx;
     }
   
-    TouchData data = touch.getData();
+    TouchData data = touch.get();
 
     if (data.pressed) {
         int nplayerx = constrain(data.x, BAR_HALF_LENGTH + 5, BOARD_WIDTH - BAR_HALF_LENGTH - 5);

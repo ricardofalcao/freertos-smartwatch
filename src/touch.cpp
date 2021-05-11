@@ -116,17 +116,26 @@ void Touch::onTick() {
     }
 }
 
-TouchData Touch::getData() {
+TouchData Touch::get() {
     TouchData data;
     xQueuePeek(data_queue, &data, 0);
     return data;
 }
 
-TouchData Touch::waitData() {
+TouchData Touch::waitRelease() {
     TouchData data;
 
     xEventGroupWaitBits(event_group, PRESSED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
     xEventGroupWaitBits(event_group, RELEASED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
+
+    xQueuePeek(data_queue, &data, portMAX_DELAY);
+    return data;
+}
+
+TouchData Touch::waitPress() {
+    TouchData data;
+
+    xEventGroupWaitBits(event_group, PRESSED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
 
     xQueuePeek(data_queue, &data, portMAX_DELAY);
     return data;

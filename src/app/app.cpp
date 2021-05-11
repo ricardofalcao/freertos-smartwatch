@@ -14,7 +14,8 @@ App::App(String _name, String _description)
 	description = _description;
 	color = rand();
 
-	resume_signal = xSemaphoreCreateBinary();
+	event_group = xEventGroupCreate();
+	APPS_REGISTRY[APPS_REGISTRY_LENGTH++] = this;
 }
 
 void _run_app_task(void *pvParameters)
@@ -32,11 +33,11 @@ void _run_app_task(void *pvParameters)
 	while (true)
 	{
 		if (c->minimized) {
-			if (xSemaphoreTake(c->resume_signal, 0) == pdTRUE) {
-				c->open();
+			if (xEventGroupWaitBits(c->event_group, EVENT_RESUME, pdTRUE, pdTRUE, 0) & EVENT_RESUME) {
+				c->resume();
 			}
 		} else {
-			if (xSemaphoreTake(c->minimize_signal, 0) == pdTRUE) {
+			if (xEventGroupWaitBits(c->event_group, EVENT_MINIMIZE, pdTRUE, pdTRUE, 0) & EVENT_MINIMIZE) {
 				c->minimize();
 			}
 		}
@@ -69,7 +70,7 @@ void App::open()
 			return;
 		}
 
-		this->resume();
+		xEventGroupSetBits(this->event_group, EVENT_RESUME);
 		return;
 	}
 
@@ -91,6 +92,8 @@ void App::minimize()
 		close();
 		return;
 	}
+
+	xEventGroupSetBits(event_group, EVENT_MINIMIZE_RES);
 
 	Serial.printf("[App] Minimizing '%s'\n", name.c_str());
 	this->minimized = true;
@@ -123,15 +126,19 @@ bool App::close()
 }
 
 void App::vAppDelay(const TickType_t xTicksToDelay) {
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+
 	if (this->minimized) {
-		if (xSemaphoreTake(resume_signal, xTicksToDelay) == pdTRUE) {
-			this->open();
+		if (xEventGroupWaitBits(event_group, EVENT_RESUME, pdTRUE, pdTRUE, xTicksToDelay) & EVENT_RESUME) {
+			this->resume();
 		}
 	} else {
-		if (xSemaphoreTake(minimize_signal, xTicksToDelay) == pdTRUE) {
+		if (xEventGroupWaitBits(event_group, EVENT_MINIMIZE, pdTRUE, pdTRUE, xTicksToDelay) & EVENT_MINIMIZE) {
 			this->minimize();
 		}
 	}
+
+	vTaskDelayUntil(&xLastWakeTime, xTicksToDelay);
 }
 
 void App::startTouchTask()

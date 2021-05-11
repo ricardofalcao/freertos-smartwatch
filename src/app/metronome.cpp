@@ -72,7 +72,7 @@ int App_Metronome::check_click_button(TouchData data) {
         return -1;
     }
 
-    for(int i = 0; i < CELL_TOUCH_LISTENERS; i++) {
+    for(int i = 0; i < METRONOME_CELL_TOUCH_LISTENERS; i++) {
         
         if (button_touch_listeners[i].contains(viewport, data)) {
             return i;
@@ -113,19 +113,15 @@ void App_Metronome::onTick() {
     beep_output(NOTE_A, 5);
 
     for(int i=0;i<compass_type;i++) {
-        vTaskDelay((60*1000/bpm - DURATION_MS) / portTICK_PERIOD_MS);
+        vAppDelay((60*1000/bpm - DURATION_MS) / portTICK_PERIOD_MS);
         beep_output(NOTE_E, 5);
-
-        if (minimized && xSemaphoreTake(minimize_signal, 0) == pdTRUE) {
-			this->minimize();
-        }
     } 
     
     vAppDelay((60*1000/bpm - DURATION_MS) / portTICK_PERIOD_MS);
 }
 
 void App_Metronome::onTouchTick() {
-    TouchData data = touch.waitData();
+    TouchData data = touch.waitPress();
     unsigned long start = millis();
 
     int pressed_button = check_click_button(data);
@@ -134,7 +130,7 @@ void App_Metronome::onTouchTick() {
     switch (pressed_button)
     {
     case 0:
-        while (touch.getData().pressed)
+        while (touch.get().pressed)
         {
             if (millis() - start > 2000)
             {
@@ -154,7 +150,7 @@ void App_Metronome::onTouchTick() {
         break;
 
     case 1:
-        while (touch.getData().pressed)
+        while (touch.get().pressed)
         {
             if (millis() - start > 2000)
             {

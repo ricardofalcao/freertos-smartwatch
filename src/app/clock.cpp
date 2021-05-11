@@ -17,6 +17,12 @@ void App_Clock::onOpen() {
     graphics.fillCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 3, TFT_BLACK);
 }
 
+void App_Clock::onResume() {
+    graphics.fillScreen(TFT_WHITE);
+    graphics.drawCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 99, TFT_BLACK, 5);
+    graphics.fillCircle(TFT_WIDTH / 2, TFT_HEIGHT / 2, 3, TFT_BLACK);
+}
+
 void App_Clock::draw_line(float angle, float size, uint32_t color) {
 
     int32_t x = size * cos(angle);
@@ -30,7 +36,9 @@ void App_Clock::onTick() {
     if (!minimized) {
         old_time = current_time;
 
-        getLocalTime(&current_time);
+        time_t now;
+        time(&now);
+        localtime_r(&now, &current_time);
 
         float angle_s = old_time.tm_sec * 0.1047 - 1.5708;
         draw_line(angle_s, 96, TFT_WHITE);

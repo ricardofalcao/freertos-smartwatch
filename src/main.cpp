@@ -16,6 +16,7 @@
 #include "pins.h"
 
 #include "app/drawer.h"
+#include "app/status_bar.h"
 #include "app/monitor.h"
 #include "app/clock.h"
 #include "app/weather.h"
@@ -25,8 +26,8 @@
 
 #include "lang/lang.h"
 
-#define WIFI_NETWORK "Vodafone-284C30"
-#define WIFI_PASS "tYUREqcuVn"
+#define WIFI_NETWORK "NOS-219D"
+#define WIFI_PASS "VNQN3MM9"
 
 Touch touch;
 Graphics graphics;
@@ -35,11 +36,13 @@ Pins pins;
 
 //
 
-SemaphoreHandle_t App::minimize_signal = xSemaphoreCreateBinary();
+App * App::APPS_REGISTRY[APP_REGISTRY_MAX_LENGTH];
+size_t App::APPS_REGISTRY_LENGTH = 0;
 
 //
 
 App_Drawer drawer_app;
+App_Statusbar statusbar_app;
 
 App_Clock clock_app;
 App_Monitor monitor_app;
@@ -50,8 +53,6 @@ App_TicTacToe tictactoe_app;
 App_Pong pong_app;
 
 void wifi_task(void * pvParameters)  {
-  WiFi.mode(WIFI_STA);
-
   while(true) {
     if (WiFi.status() == WL_CONNECTED) {
       vTaskDelay(10000 / portTICK_PERIOD_MS);
@@ -69,7 +70,7 @@ void wifi_task(void * pvParameters)  {
 
     if (WiFi.status() == WL_CONNECTED) {
       Serial.println("[WiFi] Connected!");
-      //esp_Wsync_time();
+      esp_Wsync_time();
       continue;
     }
   }
@@ -86,9 +87,11 @@ void setup() {
   Serial.println("[Main] Initializing TFT");
   tft.init();
 
-  ledcSetup(4, 5000, 8);
+  /*ledcSetup(4, 5000, 8);
   ledcAttachPin(27, 4);
-  ledcWrite(4, 0);
+  ledcWrite(4, 0);*/
+  pinMode(27, OUTPUT);
+  digitalWrite(27, LOW);
 
   xTaskCreatePinnedToCore(
       wifi_task,
@@ -114,7 +117,6 @@ void setup() {
   pins.begin();
 
   graphics.setViewport({ 0, 0, TFT_WIDTH, TFT_HEIGHT });
-  graphics.fillScreen(TFT_BLACK);
 
   drawer_app.addApp(&clock_app);
   drawer_app.addApp(&monitor_app);
@@ -123,6 +125,7 @@ void setup() {
   drawer_app.addApp(&pong_app);
   drawer_app.addApp(&weather_app);
   
+  statusbar_app.open();
   drawer_app.open();
 }
 

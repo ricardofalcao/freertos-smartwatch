@@ -16,6 +16,8 @@ class App_Clock : public App {
 
         void onOpen() override;   
 
+        void onResume() override;  
+
         void onTick() override;   
 
         void onClose() override;   

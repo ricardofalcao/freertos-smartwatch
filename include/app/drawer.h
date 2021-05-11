@@ -6,7 +6,7 @@
 #include "app/app.h"
 #include "touch.h"
 
-#define DRAWER_MAX_APPS     16
+#define DRAWER_APPS_MAX_LENGTH  16
 
 #define DRAWER_ROWS         1
 #define DRAWER_COLUMNS      2
@@ -25,8 +25,8 @@
 
 class App_Drawer : public App {
     private:
-        App * apps[DRAWER_MAX_APPS];
-        int apps_length = 0;
+        App * apps[DRAWER_APPS_MAX_LENGTH];
+        size_t apps_length = 0;
 
         RectangleTouchListener app_touch_listeners[APPS_PER_PAGE];
         RectangleTouchListener next_page_touch_listener;

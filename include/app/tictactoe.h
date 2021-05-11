@@ -16,7 +16,6 @@ class App_TicTacToe : public App {
         bool empty = true;
 
         QueueHandle_t cell_queue;
-        QueueSetHandle_t queue_set;
 
         RectangleTouchListener cell_touch_listeners[CELL_TOUCH_LISTENERS];
         RectangleTouchListener reset_touch_listener;

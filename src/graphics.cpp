@@ -89,6 +89,7 @@ typedef struct {
     char * str;
     uint8_t datum;
     uint32_t color;
+    uint32_t fill;
     uint8_t font_size;
 
 } String_t;
@@ -342,7 +343,7 @@ void Graphics::processOperation(GOperation_t * operation) {
                 tft.setFreeFont(text->font_size <= 0 || text->font_size > FONTS_LENGTH ? fonts[0] : fonts[text->font_size - 1]);
                 tft.setTextSize(1);
 
-                tft.setTextColor(text->color);
+                tft.setTextColor(text->color, text->fill);
                 tft.setTextDatum(text->datum);
                 tft.drawString(text->str, text->x, text->y);
 
@@ -483,7 +484,7 @@ Pixel_t * _pixel(int32_t x, int32_t y, uint32_t color) {
     return pixel;
 }
 
-String_t * _text(int32_t x, int32_t y, const char * str, uint8_t datum, uint32_t color, uint8_t font_size) {
+String_t * _text(int32_t x, int32_t y, const char * str, uint8_t datum, uint32_t color, uint32_t fill, uint8_t font_size) {
     size_t len = strlen(str) + 1;
     char * copy = (char *) pvPortMalloc(len);
     if (copy) {
@@ -496,6 +497,7 @@ String_t * _text(int32_t x, int32_t y, const char * str, uint8_t datum, uint32_t
     text->str = copy;
     text->datum = datum;
     text->color = color;
+    text->fill = fill;
     text->font_size = font_size;
     return text;
 }
@@ -638,7 +640,17 @@ void Graphics::drawString(int32_t x, int32_t y, const char * string, uint32_t co
     
     operation->type = DRAW_STRING;
     operation->viewport = viewport_buffer;
-    operation->pvData = (void *) _text(x, y, string, datum, color, font_size);
+    operation->pvData = (void *) _text(x, y, string, datum, color, color, font_size);
+
+    enqueueOperationBuffer();
+}
+
+void Graphics::drawFilledString(int32_t x, int32_t y, const char * string, uint32_t color, uint32_t fill, uint8_t font_size, uint8_t datum) {
+    GOperation_t * operation = getOperationBuffer();
+    
+    operation->type = DRAW_STRING;
+    operation->viewport = viewport_buffer;
+    operation->pvData = (void *) _text(x, y, string, datum, color, fill, font_size);
 
     enqueueOperationBuffer();
 }
