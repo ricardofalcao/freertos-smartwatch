@@ -14,6 +14,8 @@
 
 #define STATUSBAR_HEIGHT   30
 
+#define DEFAULT_VIEWPORT    GViewport_t{ .x = 0, .y = STATUSBAR_HEIGHT, .width = TFT_WIDTH, .height = TFT_HEIGHT - STATUSBAR_HEIGHT}
+
 class App {
     public:
         static App * APPS_REGISTRY[APP_REGISTRY_MAX_LENGTH];
@@ -22,13 +24,6 @@ class App {
         String name;
         String description;
         uint32_t color;
-
-        GViewport_t viewport = {
-            .x = 0,
-            .y = STATUSBAR_HEIGHT,
-            .width = TFT_WIDTH,
-            .height = TFT_HEIGHT - STATUSBAR_HEIGHT
-        };
 
         bool minimized = false;
         bool running = false;

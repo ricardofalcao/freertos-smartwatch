@@ -21,8 +21,6 @@ class App_Monitor : public App {
 
         void onTick() override;   
 
-        void onTouchTick() override;   
-
         void onClose() override;   
 
     private:

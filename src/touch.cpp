@@ -95,19 +95,23 @@ void Touch::onTick() {
 #endif
 
         xSemaphoreGive(spi_mutex);
-
-        if (data.pressed) {
-            xQueueOverwrite(data_queue, &data);
-        }
         
         if (data.pressed && !oldData.pressed) {
+            xQueueOverwrite(data_queue, &data);
+
             xEventGroupClearBits(event_group, RELEASED_BIT);
             xEventGroupSetBits(event_group, PRESSED_BIT);
-        }
-
-        if (!data.pressed && oldData.pressed) {
+        } else if (!data.pressed && oldData.pressed) {
             xEventGroupClearBits(event_group, PRESSED_BIT);
             xEventGroupSetBits(event_group, RELEASED_BIT);
+        
+            data = oldData;
+            data.pressed = false;
+
+            xQueueOverwrite(data_queue, &data);
+        } else if (data.pressed) {
+
+            xQueueOverwrite(data_queue, &data);
         }
 
         oldData = data;
@@ -129,6 +133,7 @@ TouchData Touch::waitRelease() {
     xEventGroupWaitBits(event_group, RELEASED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
 
     xQueuePeek(data_queue, &data, portMAX_DELAY);
+
     return data;
 }
 

@@ -10,7 +10,7 @@
 #define MICRO_MARGIN_X  10
 #define MICRO_MARGIN_Y  10
 
-#define BOARD_WIDTH     (VIEW_WIDTH - (MARGIN_X * 2))
+#define BOARD_WIDTH     (DEFAULT_VIEWPORT.width - (MARGIN_X * 2))
 #define BOARD_HEIGHT    (BOARD_WIDTH)
 
 #define CELL_WIDTH      (int) (BOARD_WIDTH / 3.0)
@@ -56,40 +56,43 @@ int winPos[8][3] = {
 */
 
 void App_TicTacToe::print_winning_line(int8_t layout) {
-    //Serial.printf("Layout: %d\n", layout);
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
 
     if(layout < 3) {
-        graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT*layout + CELL_HEIGHT/2, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT*layout + CELL_HEIGHT/2, TFT_ORANGE, 6);
+        batch.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT*layout + CELL_HEIGHT/2, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT*layout + CELL_HEIGHT/2, TFT_ORANGE, 6);
+        graphics.endBatch(&batch);
         return;
     }
 
     if(layout < 6) {
-        graphics.drawLine(MARGIN_X + CELL_WIDTH/2 + CELL_WIDTH*(layout-3), MARGIN_Y, MARGIN_X + CELL_WIDTH/2 + CELL_WIDTH*(layout-3), MARGIN_Y + BOARD_HEIGHT, TFT_ORANGE, 6);
+        batch.drawLine(MARGIN_X + CELL_WIDTH/2 + CELL_WIDTH*(layout-3), MARGIN_Y, MARGIN_X + CELL_WIDTH/2 + CELL_WIDTH*(layout-3), MARGIN_Y + BOARD_HEIGHT, TFT_ORANGE, 6);
+        graphics.endBatch(&batch);
         return;
     }
 
     if(layout == 6) {
-        graphics.drawLine(MARGIN_X, MARGIN_Y, MARGIN_X + BOARD_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_ORANGE, 6);
+        batch.drawLine(MARGIN_X, MARGIN_Y, MARGIN_X + BOARD_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_ORANGE, 6);
+        graphics.endBatch(&batch);
         return;
     }
 
-    graphics.drawLine(MARGIN_X, MARGIN_Y + BOARD_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y, TFT_ORANGE, 6);   
+    batch.drawLine(MARGIN_X, MARGIN_Y + BOARD_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y, TFT_ORANGE, 6);   
+    graphics.endBatch(&batch);
 }
 
-void App_TicTacToe::clear_grid() {
-    graphics.fillRectangle(MARGIN_X - 10, MARGIN_Y - 10, BOARD_WIDTH + 10, BOARD_HEIGHT + 10, TFT_WHITE);
+void App_TicTacToe::clear_grid(GBatch_t * batch) {
+    batch->fillRectangle(MARGIN_X - 10, MARGIN_Y - 10, BOARD_WIDTH + 10, BOARD_HEIGHT + 10, TFT_WHITE);
 }
 
-void App_TicTacToe::print_grid() {
-    graphics.beginBatch();
-    graphics.drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT, TFT_BLACK, 5);
-    graphics.drawLine(MARGIN_X, MARGIN_Y + 2 * CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + 2 * CELL_HEIGHT, TFT_BLACK, 5);
-    graphics.drawLine(MARGIN_X + CELL_WIDTH, MARGIN_Y, MARGIN_X + CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
-    graphics.drawLine(MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y, MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
-    graphics.endBatch();
+void App_TicTacToe::print_grid(GBatch_t * batch) {
+    batch->drawLine(MARGIN_X, MARGIN_Y + CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + CELL_HEIGHT, TFT_BLACK, 5);
+    batch->drawLine(MARGIN_X, MARGIN_Y + 2 * CELL_HEIGHT, MARGIN_X + BOARD_WIDTH, MARGIN_Y + 2 * CELL_HEIGHT, TFT_BLACK, 5);
+    batch->drawLine(MARGIN_X + CELL_WIDTH, MARGIN_Y, MARGIN_X + CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
+    batch->drawLine(MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y, MARGIN_X + 2 * CELL_WIDTH, MARGIN_Y + BOARD_HEIGHT, TFT_BLACK, 5);
 }
 
 void App_TicTacToe::print_x(int8_t cell) {
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
 
     int line = (int)floor(cell / 3.0f);
     int column = (cell % 3);
@@ -97,13 +100,14 @@ void App_TicTacToe::print_x(int8_t cell) {
     int X = MARGIN_X + column*CELL_WIDTH + MICRO_MARGIN_X;
     int Y = MARGIN_Y + line*CELL_HEIGHT + MICRO_MARGIN_Y;
 
-    graphics.drawLine(X, Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, TFT_RED, 5);
-    graphics.drawLine(X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y, TFT_RED, 5);
+    batch.drawLine(X, Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, TFT_RED, 5);
+    batch.drawLine(X, Y + CELL_HEIGHT - 2*MICRO_MARGIN_Y, X + CELL_WIDTH - 2*MICRO_MARGIN_X, Y, TFT_RED, 5);
 
-
+    graphics.endBatch(&batch);
 }
 
 void App_TicTacToe::print_o(int8_t cell) {
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
 
     int line = (int)floor(cell / 3.0f);
     int column = (cell % 3);
@@ -111,25 +115,27 @@ void App_TicTacToe::print_o(int8_t cell) {
     int X = MARGIN_X + column*CELL_WIDTH + CELL_WIDTH/2;
     int Y = MARGIN_Y + line*CELL_HEIGHT + CELL_HEIGHT/2;
 
-    graphics.drawCircle(X, Y, CELL_WIDTH/2 - MICRO_MARGIN_X, TFT_SKYBLUE, 5);
+    batch.drawCircle(X, Y, CELL_WIDTH/2 - MICRO_MARGIN_X, TFT_SKYBLUE, 5);
+
+    graphics.endBatch(&batch);
 
 }
 
-void App_TicTacToe::erase_cell(int8_t cell) {
+void App_TicTacToe::erase_cell(GBatch_t * batch, int8_t cell) {
     int line = (int)floor(cell / 3.0f);
     int column = (cell % 3);
 
     int X = MARGIN_X + column*CELL_WIDTH + MICRO_MARGIN_X;
     int Y = MARGIN_Y + line*CELL_HEIGHT + MICRO_MARGIN_Y;
 
-    graphics.fillRectangle(X, Y, CELL_WIDTH - 2 * MICRO_MARGIN_X, CELL_HEIGHT - 2 * MICRO_MARGIN_Y, TFT_WHITE);
+    batch->fillRectangle(X, Y, CELL_WIDTH - 2 * MICRO_MARGIN_X, CELL_HEIGHT - 2 * MICRO_MARGIN_Y, TFT_WHITE);
 }
 
 void App_TicTacToe::show_message(const char * message) {
-    graphics.beginBatch();
-    graphics.fillRectangle(0, MARGIN_Y + BOARD_HEIGHT + 40, VIEW_WIDTH, 40, TFT_WHITE);
-    graphics.drawString(VIEW_WIDTH / 2, MARGIN_Y + BOARD_HEIGHT + 40 + 20 , message, TFT_BLACK, 2, MC_DATUM);
-    graphics.endBatch();
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+    batch.fillRectangle(0, MARGIN_Y + BOARD_HEIGHT + 40, batch.viewWidth(), 40, TFT_WHITE);
+    batch.drawString(batch.viewWidth() / 2, MARGIN_Y + BOARD_HEIGHT + 40 + 20 , message, TFT_BLACK, 2, MC_DATUM);
+    graphics.endBatch(&batch);
 }
 /*
     Data structures
@@ -153,7 +159,7 @@ int8_t App_TicTacToe::check_click_cells(TouchData data) {
             continue;
         }
 
-        if (cell_touch_listeners[i].contains(viewport, data)) {
+        if (cell_touch_listeners[i].contains(DEFAULT_VIEWPORT, data)) {
             return i;
         }
     }
@@ -221,7 +227,8 @@ void App_TicTacToe::onOpen() {
     ended = false;
     empty = true;
 
-    graphics.fillScreen(TFT_WHITE);
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+    batch.fillScreen(TFT_WHITE);
 
     for(uint8_t i = 0; i < 9; i++) {
         places[i] = 0;
@@ -238,20 +245,22 @@ void App_TicTacToe::onOpen() {
         cell_touch_listeners[i].height = CELL_HEIGHT;
     }
 
-    print_grid();
+    print_grid(&batch);
 
     for(int i = 0; i < 9;i++) {
-        erase_cell(i);
+        erase_cell(&batch, i);
     }
 
-    graphics.drawString(VIEW_WIDTH / 2, MARGIN_Y / 2, "Tic Tac Toe", TFT_BLACK, 3, MC_DATUM);
-    graphics.fillRectangle(10, VIEW_HEIGHT - 40 - 10, VIEW_WIDTH - 2*10, 40, TFT_PURPLE);
-    graphics.drawString(VIEW_WIDTH / 2, VIEW_HEIGHT - 20 - 10 - 2, "RESET", TFT_WHITE, 3, MC_DATUM);
+    batch.drawString(batch.viewWidth() / 2, MARGIN_Y / 2, "Tic Tac Toe", TFT_BLACK, 3, MC_DATUM);
+    batch.fillRectangle(10, batch.viewHeight() - 40 - 10, batch.viewWidth() - 2*10, 40, TFT_PURPLE);
+    batch.drawString(batch.viewWidth() / 2, batch.viewHeight() - 20 - 10 - 2, "RESET", TFT_WHITE, 3, MC_DATUM);
 
     reset_touch_listener.x = 10;
-    reset_touch_listener.y = VIEW_HEIGHT - 40 - 10;
-    reset_touch_listener.width = VIEW_WIDTH - 2*10;
+    reset_touch_listener.y = batch.viewHeight() - 40 - 10;
+    reset_touch_listener.width = batch.viewWidth() - 2*10;
     reset_touch_listener.height = 40;
+
+    graphics.endBatch(&batch);
 }
 
 void App_TicTacToe::onTick() {
@@ -303,6 +312,7 @@ void App_TicTacToe::onTouchTick() {
     }
 
     xQueueOverwrite(cell_queue, (int8_t *) &play);
+    xEventGroupSetBits(event_group, EVENT_DRAW_CELL);
 }
 
 void App_TicTacToe::onClose() {
@@ -363,7 +373,7 @@ bool App_TicTacToe::check_click_reset(TouchData data) {
         return false;
     }
 
-    if (reset_touch_listener.contains(viewport, data)) {
+    if (reset_touch_listener.contains(DEFAULT_VIEWPORT, data)) {
         for(int i = 0; i < 9; i++) {
             places[i] = 0;
         }
@@ -371,8 +381,11 @@ bool App_TicTacToe::check_click_reset(TouchData data) {
         empty = true;
         ended = false;
 
-        clear_grid();
-        print_grid();
+        GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+        clear_grid(&batch);
+        print_grid(&batch);
+        graphics.endBatch(&batch);
+
         return true;
     }
 

@@ -4,8 +4,24 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
 
-#define GRAPHICS_OPERATION_QUEUE_SIZE   64
+#define GRAPHICS_OPERATION_QUEUE_SIZE   16
 #define GRAPHICS_BATCH_MAX_SIZE         32
+
+typedef struct {
+
+    int32_t x;
+    
+    int32_t y;
+    
+    int32_t width;
+
+    int32_t height;
+
+} GViewport_t;
+
+/*
+
+*/
 
 typedef enum {
 
@@ -28,27 +44,11 @@ typedef enum {
 
     FILL_SCREEN,
 
-    BATCH
-
 } GOperationType_t;
 
 typedef struct {
 
-    int32_t x;
-    
-    int32_t y;
-    
-    int32_t width;
-
-    int32_t height;
-
-} GViewport_t;
-
-typedef struct {
-
     GOperationType_t type;
-
-    GViewport_t viewport;
 
     void * pvData;
 
@@ -58,38 +58,15 @@ typedef struct {
 
 */
 
-class Graphics {
-    private:
-        QueueHandle_t operation_queue;
-
-        GViewport_t viewport_buffer;
-
-        GOperation_t operation_buffer;
+class GBatch_t {
+    public:
+        GViewport_t viewport;
 
         GOperation_t batch_queue[GRAPHICS_BATCH_MAX_SIZE];
         size_t batch_queue_length = 0;
-        bool batching = false;
 
     public:
-        Graphics();
-
-        void begin();
-
-        void onTick();
-
-        //
-
-        void beginBatch();
-
-        void endBatch();
-
-        //
-
-        GViewport_t getViewport();
-
-        void setViewport(GViewport_t viewport);
-
-        //
+        GBatch_t(GViewport_t viewport);
 
         void drawRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color, uint8_t thickness = 1);
 
@@ -129,16 +106,35 @@ class Graphics {
 
         void fillScreen(uint32_t color);
 
+        int32_t viewHeight();
+
+        int32_t viewWidth();
+};
+
+/*
+
+*/
+
+class Graphics {
+    private:
+        QueueHandle_t operation_queue;
+
+    public:
+        Graphics();
+
+        void begin();
+
+        void onTick();
+
+        //
+
+        GBatch_t beginBatch(GViewport_t _viewport);
+
+        void endBatch(GBatch_t * batch);
+
     private:
         void processOperation(GOperation_t * operation);
-
-        GOperation_t * getOperationBuffer();
-
-        void enqueueOperationBuffer();
 
 };
 
 extern Graphics graphics;
-
-#define VIEW_WIDTH  graphics.getViewport().width
-#define VIEW_HEIGHT graphics.getViewport().height

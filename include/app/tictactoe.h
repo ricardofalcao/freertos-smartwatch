@@ -38,9 +38,9 @@ class App_TicTacToe : public App {
 
         void print_winning_line(int8_t layout);
 
-        void clear_grid();
+        void clear_grid(GBatch_t * batch);
 
-        void print_grid();
+        void print_grid(GBatch_t * batch);
 
         uint8_t get_winner(uint8_t * layout);
 
@@ -52,7 +52,7 @@ class App_TicTacToe : public App {
 
         void print_o(int8_t cell);
 
-        void erase_cell(int8_t cell);
+        void erase_cell(GBatch_t * batch, int8_t cell);
 
         void show_message(const char * message);
 

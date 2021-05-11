@@ -31,9 +31,9 @@ class App_Metronome : public App {
 
         int check_click_button(TouchData data);
 
-        void print_button_up();
+        void print_button_up(GBatch_t * batch);
         
-        void print_button_down();
+        void print_button_down(GBatch_t * batch);
         
-        void print_bpm();
+        void print_bpm(GBatch_t * batch);
 };

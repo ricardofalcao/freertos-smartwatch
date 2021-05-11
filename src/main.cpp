@@ -87,12 +87,6 @@ void setup() {
   Serial.println("[Main] Initializing TFT");
   tft.init();
 
-  /*ledcSetup(4, 5000, 8);
-  ledcAttachPin(27, 4);
-  ledcWrite(4, 0);*/
-  pinMode(27, OUTPUT);
-  digitalWrite(27, LOW);
-
   xTaskCreatePinnedToCore(
       wifi_task,
       "WiFi",
@@ -116,8 +110,6 @@ void setup() {
   Serial.println("[Main] Initializing Pins");
   pins.begin();
 
-  graphics.setViewport({ 0, 0, TFT_WIDTH, TFT_HEIGHT });
-
   drawer_app.addApp(&clock_app);
   drawer_app.addApp(&monitor_app);
   drawer_app.addApp(&tictactoe_app);
@@ -127,6 +119,18 @@ void setup() {
   
   statusbar_app.open();
   drawer_app.open();
+
+  vTaskDelay(500 / portTICK_PERIOD_MS);
+
+  ledcSetup(4, 5000, 8);
+  ledcAttachPin(27, 4);
+  
+  for(int i = 255; i >= 0; i -= 20) {
+    ledcWrite(4, i);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
+
+  ledcWrite(4, 0);
 }
 
 void loop() {

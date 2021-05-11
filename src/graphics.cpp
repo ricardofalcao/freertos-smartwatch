@@ -104,6 +104,8 @@ typedef struct {
 
     size_t batch_size;
 
+    GViewport_t viewport;
+
     void * pvData;
 
 } Batch_t;
@@ -125,7 +127,7 @@ void graphics_task(void * pvParameters) {
 */
 
 Graphics::Graphics() {
-    operation_queue = xQueueCreate(GRAPHICS_OPERATION_QUEUE_SIZE, sizeof(GOperation_t));
+    operation_queue = xQueueCreate(GRAPHICS_OPERATION_QUEUE_SIZE, sizeof(Batch_t));
 }
 
 void Graphics::begin() {
@@ -140,25 +142,25 @@ void Graphics::begin() {
   );
 }
 
-GViewport_t Graphics::getViewport() {
-    return viewport_buffer;
-}
-
-void Graphics::setViewport(GViewport_t viewport) {
-    viewport_buffer = viewport;
-}
-
 void Graphics::onTick() {
-    GOperation_t receive_buffer;
+    Batch_t receive_buffer;
+
     if (xQueueReceive(operation_queue, &receive_buffer, portMAX_DELAY)) {
+        GOperation_t * operations = (GOperation_t *) receive_buffer.pvData;
+
         if (xSemaphoreTake(spi_mutex, portMAX_DELAY) == pdTRUE) {
-
             tft.startWrite();
-            processOperation(&receive_buffer);
-            tft.endWrite();
+            tft.setViewport(receive_buffer.viewport.x, receive_buffer.viewport.y, receive_buffer.viewport.width, receive_buffer.viewport.height);
 
+            for(size_t i = 0; i < receive_buffer.batch_size; i++) {
+                processOperation(&operations[i]);
+            }
+            tft.endWrite();
             xSemaphoreGive(spi_mutex);
+
         }
+        
+        vPortFree(operations);
     }
 }
 
@@ -248,8 +250,6 @@ void _draw_thick_circle(int32_t xc, int32_t yc, int32_t radius, uint8_t thicknes
 }
 
 void Graphics::processOperation(GOperation_t * operation) {
-    tft.setViewport(operation->viewport.x, operation->viewport.y, operation->viewport.width, operation->viewport.height);
-
     switch(operation->type) {
         case DRAW_RECTANGLE: {
             Rectangle_t * rect = (Rectangle_t *) operation->pvData;
@@ -358,18 +358,6 @@ void Graphics::processOperation(GOperation_t * operation) {
             tft.fillScreen(screen->color);
             break;
         }
-
-        case BATCH: {
-            Batch_t * batch = (Batch_t *) operation->pvData;
-            GOperation_t * operations = (GOperation_t *) batch->pvData;
-
-            for(size_t i = 0; i < batch->batch_size; i++) {
-                processOperation(&operations[i]);
-            }
-
-            vPortFree(operations);
-            break;
-        }
     }
 
     vPortFree(operation->pvData);
@@ -379,40 +367,32 @@ void Graphics::processOperation(GOperation_t * operation) {
 
 */
 
-void Graphics::beginBatch() {
-    batching = true;
-    batch_queue_length = 0;
+GBatch_t::GBatch_t(GViewport_t _viewport) {
+    viewport = _viewport;
 }
 
-void Graphics::endBatch() {
-    if(!batching) {
+GBatch_t Graphics::beginBatch(GViewport_t _viewport) {
+    return GBatch_t(_viewport);
+}
+
+void Graphics::endBatch(GBatch_t * _batch) {
+    if (_batch->batch_queue_length == 0) {
         return;
     }
 
-    batching = false;
+    GOperation_t * copy = (GOperation_t *) pvPortMalloc(sizeof(GOperation_t) * _batch->batch_queue_length);
 
-    if (batch_queue_length == 0) {
-        return;
+    for(size_t i = 0; i < _batch->batch_queue_length; i++) {
+        copy[i] = _batch->batch_queue[i];
     }
 
-    Batch_t * batch = (Batch_t *) pvPortMalloc(sizeof(Batch_t));
-    batch->batch_size = batch_queue_length;
-
-    GOperation_t * copy = (GOperation_t *) pvPortMalloc(sizeof(GOperation_t) * batch_queue_length);
-
-    for(size_t i = 0; i < batch_queue_length; i++) {
-        copy[i] = batch_queue[i];
-    }
-
-    batch->pvData = (void *) copy;
-
-    const GOperation_t operation = {
-        .type = BATCH,
-        .viewport = {},
-        .pvData = (void *) batch
+    Batch_t batch = {
+        .batch_size = _batch->batch_queue_length,
+        .viewport = _batch->viewport,
+        .pvData = (void *) copy 
     };
 
-    xQueueSendToBack(operation_queue, &operation, portMAX_DELAY);
+    xQueueSendToBack(operation_queue, &batch, portMAX_DELAY);
 }
 
 /*
@@ -510,157 +490,110 @@ Screen_t * _screen(uint32_t color) {
 
 //
 
-GOperation_t * Graphics::getOperationBuffer() {
-    if (batching) {
-        return &batch_queue[batch_queue_length];
-    }
-
-    return &operation_buffer;
-}
-
-void Graphics::enqueueOperationBuffer() {
-    if (batching) {
-        batch_queue_length++;
-        return;
-    }
-
-    xQueueSendToBack(operation_queue, &operation_buffer, portMAX_DELAY);
-}
-
-void Graphics::drawRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color, uint8_t thickness) {
-    
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::drawRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color, uint8_t thickness) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = DRAW_RECTANGLE;
-    operation->viewport = viewport_buffer;
     operation->pvData = (void *) _rectangle(x, y, width, height, color, thickness);
-
-    enqueueOperationBuffer();
 }
 
-void Graphics::fillRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::fillRectangle(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = FILL_RECTANGLE;
-    operation->viewport = viewport_buffer;
+    
     operation->pvData = (void *) _rectangle(x, y, width, height, color, 0);
 
-    enqueueOperationBuffer();
+    
 }
 
 //
 
-void Graphics::drawRoundedRectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color, uint8_t thickness) {
-    
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::drawRoundedRectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color, uint8_t thickness) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = DRAW_ROUNDED_RECTANGLE;
-    operation->viewport = viewport_buffer;
     operation->pvData = (void *) _rounded_rectangle(x, y, width, height, radius, color, thickness);
-
-    enqueueOperationBuffer();
 }
 
-void Graphics::fillRoundedRectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::fillRoundedRectangle(int32_t x, int32_t y, int32_t width, int32_t height, int32_t radius, uint32_t color) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = FILL_ROUNDED_RECTANGLE;
-    operation->viewport = viewport_buffer;
     operation->pvData = (void *) _rounded_rectangle(x, y, width, height, radius, color, 0);
-
-    enqueueOperationBuffer();
 }
 
 //
 
-void Graphics::drawCircle(int32_t x, int32_t y, int32_t radius, uint32_t color, uint8_t thickness) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::drawCircle(int32_t x, int32_t y, int32_t radius, uint32_t color, uint8_t thickness) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = DRAW_CIRCLE;
-    operation->viewport = viewport_buffer;
     operation->pvData = (void *) _circle(x, y, radius, color, thickness);
-
-    enqueueOperationBuffer();
 }
 
-void Graphics::fillCircle(int32_t x, int32_t y, int32_t radius, uint32_t color) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::fillCircle(int32_t x, int32_t y, int32_t radius, uint32_t color) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = FILL_CIRCLE;
-    operation->viewport = viewport_buffer;
-    operation->pvData = (void *) _circle(x, y, radius, color, 0);
-
-    enqueueOperationBuffer();
+    operation->pvData = (void *) _circle(x, y, radius, color, 0);    
 }
 
 //
 
-void Graphics::drawTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color, uint8_t thickness) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::drawTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color, uint8_t thickness) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = DRAW_TRIANGLE;
-    operation->viewport = viewport_buffer;
     operation->pvData = (void *) _triangle(x1, y1, x2, y2, x3, y3, color, thickness);
-
-    enqueueOperationBuffer();
 }
 
-void Graphics::fillTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::fillTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, uint32_t color) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = FILL_TRIANGLE;
-    operation->viewport = viewport_buffer;
     operation->pvData = (void *) _triangle(x1, y1, x2, y2, x3, y3, color, 0);
-
-    enqueueOperationBuffer();
 }
 
-void Graphics::drawLine(int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color, uint8_t thickness) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::drawLine(int32_t xstart, int32_t ystart, int32_t xend, int32_t yend, uint32_t color, uint8_t thickness) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = DRAW_LINE;
-    operation->viewport = viewport_buffer;
     operation->pvData = (void *) _line(xstart, ystart, xend, yend, color, thickness);
-
-    enqueueOperationBuffer();
 }
 
-void Graphics::drawPixel(int32_t x, int32_t y, uint32_t color) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::drawPixel(int32_t x, int32_t y, uint32_t color) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
     operation->type = DRAW_PIXEL;
-    operation->viewport = viewport_buffer;
     operation->pvData = (void *) _pixel(x, y, color);
-
-    enqueueOperationBuffer();
 }
 
-void Graphics::drawString(int32_t x, int32_t y, const char * string, uint32_t color, uint8_t font_size, uint8_t datum) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::drawString(int32_t x, int32_t y, const char * string, uint32_t color, uint8_t font_size, uint8_t datum) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
-    operation->type = DRAW_STRING;
-    operation->viewport = viewport_buffer;
-    operation->pvData = (void *) _text(x, y, string, datum, color, color, font_size);
-
-    enqueueOperationBuffer();
+    operation->type = DRAW_STRING;    
+    operation->pvData = (void *) _text(x, y, string, datum, color, color, font_size);    
 }
 
-void Graphics::drawFilledString(int32_t x, int32_t y, const char * string, uint32_t color, uint32_t fill, uint8_t font_size, uint8_t datum) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::drawFilledString(int32_t x, int32_t y, const char * string, uint32_t color, uint32_t fill, uint8_t font_size, uint8_t datum) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
-    operation->type = DRAW_STRING;
-    operation->viewport = viewport_buffer;
-    operation->pvData = (void *) _text(x, y, string, datum, color, fill, font_size);
-
-    enqueueOperationBuffer();
+    operation->type = DRAW_STRING;    
+    operation->pvData = (void *) _text(x, y, string, datum, color, fill, font_size);    
 }
 
-void Graphics::fillScreen(uint32_t color) {
-    GOperation_t * operation = getOperationBuffer();
+void GBatch_t::fillScreen(uint32_t color) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
     
-    operation->type = FILL_SCREEN;
-    operation->viewport = viewport_buffer;
-    operation->pvData = (void *) _screen(color);
+    operation->type = FILL_SCREEN;    
+    operation->pvData = (void *) _screen(color);    
+}
 
-    enqueueOperationBuffer();
+int32_t GBatch_t::viewHeight() {
+    return viewport.height;
+}
+
+int32_t GBatch_t::viewWidth() {
+    return viewport.width;
 }

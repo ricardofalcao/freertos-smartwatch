@@ -9,8 +9,8 @@
 class App_Pong : public App {
     private:
         int tick = 0;
-        int playerx = VIEW_WIDTH / 2, tplayerx = VIEW_WIDTH / 2;
-        int botx = VIEW_WIDTH / 2;
+        int playerx = DEFAULT_VIEWPORT.width / 2, tplayerx = DEFAULT_VIEWPORT.width / 2;
+        int botx = DEFAULT_VIEWPORT.width / 2;
         char _bot_score[3];
         char _player_score[3];
 
@@ -24,13 +24,13 @@ class App_Pong : public App {
         void onClose() override;   
     
     private:
-        void print_top_bar(int previous_x, int new_x);
+        void print_top_bar(GBatch_t * batch, int previous_x, int new_x);
 
-        void print_bottom_bar(int previous_x, int new_x);
+        void print_bottom_bar(GBatch_t * batch, int previous_x, int new_x);
 
-        void print_field_lines(uint32_t color);
+        void print_field_lines(GBatch_t * batch, uint32_t color);
 
-        void print_ball(int x_center, int y_center, uint32_t color);
+        void print_ball(GBatch_t * batch, int x_center, int y_center, uint32_t color);
 
-        void print_score(uint32_t color);
+        void print_score(GBatch_t * batch, uint32_t color);
 };

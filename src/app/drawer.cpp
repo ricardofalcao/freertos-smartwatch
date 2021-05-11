@@ -5,7 +5,7 @@
 #include "graphics.h"
 #include "pins.h"
 
-#define APP_WIDTH           ((VIEW_WIDTH - 2*APPS_MARGIN_X - APPS_SPACING_X * (DRAWER_COLUMNS - 1)) / DRAWER_COLUMNS)
+#define APP_WIDTH           ((DEFAULT_VIEWPORT.width - 2*APPS_MARGIN_X - APPS_SPACING_X * (DRAWER_COLUMNS - 1)) / DRAWER_COLUMNS)
 #define APP_HEIGHT          APP_WIDTH
 #define APP_BORDER_RADIUS   (APP_WIDTH / 4)
 
@@ -37,12 +37,12 @@ void App_Drawer::click_home() {
 
 void App_Drawer::onOpen() {
     previous_page_touch_listener.x = PAGE_ARROW_MARGIN_X - PAGE_ARROW_CLICK_PADDING;
-    previous_page_touch_listener.y = VIEW_HEIGHT - PAGE_ARROW_MARGIN_Y - PAGE_ARROW_SIZE / 2 - PAGE_ARROW_CLICK_PADDING;
+    previous_page_touch_listener.y = DEFAULT_VIEWPORT.height - PAGE_ARROW_MARGIN_Y - PAGE_ARROW_SIZE / 2 - PAGE_ARROW_CLICK_PADDING;
     previous_page_touch_listener.width = PAGE_ARROW_HEIGHT + 2*PAGE_ARROW_CLICK_PADDING;
     previous_page_touch_listener.height = PAGE_ARROW_SIZE + 2*PAGE_ARROW_CLICK_PADDING;
 
-    next_page_touch_listener.x = VIEW_WIDTH - PAGE_ARROW_MARGIN_X - PAGE_ARROW_HEIGHT - PAGE_ARROW_CLICK_PADDING;
-    next_page_touch_listener.y = VIEW_HEIGHT - PAGE_ARROW_MARGIN_Y - PAGE_ARROW_SIZE / 2 - PAGE_ARROW_CLICK_PADDING;
+    next_page_touch_listener.x = DEFAULT_VIEWPORT.width - PAGE_ARROW_MARGIN_X - PAGE_ARROW_HEIGHT - PAGE_ARROW_CLICK_PADDING;
+    next_page_touch_listener.y = DEFAULT_VIEWPORT.height - PAGE_ARROW_MARGIN_Y - PAGE_ARROW_SIZE / 2 - PAGE_ARROW_CLICK_PADDING;
     next_page_touch_listener.width = PAGE_ARROW_HEIGHT + 2*PAGE_ARROW_CLICK_PADDING;
     next_page_touch_listener.height = PAGE_ARROW_SIZE + 2*PAGE_ARROW_CLICK_PADDING; 
 
@@ -59,13 +59,17 @@ void App_Drawer::onOpen() {
         app_touch_listeners[i].height = APP_HEIGHT;
     }
 
-    graphics.fillScreen(TFT_WHITE);
-    this->draw_page();
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+    batch.fillScreen(TFT_WHITE);
+    this->draw_page(&batch);
+    graphics.endBatch(&batch);
 }
 
 void App_Drawer::onResume() {
-    graphics.fillScreen(TFT_WHITE);
-    this->draw_page();
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+    batch.fillScreen(TFT_WHITE);
+    this->draw_page(&batch);
+    graphics.endBatch(&batch);
 }
 
 void App_Drawer::onTick() {
@@ -73,7 +77,10 @@ void App_Drawer::onTick() {
 
     if (activated == redraw_signal) {
         xSemaphoreTake(redraw_signal, 0);
-        this->draw_page();
+
+        GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+        this->draw_page(&batch);
+        graphics.endBatch(&batch);
     } else if (activated == app_open_queue) {
         App * app;
         xQueueReceive(app_open_queue, &app, 0);
@@ -107,7 +114,7 @@ void App_Drawer::onTouchTick() {
     TouchData data = touch.waitRelease();
 
     for(uint8_t i = 0; i < APPS_PER_PAGE; i++) {
-        if(app_touch_listeners[i].contains(viewport, data)) {
+        if(app_touch_listeners[i].contains(DEFAULT_VIEWPORT, data)) {
             uint8_t start = page * APPS_PER_PAGE;
             uint8_t target = start + i;
 
@@ -122,21 +129,21 @@ void App_Drawer::onTouchTick() {
     }
 
 
-    if (previous_page_touch_listener.contains(viewport, data)) {
+    if (previous_page_touch_listener.contains(DEFAULT_VIEWPORT, data)) {
         
         if (page > 0) {
             page--;
             xSemaphoreGive(redraw_signal);
-            vTaskDelay(250 / portTICK_PERIOD_MS);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
         }
 
-    } else if (next_page_touch_listener.contains(viewport, data)) {
+    } else if (next_page_touch_listener.contains(DEFAULT_VIEWPORT, data)) {
         
         uint8_t pages = ceil(apps_length / (float) APPS_PER_PAGE);
         if (page < pages - 1) {
             page++;
             xSemaphoreGive(redraw_signal);
-            vTaskDelay(250 / portTICK_PERIOD_MS);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
         }
 
 
@@ -150,13 +157,11 @@ void App_Drawer::onClose() {
 
 */
 
-void App_Drawer::draw_page() {
-    graphics.beginBatch();
-    
+void App_Drawer::draw_page(GBatch_t * batch) {
     uint8_t pages = ceil(apps_length / (float) APPS_PER_PAGE);
 
-    draw_right_arrow(page < pages - 1 ? TFT_BLACK : TFT_WHITE);
-    draw_left_arrow(page > 0 ? TFT_BLACK : TFT_WHITE);
+    draw_right_arrow(batch, page < pages - 1 ? TFT_BLACK : TFT_WHITE);
+    draw_left_arrow(batch, page > 0 ? TFT_BLACK : TFT_WHITE);
 
     uint8_t start = page * APPS_PER_PAGE;
 
@@ -167,41 +172,39 @@ void App_Drawer::draw_page() {
         int32_t x = APPS_MARGIN_X + col * (APP_WIDTH + APPS_SPACING_X);
         int32_t y = APPS_MARGIN_Y + row * (APP_HEIGHT + APPS_SPACING_Y);
 
-        graphics.fillRectangle(x - APPS_SPACING_X / 2, y + APP_HEIGHT + 6, APP_WIDTH + APPS_SPACING_X, 30, TFT_WHITE);
+        batch->fillRectangle(x - APPS_SPACING_X / 2, y + APP_HEIGHT + 6, APP_WIDTH + APPS_SPACING_X, 30, TFT_WHITE);
         if (start + i > apps_length - 1) {
-            graphics.fillRectangle(x, y, APP_WIDTH, APP_HEIGHT, TFT_WHITE);
+            batch->fillRectangle(x, y, APP_WIDTH, APP_HEIGHT, TFT_WHITE);
             continue;
         }
 
         App * app = apps[start +i];
 
-        graphics.fillRoundedRectangle(x, y, APP_WIDTH, APP_HEIGHT, APP_BORDER_RADIUS, app->color);
-        graphics.drawString(x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
+        batch->fillRoundedRectangle(x, y, APP_WIDTH, APP_HEIGHT, APP_BORDER_RADIUS, app->color);
+        batch->drawString(x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
     }
-
-    graphics.endBatch();
 }
 
-void App_Drawer::draw_left_arrow(int32_t color) {
-    graphics.fillTriangle(
+void App_Drawer::draw_left_arrow(GBatch_t * batch, int32_t color) {
+    batch->fillTriangle(
         PAGE_ARROW_MARGIN_X, 
-        VIEW_HEIGHT - PAGE_ARROW_MARGIN_Y,
+        batch->viewHeight() - PAGE_ARROW_MARGIN_Y,
         PAGE_ARROW_MARGIN_X + PAGE_ARROW_HEIGHT,
-        VIEW_HEIGHT - PAGE_ARROW_MARGIN_Y - PAGE_ARROW_SIZE / 2,
+        batch->viewHeight() - PAGE_ARROW_MARGIN_Y - PAGE_ARROW_SIZE / 2,
         PAGE_ARROW_MARGIN_X + PAGE_ARROW_HEIGHT,
-        VIEW_HEIGHT - PAGE_ARROW_MARGIN_Y + PAGE_ARROW_SIZE / 2,
+        batch->viewHeight() - PAGE_ARROW_MARGIN_Y + PAGE_ARROW_SIZE / 2,
         color
     );
 }
 
-void App_Drawer::draw_right_arrow(int32_t color) {
-    graphics.fillTriangle(
-        viewport.width - PAGE_ARROW_MARGIN_X, 
-        VIEW_HEIGHT - PAGE_ARROW_MARGIN_Y,
-        VIEW_WIDTH - PAGE_ARROW_MARGIN_X - PAGE_ARROW_HEIGHT,
-        VIEW_HEIGHT - PAGE_ARROW_MARGIN_Y - PAGE_ARROW_SIZE / 2,
-        VIEW_WIDTH - PAGE_ARROW_MARGIN_X - PAGE_ARROW_HEIGHT,
-        VIEW_HEIGHT - PAGE_ARROW_MARGIN_Y + PAGE_ARROW_SIZE / 2,
+void App_Drawer::draw_right_arrow(GBatch_t * batch, int32_t color) {
+    batch->fillTriangle(
+        batch->viewWidth() - PAGE_ARROW_MARGIN_X, 
+        batch->viewHeight() - PAGE_ARROW_MARGIN_Y,
+        batch->viewWidth() - PAGE_ARROW_MARGIN_X - PAGE_ARROW_HEIGHT,
+        batch->viewHeight() - PAGE_ARROW_MARGIN_Y - PAGE_ARROW_SIZE / 2,
+        batch->viewWidth() - PAGE_ARROW_MARGIN_X - PAGE_ARROW_HEIGHT,
+        batch->viewHeight() - PAGE_ARROW_MARGIN_Y + PAGE_ARROW_SIZE / 2,
         color
     );
 }

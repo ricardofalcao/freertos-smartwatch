@@ -58,10 +58,10 @@ class App_Drawer : public App {
     private:
         void click_home();
 
-        void draw_page();
+        void draw_page(GBatch_t * batch);
 
-        void draw_left_arrow(int32_t color);
+        void draw_left_arrow(GBatch_t * batch, int32_t color);
 
-        void draw_right_arrow(int32_t color);
+        void draw_right_arrow(GBatch_t * batch, int32_t color);
 
 };

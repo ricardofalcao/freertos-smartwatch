@@ -7,9 +7,6 @@
 #define BACKGROUND_COLOR        TFT_BLACK
 #define GAME_COLOR              TFT_WHITE
 
-#define BOARD_WIDTH             VIEW_WIDTH
-#define BOARD_HEIGHT            VIEW_HEIGHT
-
 #define MARGIN_Y                35
 #define MARGIN_X                35
 
@@ -31,64 +28,62 @@ int player_score = 0;
     Graphics
 */
 
-void App_Pong::print_top_bar(int previous_x, int new_x) {
+void App_Pong::print_top_bar(GBatch_t * batch, int previous_x, int new_x) {
     if (new_x == previous_x) {
         return;
     }
 
     if (new_x > previous_x) {
-        graphics.fillRectangle(previous_x - BAR_HALF_LENGTH, MARGIN_Y, new_x - previous_x, BAR_HEIGHT, BACKGROUND_COLOR);
+        batch->fillRectangle(previous_x - BAR_HALF_LENGTH, MARGIN_Y, new_x - previous_x, BAR_HEIGHT, BACKGROUND_COLOR);
     } else {
-        graphics.fillRectangle(new_x + BAR_HALF_LENGTH, MARGIN_Y, previous_x - new_x, BAR_HEIGHT, BACKGROUND_COLOR);
+        batch->fillRectangle(new_x + BAR_HALF_LENGTH, MARGIN_Y, previous_x - new_x, BAR_HEIGHT, BACKGROUND_COLOR);
     }
 
     //place_x means the center of the bar 
-    graphics.fillRectangle(new_x - BAR_HALF_LENGTH, MARGIN_Y, BAR_LENGTH, BAR_HEIGHT, GAME_COLOR);
+    batch->fillRectangle(new_x - BAR_HALF_LENGTH, MARGIN_Y, BAR_LENGTH, BAR_HEIGHT, GAME_COLOR);
 }
 
-void App_Pong::print_bottom_bar(int previous_x, int new_x) {
+void App_Pong::print_bottom_bar(GBatch_t * batch, int previous_x, int new_x) {
     if (new_x == previous_x) {
         return;
     }
 
     if (new_x > previous_x) {
-        graphics.fillRectangle(previous_x - BAR_HALF_LENGTH, BOARD_HEIGHT - MARGIN_Y - BAR_HEIGHT, new_x - previous_x, BAR_HEIGHT, BACKGROUND_COLOR);
+        batch->fillRectangle(previous_x - BAR_HALF_LENGTH, batch->viewHeight() - MARGIN_Y - BAR_HEIGHT, new_x - previous_x, BAR_HEIGHT, BACKGROUND_COLOR);
     } else {
-        graphics.fillRectangle(new_x + BAR_HALF_LENGTH, BOARD_HEIGHT - MARGIN_Y - BAR_HEIGHT, previous_x - new_x, BAR_HEIGHT, BACKGROUND_COLOR);
+        batch->fillRectangle(new_x + BAR_HALF_LENGTH, batch->viewHeight() - MARGIN_Y - BAR_HEIGHT, previous_x - new_x, BAR_HEIGHT, BACKGROUND_COLOR);
     }
     //place_x means the center of the bar 
-    graphics.fillRectangle(new_x - BAR_HALF_LENGTH, BOARD_HEIGHT - MARGIN_Y - BAR_HEIGHT, BAR_LENGTH, BAR_HEIGHT, GAME_COLOR);
+    batch->fillRectangle(new_x - BAR_HALF_LENGTH, batch->viewHeight() - MARGIN_Y - BAR_HEIGHT, BAR_LENGTH, BAR_HEIGHT, GAME_COLOR);
 }
 
-void App_Pong::print_field_lines(uint32_t color) {
-    int numberOfLines = (BOARD_WIDTH - DASHED_BARS_LENGTH) / (DASHED_BARS_LENGTH + SPACE_BETWEEN_BARS) + 1;
-    int offsetX = ((BOARD_WIDTH - DASHED_BARS_LENGTH) % (DASHED_BARS_LENGTH + SPACE_BETWEEN_BARS)) / 2;
+void App_Pong::print_field_lines(GBatch_t * batch, uint32_t color) {
+    int numberOfLines = (batch->viewWidth() - DASHED_BARS_LENGTH) / (DASHED_BARS_LENGTH + SPACE_BETWEEN_BARS) + 1;
+    int offsetX = ((batch->viewWidth() - DASHED_BARS_LENGTH) % (DASHED_BARS_LENGTH + SPACE_BETWEEN_BARS)) / 2;
 
     for(int i = 0; i < numberOfLines; i++) {
         int x = offsetX + i * (DASHED_BARS_LENGTH+SPACE_BETWEEN_BARS);
 
-        graphics.drawLine(x, BOARD_HEIGHT / 2, x + DASHED_BARS_LENGTH, BOARD_HEIGHT / 2, color, 2);
+        batch->drawLine(x, batch->viewHeight() / 2, x + DASHED_BARS_LENGTH, batch->viewHeight() / 2, color, 2);
     }
     
-    graphics.drawLine(1, 1, 1, BOARD_HEIGHT, color, 8);
-    graphics.drawLine(BOARD_WIDTH, 1, BOARD_WIDTH, BOARD_HEIGHT, color, 8);
+    batch->drawLine(1, 1, 1, batch->viewHeight(), color, 8);
+    batch->drawLine(batch->viewWidth(), 1, batch->viewWidth(), batch->viewHeight(), color, 8);
 
 }
 
-void App_Pong::print_score(uint32_t color) {
+void App_Pong::print_score(GBatch_t * batch, uint32_t color) {
 
-    graphics.beginBatch();
     sprintf(_bot_score, "%d", bot_score);
-    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 - MARGIN_Y, _bot_score, color, 4, MC_DATUM);
+    batch->drawString(batch->viewWidth() - MARGIN_X, batch->viewHeight()/2 - MARGIN_Y, _bot_score, color, 4, MC_DATUM);
     
     sprintf(_player_score, "%d", player_score);
-    graphics.drawString(BOARD_WIDTH - MARGIN_X, BOARD_HEIGHT/2 + MARGIN_Y, _player_score, color, 4, MC_DATUM);
-    graphics.endBatch();
+    batch->drawString(batch->viewWidth() - MARGIN_X, batch->viewHeight()/2 + MARGIN_Y, _player_score, color, 4, MC_DATUM);
 
 }
 
-void App_Pong::print_ball(int x_center, int y_center, uint32_t color) {
-    graphics.fillCircle(x_center, y_center, BALL_RADIUS, color);
+void App_Pong::print_ball(GBatch_t * batch, int x_center, int y_center, uint32_t color) {
+    batch->fillCircle(x_center, y_center, BALL_RADIUS, color);
 }
 
 /*
@@ -105,10 +100,11 @@ App_Pong::App_Pong() : App("Pong", "Let's Play") {
 void App_Pong::onOpen() {
     Serial.println("[Pong] OPEN");
 
-    graphics.fillScreen(BACKGROUND_COLOR);
-    print_field_lines(GAME_COLOR);
-
-    print_score(GAME_COLOR);
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+    batch.fillScreen(BACKGROUND_COLOR);
+    print_field_lines(&batch, GAME_COLOR);
+    print_score(&batch, GAME_COLOR);
+    graphics.endBatch(&batch);
 }
 
 float lerp(float a, float b, float x)
@@ -119,18 +115,18 @@ float lerp(float a, float b, float x)
 void App_Pong::onTick() {
     tick++;
 
-    int nbotx = ((int) (sin(0.05 * tick) * (BOARD_WIDTH / 2 - BAR_LENGTH))) + BOARD_WIDTH / 2;
+    int nbotx = ((int) (sin(0.05 * tick) * (DEFAULT_VIEWPORT.width / 2 - BAR_LENGTH))) + DEFAULT_VIEWPORT.width / 2;
 
-    graphics.beginBatch();
+    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
     if (nbotx != botx) {
-        print_top_bar(botx, nbotx);
+        print_top_bar(&batch, botx, nbotx);
         botx = nbotx;
     }
   
     TouchData data = touch.get();
 
     if (data.pressed) {
-        int nplayerx = constrain(data.x, BAR_HALF_LENGTH + 5, BOARD_WIDTH - BAR_HALF_LENGTH - 5);
+        int nplayerx = constrain(data.x, BAR_HALF_LENGTH + 5, DEFAULT_VIEWPORT.width - BAR_HALF_LENGTH - 5);
 
         if (playerx != nplayerx) {
             tplayerx = nplayerx;
@@ -138,10 +134,10 @@ void App_Pong::onTick() {
     }
 
     int iiplayerx = ceil(lerp(playerx, tplayerx, 0.3));
-    print_bottom_bar(playerx, iiplayerx);
+    print_bottom_bar(&batch, playerx, iiplayerx);
     playerx = iiplayerx;
 
-    graphics.endBatch();
+    graphics.endBatch(&batch);
 
     vAppDelay(10 / portTICK_PERIOD_MS);
 }
