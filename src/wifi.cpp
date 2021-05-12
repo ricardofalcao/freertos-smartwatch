@@ -4,7 +4,7 @@
 #include "time.h"
 
 void esp_Wsync_time(){
-    String server = "pool.ntp.org";
+    char * server = "pool.ntp.org";
     
-    configTime(0, 3600, server.c_str());
+    configTime(0, 3600, server);
 }

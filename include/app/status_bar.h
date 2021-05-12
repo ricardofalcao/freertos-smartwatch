@@ -6,6 +6,9 @@
 #include "app/app.h"
 
 class App_Statusbar : public App {
+    private:
+        TFT_eSprite icon_wifi = TFT_eSprite(&tft);
+
     public:
         App_Statusbar();
 

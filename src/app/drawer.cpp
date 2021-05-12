@@ -143,7 +143,7 @@ void App_Drawer::onTouchTick() {
         if (page < pages - 1) {
             page++;
             xSemaphoreGive(redraw_signal);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            vTaskDelay(250 / portTICK_PERIOD_MS);
         }
 
 

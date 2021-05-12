@@ -96,6 +96,14 @@ typedef struct {
 
 typedef struct {
 
+    TFT_eSprite * sprite;
+    int32_t x;
+    int32_t y;
+
+} Image_t;
+
+typedef struct {
+
     uint32_t color;
 
 } Screen_t;
@@ -353,6 +361,12 @@ void Graphics::processOperation(GOperation_t * operation) {
             break;
         }
 
+        case DRAW_IMAGE: {
+            Image_t * image = (Image_t *) operation->pvData;
+            image->sprite->pushSprite(image->x, image->y);
+            break;
+        }
+
         case FILL_SCREEN: {
             Screen_t * screen = (Screen_t *) operation->pvData;
             tft.fillScreen(screen->color);
@@ -482,6 +496,14 @@ String_t * _text(int32_t x, int32_t y, const char * str, uint8_t datum, uint32_t
     return text;
 }
 
+Image_t * _image(TFT_eSprite * sprite, int32_t x, int32_t y) {
+    Image_t * image = (Image_t *) pvPortMalloc(sizeof(Image_t));
+    image->sprite = sprite;
+    image->x = x;
+    image->y = y;
+    return image;
+}
+
 Screen_t * _screen(uint32_t color) {
     Screen_t * screen = (Screen_t *) pvPortMalloc(sizeof(Screen_t));
     screen->color = color;
@@ -581,6 +603,13 @@ void GBatch_t::drawFilledString(int32_t x, int32_t y, const char * string, uint3
     
     operation->type = DRAW_STRING;    
     operation->pvData = (void *) _text(x, y, string, datum, color, fill, font_size);    
+}
+
+void GBatch_t::drawImage(TFT_eSprite * sprite, int32_t x, int32_t y) {
+    GOperation_t * operation = &batch_queue[batch_queue_length ++];
+    
+    operation->type = DRAW_IMAGE;    
+    operation->pvData = (void *) _image(sprite, x, y);    
 }
 
 void GBatch_t::fillScreen(uint32_t color) {

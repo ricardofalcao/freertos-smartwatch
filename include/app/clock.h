@@ -8,8 +8,8 @@
 
 class App_Clock : public App {
     private:
-        tm current_time;
-        tm old_time;
+        struct tm current_time;
+        struct tm old_time;
 
     public:
         App_Clock();

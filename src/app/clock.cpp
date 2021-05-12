@@ -6,7 +6,7 @@
 #include "touch.h"
 #include "graphics.h"
 
-App_Clock::App_Clock() : App("Clocké", "Shows the current time") {
+App_Clock::App_Clock() : App("Clock", "Shows the current time") {
     priority = 3;
     stack_depth = 10240;
 }
@@ -49,6 +49,7 @@ void App_Clock::onTick() {
         time_t now;
         time(&now);
         localtime_r(&now, &current_time);
+          Serial.println(&current_time, "%A, %B %d %Y %H:%M:%S");
 
         float angle_s = old_time.tm_sec * 0.1047 - 1.5708;
         draw_line(&batch, angle_s, 96, TFT_WHITE);

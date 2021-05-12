@@ -41,6 +41,7 @@ typedef enum {
     DRAW_PIXEL,
 
     DRAW_STRING,
+    DRAW_IMAGE,
 
     FILL_SCREEN,
 
@@ -101,6 +102,10 @@ class GBatch_t {
         void drawString(int32_t x, int32_t y, const char * string, uint32_t color, uint8_t font_size = 4, uint8_t datum = TL_DATUM);
 
         void drawFilledString(int32_t x, int32_t y, const char * string, uint32_t color, uint32_t fill, uint8_t font_size = 4, uint8_t datum = TL_DATUM);
+
+        //
+
+        void drawImage(TFT_eSprite * sprite, int32_t x, int32_t y);
 
         //
 
