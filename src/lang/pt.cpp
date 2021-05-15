@@ -53,6 +53,7 @@ PROGMEM const char Statusbar_description[] = "Shows status and notifications";
 PROGMEM const char * const messages [] = {
     //TicTacToe
     TTT_name,
+    TTT_description,
     TTT_reset,
     TTT_player1_turn,
     TTT_player2_turn,

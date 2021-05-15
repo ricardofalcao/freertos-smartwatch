@@ -26,8 +26,8 @@
 
 #include "lang/lang.h"
 
-#define WIFI_NETWORK "NOS-219D"
-#define WIFI_PASS "VNQN3MM9"
+#define WIFI_NETWORK "Vodafone-284C30"
+#define WIFI_PASS "tYUREqcuVn"
 
 Touch touch;
 Graphics graphics;
