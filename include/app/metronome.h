@@ -12,6 +12,15 @@ class App_Metronome : public App {
     private:
         RectangleTouchListener button_touch_listeners[METRONOME_CELL_TOUCH_LISTENERS];
         char bpm_print_buffer[16];
+        char time_signature[5];
+        
+        int bpm = 100;
+        int compass_type = 4;
+        int button_on = 0;
+
+
+        SemaphoreHandle_t resume_event;
+        
 
     public:
         App_Metronome();
@@ -34,6 +43,14 @@ class App_Metronome : public App {
         void print_button_up(GBatch_t * batch);
         
         void print_button_down(GBatch_t * batch);
+
+        void print_play_button(GBatch_t * batch);
+
+        void print_pause_button(GBatch_t * batch);
         
         void print_bpm(GBatch_t * batch);
+
+        void print_time4_string(GBatch_t * batch);
+
+        void print_time3_string(GBatch_t * batch);
 };
