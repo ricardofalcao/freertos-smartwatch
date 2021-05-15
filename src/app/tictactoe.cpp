@@ -213,7 +213,7 @@ uint8_t App_TicTacToe::get_winner(uint8_t * layout)
 
 */
 
-App_TicTacToe::App_TicTacToe() : App("TicTacToe", "Let's play a game") {
+App_TicTacToe::App_TicTacToe() : App(MSG_TTT_NAME, MSG_TTT_DESCRIPTION) {
     priority = 3;
     stack_depth = 4096;
     canMinimize = false;

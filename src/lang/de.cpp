@@ -34,6 +34,18 @@ PROGMEM const char Drawer_description[] = "Shows all installed apps";
 PROGMEM const char Weather_name[] = "Weather";
 PROGMEM const char Weather_description[] = "Checks weather through API";
 
+//Monitor Text
+PROGMEM const char Monitor_name[] = "Monitor";
+PROGMEM const char Monitor_description[] = "Shows the currently active tasks";
+
+//Pong Text
+PROGMEM const char Pong_name[] = "Pong";
+PROGMEM const char Pong_description[] = "Classic game Pong";
+
+//Statusbar Text
+PROGMEM const char Statusbar_name[] = "Statusbar";
+PROGMEM const char Statusbar_description[] = "Shows status and notifications";
+
 /*
 
 */
@@ -67,7 +79,19 @@ PROGMEM const char * const messages [] = {
 
     //Weather
     Weather_name,
-    Weather_description
+    Weather_description,
+
+    //Monitor
+    Monitor_name,
+    Monitor_description,
+
+    //Pong
+    Pong_name,
+    Pong_description,
+
+    //Statusbar
+    Statusbar_name,
+    Statusbar_description
 
 };
 

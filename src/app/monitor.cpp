@@ -4,7 +4,7 @@
 
 #define MAXIMUM_TASKS   20
 
-App_Monitor::App_Monitor() : App("Monitor", "System Monitor") {
+App_Monitor::App_Monitor() : App(MSG_MONITOR_NAME, MSG_MONITOR_DESCRIPTION) {
     priority = 3;
     stack_depth = 10240;
 }

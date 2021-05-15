@@ -90,7 +90,7 @@ void App_Pong::print_ball(GBatch_t * batch, int x_center, int y_center, uint32_t
     main
 */
 
-App_Pong::App_Pong() : App("Pong", "Let's Play") {
+App_Pong::App_Pong() : App(MSG_PONG_NAME, MSG_PONG_DESCRIPTION) {
     priority = 3;
     stack_depth = 4096;
     canMinimize = false;

@@ -25,7 +25,7 @@
 
 
 
-App_Metronome::App_Metronome() : App("Metronome", "Time Marker") {
+App_Metronome::App_Metronome() : App(MSG_METRONOMER_NAME, MSG_METRONOMER_DESCRIPTION) {
     priority = 3;
     stack_depth = 10240;
     touch_stack_depth = 10240;

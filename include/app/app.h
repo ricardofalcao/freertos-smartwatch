@@ -3,6 +3,7 @@
 #include "sdkconfig.h"
 #include <Arduino.h>
 
+#include "lang/lang.h"
 #include "tft.h"
 #include "graphics.h"
 
@@ -21,8 +22,8 @@ class App {
         static App * APPS_REGISTRY[APP_REGISTRY_MAX_LENGTH];
         static size_t APPS_REGISTRY_LENGTH;
 
-        String name;
-        String description;
+        Message_t name;
+        Message_t description;
         uint32_t color;
 
         bool minimized = false;
@@ -45,7 +46,7 @@ class App {
         TaskHandle_t touch_task_handle;
 
     public:
-        App(String name, String description);
+        App(Message_t name, Message_t description);
 
         void open();
 

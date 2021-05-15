@@ -16,7 +16,7 @@
 #define ICON_BATTERY_WIDTH      16
 #define ICON_BATTERY_HEIGHT     (BAR_HEIGHT - 8)
 
-App_Statusbar::App_Statusbar() : App("Statusbar", "Shows informations on the status bar") {
+App_Statusbar::App_Statusbar() : App(MSG_STATUSBAR_NAME, MSG_STATUSBAR_DESCRIPTION) {
     priority = 2;
     stack_depth = 4096;
     minimized = true;

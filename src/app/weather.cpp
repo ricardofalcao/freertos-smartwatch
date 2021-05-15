@@ -57,7 +57,7 @@ void getWeather()
   http.end();
 }
 
-App_weather::App_weather() : App("Weather", "Checks weather through API")
+App_weather::App_weather() : App(MSG_WEATHER_NAME, MSG_WEATHER_DESCRIPTION)
 {
   priority = 5;
   stack_depth = 10240;

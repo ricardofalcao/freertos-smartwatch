@@ -12,7 +12,7 @@
 #define PAGE_ARROW_HEIGHT   (int) (0.8660254037844386f * PAGE_ARROW_SIZE)
 #define PAGE_ARROW_CLICK_PADDING    5
 
-App_Drawer::App_Drawer() : App("Drawer", "Shows all installed apps") {
+App_Drawer::App_Drawer() : App(MSG_DRAWER_NAME, MSG_DRAWER_DESCRIPTION) {
     priority = 2;
     stack_depth = 10240;
     touch_stack_depth = 4096;
@@ -181,7 +181,7 @@ void App_Drawer::draw_page(GBatch_t * batch) {
         App * app = apps[start +i];
 
         batch->fillRoundedRectangle(x, y, APP_WIDTH, APP_HEIGHT, APP_BORDER_RADIUS, app->color);
-        batch->drawString(x + APP_WIDTH / 2, y + APP_HEIGHT + 6, app->name.c_str(), TFT_BLACK, 2, TC_DATUM);
+        batch->drawString(x + APP_WIDTH / 2, y + APP_HEIGHT + 6, lang.get(app->name), TFT_BLACK, 2, TC_DATUM);
     }
 }
 

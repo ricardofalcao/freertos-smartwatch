@@ -3,8 +3,6 @@
 #include "sdkconfig.h"
 #include <Arduino.h>
 
-#include "app/app.h"
-
 typedef enum 
 {   
     //TicTacToe
@@ -37,6 +35,18 @@ typedef enum
     //Weather
     MSG_WEATHER_NAME,
     MSG_WEATHER_DESCRIPTION,
+
+    //Monitor
+    MSG_MONITOR_NAME,
+    MSG_MONITOR_DESCRIPTION,
+
+    //Pong
+    MSG_PONG_NAME,
+    MSG_PONG_DESCRIPTION,
+
+    //Statusbar
+    MSG_STATUSBAR_NAME,
+    MSG_STATUSBAR_DESCRIPTION,
 
 
     MSG_NUM

@@ -8,7 +8,7 @@
 #define ARDUINO_RUNNING_CORE 1
 #endif
 
-App::App(String _name, String _description)
+App::App(Message_t _name, Message_t _description)
 {
 	name = _name;
 	description = _description;
@@ -70,11 +70,12 @@ void App::open()
 		return;
 	}
 
-	Serial.printf("[App] Start '%s' main task\n", name.c_str());
+	const char * name_c = lang.get(name);
+	Serial.printf("[App] Start '%s' main task\n", name_c);
 
 	xTaskCreatePinnedToCore(
 		_run_app_task,
-		name.c_str(),
+		name_c,
 		stack_depth,
 		this,
 		tskIDLE_PRIORITY + 5 + priority,
@@ -91,7 +92,8 @@ void App::minimize()
 
 	xEventGroupSetBits(event_group, EVENT_MINIMIZE_RES);
 
-	Serial.printf("[App] Minimizing '%s'\n", name.c_str());
+	const char * name_c = lang.get(name);
+	Serial.printf("[App] Minimizing '%s'\n", name_c);
 	this->minimized = true;
 	this->onMinimize();
 	vTaskDelete(touch_task_handle);
@@ -99,7 +101,8 @@ void App::minimize()
 
 void App::resume()
 {
-	Serial.printf("[App] Resuming '%s' main task\n", name.c_str());
+	const char * name_c = lang.get(name);
+	Serial.printf("[App] Resuming '%s' main task\n", name_c);
 
 	this->minimized = false;
 	this->onResume();
@@ -113,7 +116,8 @@ bool App::close()
 		return false;
 	}
 
-	Serial.printf("[App] Closing '%s'\n", name.c_str());
+	const char * name_c = lang.get(name);
+	Serial.printf("[App] Closing '%s'\n", name_c);
 	this->running = false;
 	this->onClose();
 	vTaskDelete(touch_task_handle);
@@ -139,10 +143,15 @@ void App::vAppDelay(const TickType_t xTicksToDelay) {
 
 void App::startTouchTask()
 {
-	Serial.printf("[App] Start '%s' touch task\n", name.c_str());
+	const char * name_c = lang.get(name);
+
+	char touchname_c[24];
+	sprintf(touchname_c, "%s-TOUCH", name_c);
+
+	Serial.printf("[App] Start '%s' touch task\n", name_c);
 	xTaskCreatePinnedToCore(
 		_run_app_touch_task,
-		(name + "-TOUCH").c_str(),
+		touchname_c,
 		touch_stack_depth,
 		this,
 		tskIDLE_PRIORITY + 5 + touch_priority,
