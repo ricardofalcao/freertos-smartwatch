@@ -24,6 +24,7 @@
 #include "app/tictactoe.h"
 #include "app/pong.h"
 #include "app/metronome.h"
+#include "app/delayer.h"
 
 #include "lang/lang.h"
 
@@ -50,6 +51,7 @@ App_Monitor monitor_app;
 App_Lang lang_app;
 App_Metronome metronome_app;
 App_weather weather_app;
+App_Delayer delayer_app;
 
 App_TicTacToe tictactoe_app;
 App_Pong pong_app;
@@ -119,6 +121,7 @@ void setup() {
   drawer_app.addApp(&metronome_app);
   drawer_app.addApp(&pong_app);
   drawer_app.addApp(&weather_app);
+  drawer_app.addApp(&delayer_app);
   
   statusbar_app.open();
   drawer_app.open();
