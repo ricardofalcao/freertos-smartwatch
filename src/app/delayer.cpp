@@ -111,7 +111,10 @@ void App_Delayer::draw_arrows(GBatch_t * batch) {
 }
 
 void App_Delayer::draw_test(GBatch_t * batch) {
-    batch->drawRectangle(MARGIN_X - TRIANGLES_DISTANCE - TRIANGLE_WIDTH/2, MARGIN_Y - TRIANGLE_HEIGHT,TRIANGLE_WIDTH, TRIANGLE_HEIGHT, TFT_BLUE, 2);
+    for (uint8_t i = 0; i < DELAYER_CELL_TOUCH_LISTENERS; i++) {
+        RectangleTouchListener listener = button_touch_listeners[i];
+        batch->drawRectangle(listener.x, listener.y, listener.width, listener.height, 2);
+    }
 }
 void App_Delayer::draw_hours(GBatch_t * batch) {
 
@@ -141,21 +144,21 @@ void App_Delayer::draw_seconds(GBatch_t * batch) {
 }
 
 void App_Delayer::draw_play_button(GBatch_t * batch) {
-    batch->fillCircle(BOARD_WIDTH - MARGIN_X/2, BOTTOM_Y + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
+    batch->fillCircle(BOARD_WIDTH - MARGIN_X/2, BOTTOM_Y + CIRCLE_RADIUS + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
     batch->fillTriangle(BOARD_WIDTH - MARGIN_X/2 - PLAY_TRIANGLE_OFFSET, BOTTOM_Y + PLAY_TRIANGLE_OFFSET + TRIANGLE_MARGIN,
                         BOARD_WIDTH - MARGIN_X/2 - PLAY_TRIANGLE_OFFSET, BOTTOM_Y + TRIANGLE_MARGIN + 2*CIRCLE_RADIUS - PLAY_TRIANGLE_OFFSET, 
                         BOARD_WIDTH - MARGIN_X/2 + PLAY_TRIANGLE_OFFSET, BOTTOM_Y + TRIANGLE_MARGIN + CIRCLE_RADIUS, TFT_WHITE);
 }
 
 void App_Delayer::draw_pause_button(GBatch_t * batch) {
-    batch->fillCircle(BOARD_WIDTH - MARGIN_X/2, BOTTOM_Y + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
+    batch->fillCircle(BOARD_WIDTH - MARGIN_X/2, BOTTOM_Y + CIRCLE_RADIUS + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
     batch->fillRectangle(BOARD_WIDTH - MARGIN_X/2 - PAUSE_BARS_DISTANCE / 2 - PAUSE_BARS_WIDTH, BOTTOM_Y + TRIANGLE_MARGIN + PLAY_TRIANGLE_OFFSET, PAUSE_BARS_WIDTH, PAUSE_BARS_HEIGHT, TFT_WHITE);
     batch->fillRectangle(BOARD_WIDTH - MARGIN_X/2 + PAUSE_BARS_DISTANCE / 2, BOTTOM_Y + TRIANGLE_MARGIN + PLAY_TRIANGLE_OFFSET, PAUSE_BARS_WIDTH, PAUSE_BARS_HEIGHT, TFT_WHITE);
 }
 
 void App_Delayer::draw_stop_button(GBatch_t * batch) {
-    batch->fillCircle(MARGIN_X/2, BOTTOM_Y + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
-    batch->fillRectangle(MARGIN_X/2 - CIRCLE_RADIUS + PLAY_TRIANGLE_OFFSET, BOTTOM_Y + PLAY_TRIANGLE_OFFSET + TRIANGLE_MARGIN, STOP_BUTTON_SIDE_LENGHT, STOP_BUTTON_SIDE_LENGHT, TFT_WHITE);
+    batch->fillCircle(MARGIN_X / 2, BOTTOM_Y + CIRCLE_RADIUS + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
+    batch->fillRectangle(MARGIN_X/2 - STOP_BUTTON_SIDE_LENGHT / 2, BOTTOM_Y + CIRCLE_RADIUS + TRIANGLE_MARGIN - STOP_BUTTON_SIDE_LENGHT / 2, STOP_BUTTON_SIDE_LENGHT, STOP_BUTTON_SIDE_LENGHT, TFT_WHITE);
 }
 
 void App_Delayer::draw_doubledots(GBatch_t * batch) {
