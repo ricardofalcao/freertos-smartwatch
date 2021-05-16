@@ -78,12 +78,12 @@ App_Delayer::App_Delayer() : App(MSG_METRONOMER_NAME, MSG_METRONOMER_NAME) {
     button_touch_listeners[5].width = TRIANGLE_WIDTH;
     button_touch_listeners[5].height = TRIANGLE_HEIGHT;
 
-    button_touch_listeners[6].x = MARGIN_X - CIRCLE_RADIUS;
+    button_touch_listeners[6].x = MARGIN_X/2 - CIRCLE_RADIUS;
     button_touch_listeners[6].y = BOTTOM_Y + TRIANGLE_MARGIN;
     button_touch_listeners[6].width = 2*CIRCLE_RADIUS;
     button_touch_listeners[6].height = 2*CIRCLE_RADIUS;
 
-    button_touch_listeners[7].x = BOARD_WIDTH - MARGIN_X/2 - CIRCLE_RADIUS;
+    button_touch_listeners[7].x = MARGIN_X + MARGIN_X/2 - CIRCLE_RADIUS;
     button_touch_listeners[7].y = BOTTOM_Y + TRIANGLE_MARGIN;
     button_touch_listeners[7].width = 2*CIRCLE_RADIUS;
     button_touch_listeners[7].height = 2*CIRCLE_RADIUS;
@@ -155,7 +155,7 @@ void App_Delayer::draw_pause_button(GBatch_t * batch) {
 
 void App_Delayer::draw_stop_button(GBatch_t * batch) {
     batch->fillCircle(MARGIN_X/2, BOTTOM_Y + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
-    batch->fillRectangle(MARGIN_X/2 - PLAY_TRIANGLE_OFFSET, BOTTOM_Y + PLAY_TRIANGLE_OFFSET + TRIANGLE_MARGIN, STOP_BUTTON_SIDE_LENGHT, STOP_BUTTON_SIDE_LENGHT, TFT_WHITE);
+    batch->fillRectangle(MARGIN_X/2 - CIRCLE_RADIUS + PLAY_TRIANGLE_OFFSET, BOTTOM_Y + PLAY_TRIANGLE_OFFSET + TRIANGLE_MARGIN, STOP_BUTTON_SIDE_LENGHT, STOP_BUTTON_SIDE_LENGHT, TFT_WHITE);
 }
 
 void App_Delayer::draw_doubledots(GBatch_t * batch) {
@@ -331,7 +331,7 @@ void App_Delayer::onTouchTick() {
             while (touch.get().pressed)
             {
                 if (millis() - start > 1500){
-                    hours = min(hours + 9, MAX_HOURS);
+                    hours = min(hours + 5, MAX_HOURS);
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_hours(&batch);
                     graphics.endBatch(&batch);
@@ -359,7 +359,7 @@ void App_Delayer::onTouchTick() {
             {
                 if (millis() - start > 1500)
                 {
-                    minutes = min(minutes + 9, MAX_MINUTES);
+                    minutes = min(minutes + 5, MAX_MINUTES);
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_minutes(&batch);
                     graphics.endBatch(&batch);
@@ -388,7 +388,7 @@ void App_Delayer::onTouchTick() {
             {
                 if (millis() - start > 1500)
                 {
-                    seconds = min(seconds + 9, MAX_SECONDS);
+                    seconds = min(seconds + 5, MAX_SECONDS);
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_seconds(&batch);
                     graphics.endBatch(&batch);
@@ -417,7 +417,7 @@ void App_Delayer::onTouchTick() {
             {
                 if (millis() - start > 1500)
                 {
-                    hours = min(hours - 9, MAX_HOURS);
+                    hours = min(hours - 5, MAX_HOURS);
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_hours(&batch);
                     graphics.endBatch(&batch);
@@ -446,7 +446,7 @@ void App_Delayer::onTouchTick() {
             {
                 if (millis() - start > 1500)
                 {
-                    minutes = min(minutes - 9, MAX_MINUTES);
+                    minutes = min(minutes - 5, MAX_MINUTES);
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_minutes(&batch);
                     graphics.endBatch(&batch);
@@ -475,7 +475,7 @@ void App_Delayer::onTouchTick() {
             {
                 if (millis() - start > 1500)
                 {
-                    seconds = min(seconds - 9, MAX_SECONDS);
+                    seconds = min(seconds - 5, MAX_SECONDS);
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_seconds(&batch);
                     graphics.endBatch(&batch);
