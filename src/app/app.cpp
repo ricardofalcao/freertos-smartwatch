@@ -125,6 +125,44 @@ bool App::close()
 	return true;
 }
 
+EventBits_t App::vAppConditionalDelay(const TickType_t xTicksToDelay, EventBits_t additional_bits) {
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+
+	if (this->minimized) {
+		EventBits_t bits = xEventGroupWaitBits(event_group, EVENT_RESUME | additional_bits, pdFALSE, pdFALSE, xTicksToDelay);
+
+		if (bits & EVENT_RESUME) {
+			xEventGroupClearBits(event_group, EVENT_RESUME);
+			this->resume();
+		} 
+
+		if (bits & additional_bits) {
+			return bits;
+		}
+
+	} else {
+		EventBits_t bits = xEventGroupWaitBits(event_group, EVENT_MINIMIZE | additional_bits, pdFALSE, pdFALSE, xTicksToDelay);
+		
+		if (bits & EVENT_MINIMIZE) {
+			xEventGroupClearBits(event_group, EVENT_MINIMIZE);
+			this->minimize();
+		}
+
+		if (bits & additional_bits) {
+			return bits;
+		}
+	}
+
+	TickType_t xNowWakeTime = xTaskGetTickCount();
+	TickType_t delayTicks = xTicksToDelay - (xNowWakeTime - xLastWakeTime);
+	
+	if (delayTicks > 0) {
+		return vAppConditionalDelay(delayTicks, additional_bits);
+	}
+
+	return 0;
+}
+
 void App::vAppDelay(const TickType_t xTicksToDelay) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 

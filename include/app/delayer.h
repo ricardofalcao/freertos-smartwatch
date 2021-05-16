@@ -9,11 +9,11 @@
 
 
 
-#define CELL_TOUCH_LISTENERS  8
+#define DELAYER_CELL_TOUCH_LISTENERS  8
 
 class App_Delayer: public App {
     private:
-        RectangleTouchListener button_touch_listeners[CELL_TOUCH_LISTENERS];
+        RectangleTouchListener button_touch_listeners[DELAYER_CELL_TOUCH_LISTENERS];
 
         int hours = 0;
         int minutes = 0;
@@ -58,4 +58,6 @@ class App_Delayer: public App {
         int check_click_button(TouchData data);
 
         void timeout_beep(note_t note, uint8_t octave);
+
+        void draw_test(GBatch_t * batch);
 };

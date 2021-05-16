@@ -13,16 +13,16 @@
 #define TRIANGLE_HEIGHT         30
 #define TRIANGLE_WIDTH          40
 #define TRIANGLE_MARGIN         10
-#define TRIANGLES_DISTANCE      20
+#define TRIANGLES_DISTANCE      50
 
-#define NUMBERS_HEIGHT          15
+#define NUMBERS_HEIGHT          20
 
-#define DOT_THICKNESS            2
+#define DOT_THICKNESS            1
 
-#define BOTTOM_Y                MARGIN_Y + NUMBERS_HEIGHT + TRIANGLE_HEIGHT
+#define BOTTOM_Y                (MARGIN_Y + NUMBERS_HEIGHT + TRIANGLE_HEIGHT + 50)
 
 #define CIRCLE_RADIUS            30
-#define PLAY_TRIANGLE_OFFSET     10  
+#define PLAY_TRIANGLE_OFFSET     4  
 
 #define PAUSE_BARS_DISTANCE      20
 #define PAUSE_BARS_WIDTH          5
@@ -37,6 +37,10 @@
 #define EVENT_RESUME_DELAYER     0x80
 
 #define DURATION_MS              5000
+
+#define STATE_WAITING               0
+#define STATE_PLAYING               1
+#define STATE_STOP                  2
 
 
 App_Delayer::App_Delayer() : App(MSG_METRONOMER_NAME, MSG_METRONOMER_NAME) {
@@ -106,19 +110,15 @@ void App_Delayer::draw_arrows(GBatch_t * batch) {
      
 }
 
+void App_Delayer::draw_test(GBatch_t * batch) {
+    batch->drawRectangle(MARGIN_X - TRIANGLES_DISTANCE - TRIANGLE_WIDTH/2, MARGIN_Y - TRIANGLE_HEIGHT,TRIANGLE_WIDTH, TRIANGLE_HEIGHT, TFT_BLUE, 2);
+}
 void App_Delayer::draw_hours(GBatch_t * batch) {
 
     char _hours[15];
 
-    batch->fillRectangle(MARGIN_X - TRIANGLES_DISTANCE - TRIANGLE_WIDTH/2, MARGIN_Y, TRIANGLE_WIDTH, NUMBERS_HEIGHT, TFT_WHITE);
-    if(hours <= 9) {
-        sprintf(_hours, "%02d", hours);
-        batch->drawString(MARGIN_X - TRIANGLES_DISTANCE, MARGIN_Y + NUMBERS_HEIGHT/2, _hours, TFT_BLACK, 5, MC_DATUM);
-    }
-    if (hours > 9) {
-        sprintf(_hours, "%d", hours);
-        batch->drawString(MARGIN_X - TRIANGLES_DISTANCE, MARGIN_Y + NUMBERS_HEIGHT/2, _hours, TFT_BLACK, 5, MC_DATUM);
-    }
+    sprintf(_hours, " %02d ", hours);
+    batch->drawFilledString(MARGIN_X - TRIANGLES_DISTANCE, MARGIN_Y + NUMBERS_HEIGHT/2, _hours, TFT_BLACK, TFT_WHITE, 3, MC_DATUM);
     
 }
 
@@ -126,16 +126,8 @@ void App_Delayer::draw_minutes(GBatch_t * batch) {
 
     char _minutes[15];
 
-    batch->fillRectangle(MARGIN_X - TRIANGLE_WIDTH/2, MARGIN_Y, TRIANGLE_WIDTH, NUMBERS_HEIGHT, TFT_WHITE);
-
-    if(minutes <= 9) {
-        sprintf(_minutes, "%02d", minutes);
-        batch->drawString(MARGIN_X, MARGIN_Y + NUMBERS_HEIGHT/2, _minutes, TFT_BLACK, 5, MC_DATUM);
-    }
-    if (minutes > 9) {
-        sprintf(_minutes, "%d", minutes);
-        batch->drawString(MARGIN_X, MARGIN_Y + NUMBERS_HEIGHT/2, _minutes, TFT_BLACK, 5, MC_DATUM);
-    }
+    sprintf(_minutes, " %02d ", minutes);
+    batch->drawFilledString(MARGIN_X, MARGIN_Y + NUMBERS_HEIGHT/2, _minutes, TFT_BLACK, TFT_WHITE, 3, MC_DATUM);
     
 }
 
@@ -143,16 +135,8 @@ void App_Delayer::draw_seconds(GBatch_t * batch) {
     
     char _seconds[15];
 
-    batch->fillRectangle(MARGIN_X + TRIANGLES_DISTANCE + TRIANGLE_WIDTH/2, MARGIN_Y, TRIANGLE_WIDTH, NUMBERS_HEIGHT, TFT_WHITE);
-
-    if(seconds <= 9) {
-        sprintf(_seconds, "%02d", seconds);
-        batch->drawString(MARGIN_X + TRIANGLES_DISTANCE, MARGIN_Y + NUMBERS_HEIGHT/2, _seconds, TFT_BLACK, 5, MC_DATUM);
-    }
-    if (seconds > 9) {
-        sprintf(_seconds, "%d", minutes);
-        batch->drawString(MARGIN_X + TRIANGLES_DISTANCE, MARGIN_Y + NUMBERS_HEIGHT/2, _seconds, TFT_BLACK, 5, MC_DATUM);
-    }
+    sprintf(_seconds, " %02d ", minutes);
+    batch->drawFilledString(MARGIN_X + TRIANGLES_DISTANCE, MARGIN_Y + NUMBERS_HEIGHT/2, _seconds, TFT_BLACK, TFT_WHITE, 3, MC_DATUM);
     
 }
 
@@ -171,7 +155,7 @@ void App_Delayer::draw_pause_button(GBatch_t * batch) {
 
 void App_Delayer::draw_stop_button(GBatch_t * batch) {
     batch->fillCircle(MARGIN_X/2, BOTTOM_Y + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
-    batch->fillRectangle(BOARD_WIDTH - MARGIN_X/2 - PLAY_TRIANGLE_OFFSET, BOTTOM_Y + PLAY_TRIANGLE_OFFSET + TRIANGLE_MARGIN, STOP_BUTTON_SIDE_LENGHT, STOP_BUTTON_SIDE_LENGHT, TFT_WHITE);
+    batch->fillRectangle(MARGIN_X/2 - PLAY_TRIANGLE_OFFSET, BOTTOM_Y + PLAY_TRIANGLE_OFFSET + TRIANGLE_MARGIN, STOP_BUTTON_SIDE_LENGHT, STOP_BUTTON_SIDE_LENGHT, TFT_WHITE);
 }
 
 void App_Delayer::draw_doubledots(GBatch_t * batch) {
@@ -189,7 +173,7 @@ int App_Delayer::check_click_button(TouchData data) {
         return -1;
     }
 
-    for(int i = 0; i < CELL_TOUCH_LISTENERS; i++) {
+    for(int i = 0; i < DELAYER_CELL_TOUCH_LISTENERS; i++) {
         
         if (button_touch_listeners[i].contains(DEFAULT_VIEWPORT, data)) {
             return i;
@@ -216,8 +200,10 @@ void App_Delayer::onOpen() {
     draw_minutes(&batch);
     draw_seconds(&batch);
     draw_doubledots(&batch);
-    draw_pause_button(&batch);
+    draw_play_button(&batch);
     draw_stop_button(&batch);
+
+    draw_test(&batch);
     
     graphics.endBatch(&batch);
 }
@@ -233,11 +219,11 @@ void App_Delayer::onResume() {
     draw_doubledots(&batch);
     draw_stop_button(&batch);
 
-    if(state == 2) draw_arrows(&batch);
+    if(state == STATE_STOP) draw_arrows(&batch);
     
-    if(state == 0) draw_play_button(&batch);
+    if(state == STATE_WAITING) draw_play_button(&batch);
 
-    if(state == 1) draw_pause_button(&batch);
+    if(state == STATE_PLAYING) draw_pause_button(&batch);
     
     graphics.endBatch(&batch);
 }
@@ -247,7 +233,7 @@ void App_Delayer::onTick() {
     if (!minimized) {
 
         //PLAYING --> COUNTDOWN
-       if(state == 1) {
+       if(state == STATE_PLAYING) {
             unsigned long currentMillis = millis();
             aux_h = hours;
             aux_m = minutes;
@@ -312,7 +298,7 @@ void App_Delayer::onTick() {
             }
         }
 
-        if (state == 2) {
+        if (state == STATE_STOP) {
             hours = aux_h;
             minutes = aux_m;
             seconds = aux_s;
@@ -324,7 +310,7 @@ void App_Delayer::onTick() {
             graphics.endBatch(&batch);
         }
 
-        if (state == 1) {
+        if (state == STATE_WAITING) {
             return;
         }
     }
@@ -341,7 +327,7 @@ void App_Delayer::onTouchTick() {
     switch (pressed_button)
     {
     case 0:
-        if (state == 2) {
+        if (state == STATE_STOP) {
             while (touch.get().pressed)
             {
                 if (millis() - start > 1500){
@@ -368,7 +354,7 @@ void App_Delayer::onTouchTick() {
         break;
 
     case 1:
-        if (state == 2) {
+        if (state == STATE_STOP) {
             while (touch.get().pressed)
             {
                 if (millis() - start > 1500)
@@ -397,7 +383,7 @@ void App_Delayer::onTouchTick() {
         break;
 
     case 2:
-        if (state == 2) {
+        if (state == STATE_STOP) {
             while (touch.get().pressed)
             {
                 if (millis() - start > 1500)
@@ -426,7 +412,7 @@ void App_Delayer::onTouchTick() {
         break;
 
     case 3:
-        if (state == 2) {
+        if (state == STATE_STOP) {
             while (touch.get().pressed)
             {
                 if (millis() - start > 1500)
@@ -455,7 +441,7 @@ void App_Delayer::onTouchTick() {
         break;
 
     case 4:
-        if (state == 2) {
+        if (state == STATE_STOP) {
             while (touch.get().pressed)
             {
                 if (millis() - start > 1500)
@@ -484,7 +470,7 @@ void App_Delayer::onTouchTick() {
         break;
         
     case 5:
-        if (state == 2) {
+        if (state == STATE_STOP) {
             while (touch.get().pressed)
             {
                 if (millis() - start > 1500)
@@ -515,37 +501,28 @@ void App_Delayer::onTouchTick() {
     case 6: 
         touch.waitRelease();
 
-        if(state == 0) {
-            state = 1;
+        state = STATE_STOP;
 
-            GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
-            draw_pause_button(&batch);
-            graphics.endBatch(&batch);
-
-            xEventGroupSetBits(event_group, EVENT_RESUME_DELAYER);
-        }
-
-        else {
-            state = 0;
-            GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
-            draw_play_button(&batch);
-            graphics.endBatch(&batch);
-        }
         break;
 
     case 7:
         touch.waitRelease();
 
-        if(state == 0) {
-            state = 2;
+        if(state == STATE_WAITING) { 
+            state = STATE_PLAYING;
+            GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+            draw_pause_button(&batch);
+            graphics.endBatch(&batch);
             xEventGroupSetBits(event_group, EVENT_RESUME_DELAYER);
+            
         }
 
         else {
-            state = 2;
+            state = STATE_WAITING; 
             GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
             draw_play_button(&batch);
             graphics.endBatch(&batch);
+            
         }
         break;
     }

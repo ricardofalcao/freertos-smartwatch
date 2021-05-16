@@ -58,6 +58,8 @@ class App {
 
         void startTouchTask();
 
+        EventBits_t vAppConditionalDelay(const TickType_t xTicksToDelay, EventBits_t additional_bits);
+
         void vAppDelay(const TickType_t xTicksToDelay);
 
         /*
