@@ -18,6 +18,7 @@
 #include "app/drawer.h"
 #include "app/status_bar.h"
 #include "app/monitor.h"
+#include "app/lang.h"
 #include "app/clock.h"
 #include "app/weather.h"
 #include "app/tictactoe.h"
@@ -46,6 +47,7 @@ App_Statusbar statusbar_app;
 
 App_Clock clock_app;
 App_Monitor monitor_app;
+App_Lang lang_app;
 App_Metronome metronome_app;
 App_weather weather_app;
 
@@ -112,6 +114,7 @@ void setup() {
 
   drawer_app.addApp(&clock_app);
   drawer_app.addApp(&monitor_app);
+  drawer_app.addApp(&lang_app);
   drawer_app.addApp(&tictactoe_app);
   drawer_app.addApp(&metronome_app);
   drawer_app.addApp(&pong_app);

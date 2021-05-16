@@ -46,6 +46,10 @@ PROGMEM const char Pong_description[] = "Classic game Pong";
 PROGMEM const char Statusbar_name[] = "Statusbar";
 PROGMEM const char Statusbar_description[] = "Shows status and notifications";
 
+//Lang Text
+PROGMEM const char Lang_name[] = "Language";
+PROGMEM const char Lang_description[] = "Choose the OS language";
+
 /*
 
 */
@@ -92,7 +96,11 @@ PROGMEM const char * const messages [] = {
 
     //Statusbar
     Statusbar_name,
-    Statusbar_description
+    Statusbar_description,
+
+    //Lang
+    Lang_name,
+    Lang_description
 
 };
 

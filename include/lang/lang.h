@@ -48,6 +48,10 @@ typedef enum
     MSG_STATUSBAR_NAME,
     MSG_STATUSBAR_DESCRIPTION,
 
+    //Lang
+    MSG_LANG_NAME,
+    MSG_LANG_DESCRIPTION,
+
 
     MSG_NUM
 
@@ -71,10 +75,11 @@ extern const Language_t LANG_DE;
 
 class Lang {
     private:
-
         const Language_t * active_language = &LANG_EN;
     
     public:
+
+        const Language_t * getLanguage();
 
         void setLanguage(const Language_t * language);
 

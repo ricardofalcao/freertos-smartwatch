@@ -35,16 +35,20 @@ PROGMEM const char Weather_name[] = "Metereologia";
 PROGMEM const char Weather_description[] = "Consulta a meteorologia através duma API";
 
 //Monitor Text
-PROGMEM const char Monitor_name[] = "Monitor";
-PROGMEM const char Monitor_description[] = "Shows the currently active tasks";
+PROGMEM const char Monitor_name[] = "Gestor";
+PROGMEM const char Monitor_description[] = "Gere as tarefas ativas no momento";
 
 //Pong Text
 PROGMEM const char Pong_name[] = "Pong";
-PROGMEM const char Pong_description[] = "Classic game Pong";
+PROGMEM const char Pong_description[] = "O jogo classico de Pong";
 
 //Statusbar Text
-PROGMEM const char Statusbar_name[] = "Statusbar";
-PROGMEM const char Statusbar_description[] = "Shows status and notifications";
+PROGMEM const char Statusbar_name[] = "Barra de Estado";
+PROGMEM const char Statusbar_description[] = "Mostra o estado e notificações";
+
+//Lang Text
+PROGMEM const char Lang_name[] = "Língua";
+PROGMEM const char Lang_description[] = "Escolhe a língua do SO";
 
 /*
 
@@ -92,7 +96,11 @@ PROGMEM const char * const messages [] = {
 
     //Statusbar
     Statusbar_name,
-    Statusbar_description
+    Statusbar_description,
+
+    //Lang
+    Lang_name,
+    Lang_description
 
 };
 

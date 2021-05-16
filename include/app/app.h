@@ -37,8 +37,8 @@ class App {
         unsigned int priority = 3;
         unsigned int touch_priority = 3;
 
-        uint32_t stack_depth = 1024;
-        uint32_t touch_stack_depth = 1024;
+        uint32_t stack_depth = 4096;
+        uint32_t touch_stack_depth = 4096;
 
         int target_core = 1;
 

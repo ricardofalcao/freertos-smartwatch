@@ -138,7 +138,12 @@ void App::vAppDelay(const TickType_t xTicksToDelay) {
 		}
 	}
 
-	vTaskDelayUntil(&xLastWakeTime, xTicksToDelay);
+	TickType_t xNowWakeTime = xTaskGetTickCount();
+	TickType_t delayTicks = xTicksToDelay - (xNowWakeTime - xLastWakeTime);
+	
+	if (delayTicks > 0) {
+		vAppDelay(delayTicks);
+	}
 }
 
 void App::startTouchTask()
