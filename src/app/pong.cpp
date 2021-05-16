@@ -115,8 +115,21 @@ float lerp(float a, float b, float x)
 void App_Pong::onTick() {
     tick++;
 
+    /*
+        Game logic
+    */
+
+   int nballx, nbally;
+
+   // check colisions
+   // change velocity or win game
+   // add velocity to ball
+   // nballx = ballx + velocityx;
+   // nbally = bally + velocityy;
+
     int nbotx = ((int) (sin(0.05 * tick) * (DEFAULT_VIEWPORT.width / 2 - BAR_LENGTH))) + DEFAULT_VIEWPORT.width / 2;
 
+    // Draw top bar
     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
     if (nbotx != botx) {
         print_top_bar(&batch, botx, nbotx);
@@ -133,6 +146,7 @@ void App_Pong::onTick() {
         }
     }
 
+    // Draw bot bar
     int iiplayerx = ceil(lerp(playerx, tplayerx, 0.3));
     print_bottom_bar(&batch, playerx, iiplayerx);
     playerx = iiplayerx;

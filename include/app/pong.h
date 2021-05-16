@@ -9,8 +9,13 @@
 class App_Pong : public App {
     private:
         int tick = 0;
+        
         int playerx = DEFAULT_VIEWPORT.width / 2, tplayerx = DEFAULT_VIEWPORT.width / 2;
+
         int botx = DEFAULT_VIEWPORT.width / 2;
+
+        int ballx = DEFAULT_VIEWPORT.width / 2, bally = DEFAULT_VIEWPORT.height / 2;
+
         char _bot_score[3];
         char _player_score[3];
 
