@@ -9,6 +9,8 @@
 
 class Pins {
     public:
+        SemaphoreHandle_t buzzer_mutex;
+
         SemaphoreHandle_t gpio0;
 
     public:

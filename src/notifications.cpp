@@ -4,7 +4,8 @@ Notifications::Notifications() {
     notifications_queue = xQueueCreate(10, sizeof(Notification_t));
 }
 
-void Notifications::enqueueNotification(char * message) {
+void Notifications::enqueueNotification(const char * message) {
+
     size_t len = strlen(message) + 1;
     char * copy = (char *) pvPortMalloc(len);
 
@@ -13,12 +14,12 @@ void Notifications::enqueueNotification(char * message) {
     }
 
     Notification_t notification = {
-        .message = message
+        .message = copy
     };
 
     xQueueSend(notifications_queue, &notification, portMAX_DELAY);
 }
 
 bool Notifications::popNotification(Notification_t * notification) {
-    return xQueueReceive(notifications_queue, &notification, 0) == pdTRUE;
+    return xQueueReceive(notifications_queue, notification, 0) == pdTRUE;
 }

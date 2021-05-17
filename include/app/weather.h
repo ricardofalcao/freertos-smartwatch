@@ -13,8 +13,6 @@ class App_weather : public App {
 
         void onOpen() override;   
 
-        void onTick() override;   
-
         void onClose() override;   
 
 };

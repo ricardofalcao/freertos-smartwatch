@@ -1,9 +1,9 @@
 #include "app/metronome.h"
 #include "tft.h"
 #include "graphics.h"
+#include "pins.h"
 
 #define DURATION_MS 200
-#define OUTPUT_PIN 22
 
 #define BOARD_WIDTH     (DEFAULT_VIEWPORT.width)
 #define BOARD_HEIGHT    (DEFAULT_VIEWPORT.height)
@@ -126,13 +126,16 @@ int App_Metronome::check_click_button(TouchData data) {
 
 void App_Metronome::beep_output(note_t note, uint8_t octave) {
     
-    ledcWriteNote(0, note, octave);
-    vTaskDelay(DURATION_MS / portTICK_PERIOD_MS);
-    ledcWrite(0, 0);
+    if (xSemaphoreTake(pins.buzzer_mutex, 0) == pdTRUE) {
+        ledcWriteNote(0, note, octave);
+        vTaskDelay(DURATION_MS / portTICK_PERIOD_MS);
+        ledcWrite(0, 0);
+
+        xSemaphoreGive(pins.buzzer_mutex);
+    }
 }
 
 void App_Metronome::onOpen() {
-    ledcAttachPin(OUTPUT_PIN, 0);
 
     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
     batch.fillScreen(TFT_WHITE);
@@ -281,6 +284,4 @@ void App_Metronome::onTouchTick() {
 }
 
 void App_Metronome::onClose() {
-    ledcDetachPin(OUTPUT_PIN);
-    
 }

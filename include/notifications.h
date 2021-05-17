@@ -16,7 +16,7 @@ class Notifications {
     public:
         Notifications();
 
-        void enqueueNotification(char * message);
+        void enqueueNotification(const char * message);
 
         bool popNotification(Notification_t * notification);
 };

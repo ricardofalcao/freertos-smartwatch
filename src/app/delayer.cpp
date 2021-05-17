@@ -2,6 +2,8 @@
 
 #include "tft.h"
 #include "graphics.h"
+#include "notifications.h"
+#include "pins.h"
 
 #define BOARD_WIDTH (DEFAULT_VIEWPORT.width)
 #define BOARD_HEIGHT (DEFAULT_VIEWPORT.height)
@@ -38,7 +40,9 @@
 #define EVENT_PAUSE_DELAYER 0x40
 #define EVENT_STOP_DELAYER 0x20
 
-#define DURATION_MS 5000
+#define BUZZ_CYCLES         1
+#define BUZZ_HZ             5
+#define BUZZ_DURATION_MS    100
 
 #define STATE_WAITING 0
 #define STATE_PLAYING 1
@@ -46,7 +50,7 @@
 
 App_Delayer::App_Delayer() : App(MSG_METRONOMER_NAME, MSG_METRONOMER_NAME)
 {
-    priority = 3;
+    priority = 4;
     stack_depth = 10240;
     touch_stack_depth = 10240;
 
@@ -140,7 +144,7 @@ void App_Delayer::draw_seconds(GBatch_t *batch)
 
     char _seconds[15];
 
-    sprintf(_seconds, " %02d ", minutes);
+    sprintf(_seconds, " %02d ", seconds);
     batch->drawFilledString(MARGIN_X + TRIANGLES_DISTANCE, MARGIN_Y + NUMBERS_HEIGHT / 2, _seconds, TFT_BLACK, TFT_WHITE, 3, MC_DATUM);
 }
 
@@ -155,8 +159,8 @@ void App_Delayer::draw_play_button(GBatch_t *batch)
 void App_Delayer::draw_pause_button(GBatch_t *batch)
 {
     batch->fillCircle(BOARD_WIDTH - MARGIN_X / 2, BOTTOM_Y + CIRCLE_RADIUS + TRIANGLE_MARGIN, CIRCLE_RADIUS, TFT_BLACK);
-    batch->fillRectangle(BOARD_WIDTH - MARGIN_X / 2 - PAUSE_BARS_DISTANCE / 2 - PAUSE_BARS_WIDTH, BOTTOM_Y + TRIANGLE_MARGIN + PLAY_TRIANGLE_OFFSET, PAUSE_BARS_WIDTH, PAUSE_BARS_HEIGHT, TFT_WHITE);
-    batch->fillRectangle(BOARD_WIDTH - MARGIN_X / 2 + PAUSE_BARS_DISTANCE / 2, BOTTOM_Y + TRIANGLE_MARGIN + PLAY_TRIANGLE_OFFSET, PAUSE_BARS_WIDTH, PAUSE_BARS_HEIGHT, TFT_WHITE);
+    batch->fillRectangle(BOARD_WIDTH - MARGIN_X / 2 - PAUSE_BARS_DISTANCE / 2 - PAUSE_BARS_WIDTH, BOTTOM_Y + TRIANGLE_MARGIN + 2*PLAY_TRIANGLE_OFFSET, PAUSE_BARS_WIDTH, PAUSE_BARS_HEIGHT, TFT_WHITE);
+    batch->fillRectangle(BOARD_WIDTH - MARGIN_X / 2 + PAUSE_BARS_DISTANCE / 2, BOTTOM_Y + TRIANGLE_MARGIN + 2*PLAY_TRIANGLE_OFFSET, PAUSE_BARS_WIDTH, PAUSE_BARS_HEIGHT, TFT_WHITE);
 }
 
 void App_Delayer::draw_stop_button(GBatch_t *batch)
@@ -197,13 +201,31 @@ int App_Delayer::check_click_button(TouchData data)
 
 void App_Delayer::timeout_beep(note_t note, uint8_t octave)
 {
+    notifications.enqueueNotification("Timer finished!");
 
-    ledcWriteNote(0, note, octave);
-    vTaskDelay(DURATION_MS / portTICK_PERIOD_MS);
-    ledcWrite(0, 0);
+    if (xSemaphoreTake(pins.buzzer_mutex, portMAX_DELAY) == pdTRUE) {
+        for(uint8_t i = 0;  i < BUZZ_CYCLES * BUZZ_HZ; i++) {
+            ledcWriteNote(0, note, octave);
+            
+            if (vAppConditionalDelay(BUZZ_DURATION_MS / portTICK_RATE_MS, EVENT_STOP_DELAYER | EVENT_PAUSE_DELAYER)) {
+                break;
+            }
+
+            ledcWrite(0, 0);
+
+            if (vAppConditionalDelay((1000 / BUZZ_HZ - BUZZ_DURATION_MS) / portTICK_RATE_MS, EVENT_STOP_DELAYER | EVENT_PAUSE_DELAYER)) {
+                break;
+            }
+        }
+
+        vAppConditionalDelay(250 / portTICK_RATE_MS, EVENT_STOP_DELAYER | EVENT_PAUSE_DELAYER);
+
+        xSemaphoreGive(pins.buzzer_mutex);
+    }
+
 }
 void App_Delayer::onOpen()
-{
+{   
     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
 
     batch.fillScreen(TFT_WHITE);
@@ -216,7 +238,7 @@ void App_Delayer::onOpen()
     draw_play_button(&batch);
     draw_stop_button(&batch);
 
-    draw_test(&batch);
+    //draw_test(&batch);
 
     graphics.endBatch(&batch);
 }
@@ -236,7 +258,7 @@ void App_Delayer::onResume()
     if (state == STATE_STOP)
         draw_arrows(&batch, TFT_BLACK);
 
-    if (state == STATE_WAITING)
+    if (state == STATE_WAITING || state == STATE_STOP)
         draw_play_button(&batch);
 
     if (state == STATE_PLAYING)
@@ -247,64 +269,71 @@ void App_Delayer::onResume()
 
 void App_Delayer::onTick()
 {
-
-    if (!minimized)
+    //PLAYING --> COUNTDOWN
+    if (state == STATE_PLAYING)
     {
-        //PLAYING --> COUNTDOWN
-        if (state == STATE_PLAYING)
+        if (hours == 0)
         {
-            if (hours == 0)
+            if ((minutes > 0 && seconds > 0) || (minutes == 0 && seconds > 0))
             {
-                if ((minutes > 0 && seconds > 0) || (minutes == 0 && seconds > 0))
-                {
-                    seconds = seconds - 1;
+                seconds = seconds - 1;
 
+                if (!minimized) {
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_seconds(&batch);
                     graphics.endBatch(&batch);
-                }
-                else if (minutes > 0 && seconds == 0)
-                {
-                    seconds = 59;
-                    minutes = minutes - 1;
-
-                    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
-                    draw_seconds(&batch);
-                    draw_minutes(&batch);
-                    graphics.endBatch(&batch);
-                }
-                else if (minutes == 0 && seconds == 0)
-                {
-                    timeout_beep(NOTE_A, 4);
                 }
             }
-
-            else if (hours > 0)
+            else if (minutes > 0 && seconds == 0)
             {
-                if ((minutes > 0 && seconds > 0) || (minutes == 0 && seconds > 0))
-                {
-                    seconds = seconds - 1;
+                seconds = 59;
+                minutes = minutes - 1;
 
-                    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
-                    draw_seconds(&batch);
-                    graphics.endBatch(&batch);
-                }
-                else if (minutes > 0 && seconds == 0)
-                {
-                    seconds = 59;
-                    minutes = minutes - 1;
-
+                if (!minimized) {
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_seconds(&batch);
                     draw_minutes(&batch);
                     graphics.endBatch(&batch);
                 }
-                else if (minutes == 0 && seconds == 0)
-                {
-                    minutes = 59;
-                    seconds = 59;
-                    hours = hours - 1;
+            }
+            else if (minutes == 0 && seconds == 0)
+            {
+                timeout_beep(NOTE_A, 4);
+                xEventGroupSetBits(event_group, EVENT_STOP_DELAYER);
+            }
+        }
 
+        else if (hours > 0)
+        {
+            if ((minutes > 0 && seconds > 0) || (minutes == 0 && seconds > 0))
+            {
+                seconds = seconds - 1;
+
+                if (!minimized) {
+                    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+                    draw_seconds(&batch);
+                    graphics.endBatch(&batch);
+                }
+            }
+            else if (minutes > 0 && seconds == 0)
+            {
+                seconds = 59;
+                minutes = minutes - 1;
+
+                if (!minimized) {
+                    GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+                    draw_seconds(&batch);
+                    draw_minutes(&batch);
+                    graphics.endBatch(&batch);
+                }
+            }
+            else if (minutes == 0 && seconds == 0)
+            {
+                minutes = 59;
+                seconds = 59;
+                hours = hours - 1;
+
+                if (!minimized) {
                     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
                     draw_seconds(&batch);
                     draw_minutes(&batch);
@@ -323,29 +352,48 @@ void App_Delayer::onTick()
         hours = aux_h;
         minutes = aux_m;
         seconds = aux_s;
+        state = STATE_STOP;
 
-        GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
-        draw_arrows(&batch, TFT_BLACK);
-        draw_play_button(&batch);
-        graphics.endBatch(&batch);
+        if(!minimized) {
+            GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+            draw_arrows(&batch, TFT_BLACK);
+            draw_play_button(&batch);
+            draw_seconds(&batch);
+            draw_minutes(&batch);
+            draw_hours(&batch);
+            graphics.endBatch(&batch);
+        }
+
     } else if (bits & EVENT_PAUSE_DELAYER) {
         xEventGroupClearBits(event_group, EVENT_PAUSE_DELAYER);
 
-        GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
-        draw_arrows(&batch, TFT_WHITE);
-        draw_play_button(&batch);
-        graphics.endBatch(&batch);
+        state = STATE_WAITING;
+
+        if (!minimized) {
+            GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+            draw_arrows(&batch, TFT_WHITE);
+            draw_play_button(&batch);
+            graphics.endBatch(&batch);
+        }
+
     } else if (bits & EVENT_RESUME_DELAYER) {
         xEventGroupClearBits(event_group, EVENT_RESUME_DELAYER);
 
-        aux_h = hours;
-        aux_m = minutes;
-        aux_s = seconds;
+        if (state == STATE_STOP) {
+            aux_h = hours;
+            aux_m = minutes;
+            aux_s = seconds;
+        }
 
-        GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
-        draw_arrows(&batch, TFT_WHITE);
-        draw_pause_button(&batch);
-        graphics.endBatch(&batch);
+        state = STATE_PLAYING;
+
+        if (!minimized) {
+            GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
+            draw_arrows(&batch, TFT_WHITE);
+            draw_pause_button(&batch);
+            graphics.endBatch(&batch);
+        }
+
     }
 }
 
@@ -540,7 +588,6 @@ void App_Delayer::onTouchTick()
             return;
         }
 
-        state = STATE_STOP;
         xEventGroupSetBits(event_group, EVENT_STOP_DELAYER);
         break;
 
@@ -549,12 +596,10 @@ void App_Delayer::onTouchTick()
 
         if (state == STATE_PLAYING)
         {
-            state = STATE_WAITING;
             xEventGroupSetBits(event_group, EVENT_PAUSE_DELAYER);
             return;
         }
 
-        state = STATE_PLAYING;
         xEventGroupSetBits(event_group, EVENT_RESUME_DELAYER);
         return;
     }

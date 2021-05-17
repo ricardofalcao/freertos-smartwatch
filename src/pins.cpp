@@ -1,5 +1,7 @@
 #include "pins.h"
 
+#define BUZZER_PIN  22
+
 Pins * _pins;
 
 void isr_set_bit(SemaphoreHandle_t * handle) {
@@ -19,6 +21,8 @@ void pins_task(void * pvParameters) {
     Pins * t = (Pins *) pvParameters;
     _pins = t;
 
+    ledcAttachPin(BUZZER_PIN, 0);
+
     pinMode(0, INPUT);
     attachInterrupt(digitalPinToInterrupt(0), isr_click_home, FALLING);
 
@@ -32,6 +36,7 @@ void pins_task(void * pvParameters) {
 */
 
 Pins::Pins() {
+    buzzer_mutex = xSemaphoreCreateMutex();
     gpio0 = xSemaphoreCreateBinary();
 }
 

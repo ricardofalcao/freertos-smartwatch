@@ -29,8 +29,8 @@
 
 #include "lang/lang.h"
 
-#define WIFI_NETWORK "Vodafone-284C30"
-#define WIFI_PASS "tYUREqcuVn"
+#define WIFI_NETWORK "Pass"
+#define WIFI_PASS "12345678c"
 
 Touch touch;
 Graphics graphics;
@@ -59,10 +59,17 @@ App_TicTacToe tictactoe_app;
 App_Pong pong_app;
 
 void wifi_task(void * pvParameters)  {
+  static bool wifi_connected = false;
+
   while(true) {
     if (WiFi.status() == WL_CONNECTED) {
-      vTaskDelay(10000 / portTICK_PERIOD_MS);
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
       continue;
+    }
+
+    if (wifi_connected) {
+      wifi_connected = false;
+      notifications.enqueueNotification("Disconnected from WiFi!");
     }
 
     Serial.printf("[WiFi] Connecting to WiFi\n");
@@ -75,7 +82,11 @@ void wifi_task(void * pvParameters)  {
     }
 
     if (WiFi.status() == WL_CONNECTED) {
+      wifi_connected = true;
+
       Serial.println("[WiFi] Connected!");
+      notifications.enqueueNotification("Connected to WiFi!");
+
       esp_Wsync_time();
       continue;
     }
@@ -83,6 +94,7 @@ void wifi_task(void * pvParameters)  {
 }
 
 void setup() {
+
   Serial.begin(115200);
 
   Serial.println("[Main] Initializing SPIFFS");

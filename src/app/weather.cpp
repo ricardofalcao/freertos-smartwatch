@@ -68,10 +68,6 @@ void App_weather::onOpen()
   getWeather();
 }
 
-void App_weather::onTick()
-{
-}
-
 void App_weather::onClose()
 {
 }

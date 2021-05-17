@@ -60,7 +60,7 @@ void App_Statusbar::onTick() {
     char timeBuffer[9];
     sprintf(timeBuffer, " %02d:%02d  ", current_time.tm_hour, current_time.tm_min);
 
-    batch.drawFilledString(STATUSBAR_SPACING, BAR_HEIGHT / 2, timeBuffer, TFT_WHITE, TFT_BLACK, 2, ML_DATUM);
+    batch.drawFilledString(STATUSBAR_SPACING, BAR_HEIGHT / 2 - 2, timeBuffer, TFT_WHITE, TFT_BLACK, 2, ML_DATUM);
 
     // Notifications
 
@@ -72,10 +72,12 @@ void App_Statusbar::onTick() {
     } else {
         Notification_t current_notification;
         if (notifications.popNotification(&current_notification)) {
-            current_notification_cursor = notification_sprite.textWidth(current_notification.message);
+            if (current_notification.message != NULL) {
+                current_notification_cursor = notification_sprite.textWidth(current_notification.message);
             
-            notification_sprite.drawString(current_notification.message, 0, STATUSBAR_HEIGHT / 2);
-            vPortFree(current_notification.message);
+                notification_sprite.drawString(current_notification.message, 0, STATUSBAR_HEIGHT / 2);
+                vPortFree(current_notification.message);
+            }
         }
     }
 
@@ -100,11 +102,12 @@ void App_Statusbar::onTick() {
 
     x -= STATUSBAR_SPACING;
 
-    if (WiFi.status() == WL_CONNECTED) {
-        x -= ICON_STATUSBAR_WIFI_WIDTH;
-        batch.drawImage(&icon_wifi, x, (BAR_HEIGHT - ICON_STATUSBAR_WIFI_HEIGHT) / 2);
-        x -= STATUSBAR_SPACING;
+    x -= ICON_STATUSBAR_WIFI_WIDTH;
+    batch.drawImage(&icon_wifi, x, (BAR_HEIGHT - ICON_STATUSBAR_WIFI_HEIGHT) / 2);
+    if (WiFi.status() != WL_CONNECTED) {
+        batch.drawLine(x + 4, (BAR_HEIGHT - ICON_STATUSBAR_WIFI_HEIGHT) / 2 + 4, x + ICON_STATUSBAR_WIFI_WIDTH - 4, (BAR_HEIGHT + ICON_STATUSBAR_WIFI_HEIGHT) / 2 - 4, TFT_RED, 2);
     }
+    x -= STATUSBAR_SPACING;
 
     graphics.endBatch(&batch);
 
