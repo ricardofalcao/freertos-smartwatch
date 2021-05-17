@@ -136,7 +136,7 @@ EventBits_t App::vAppConditionalDelay(const TickType_t xTicksToDelay, EventBits_
 			this->resume();
 		} 
 
-		if (bits & additional_bits) {
+		if (bits) {
 			return bits;
 		}
 
@@ -148,7 +148,7 @@ EventBits_t App::vAppConditionalDelay(const TickType_t xTicksToDelay, EventBits_
 			this->minimize();
 		}
 
-		if (bits & additional_bits) {
+		if (bits) {
 			return bits;
 		}
 	}

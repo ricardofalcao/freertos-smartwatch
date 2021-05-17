@@ -7,6 +7,10 @@
 #define GRAPHICS_OPERATION_QUEUE_SIZE   16
 #define GRAPHICS_BATCH_MAX_SIZE         32
 
+#define FONTS_LENGTH 4
+
+extern const GFXfont * fonts[FONTS_LENGTH] PROGMEM;
+
 typedef struct {
 
     int32_t x;

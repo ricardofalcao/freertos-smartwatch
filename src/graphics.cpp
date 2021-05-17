@@ -8,8 +8,6 @@
 #include "fonts/OpenSans-Regular12pt8b.h"
 #include "fonts/OpenSans-Regular18pt8b.h"
 
-#define FONTS_LENGTH 4
-
 const GFXfont * fonts[FONTS_LENGTH] PROGMEM = {
     &OpenSans_Regular6pt8b,
     &OpenSans_Regular9pt8b,

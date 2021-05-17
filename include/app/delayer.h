@@ -39,7 +39,7 @@ class App_Delayer: public App {
         void onClose() override;   
     
     private:
-        void draw_arrows(GBatch_t * batch);
+        void draw_arrows(GBatch_t * batch, uint32_t color);
 
         void draw_hours(GBatch_t * batch);
 

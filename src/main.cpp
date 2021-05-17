@@ -14,6 +14,7 @@
 #include "graphics.h"
 #include "wifi.h"
 #include "pins.h"
+#include "notifications.h"
 
 #include "app/drawer.h"
 #include "app/status_bar.h"
@@ -35,6 +36,7 @@ Touch touch;
 Graphics graphics;
 Lang lang;
 Pins pins;
+Notifications notifications;
 
 //
 

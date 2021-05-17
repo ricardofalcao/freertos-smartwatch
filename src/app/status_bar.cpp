@@ -16,12 +16,22 @@
 #define ICON_BATTERY_WIDTH      16
 #define ICON_BATTERY_HEIGHT     (BAR_HEIGHT - 8)
 
+#define NOTIFICATION_WIDTH      100
+
 App_Statusbar::App_Statusbar() : App(MSG_STATUSBAR_NAME, MSG_STATUSBAR_DESCRIPTION) {
     priority = 2;
     stack_depth = 4096;
     minimized = true;
 
     icon_wifi.setColorDepth(4);
+
+    notification_sprite.setColorDepth(1);
+    notification_sprite.setScrollRect(0, 0, NOTIFICATION_WIDTH, STATUSBAR_HEIGHT, TFT_BLACK);
+    notification_sprite.setFreeFont(fonts[1]);
+    notification_sprite.setTextSize(1);
+    notification_sprite.setTextColor(TFT_WHITE, TFT_BLACK);
+    notification_sprite.setTextDatum(ML_DATUM);
+    notification_sprite.createSprite(NOTIFICATION_WIDTH * 3, STATUSBAR_HEIGHT);
 }
 
 void App_Statusbar::onOpen() {
@@ -37,26 +47,56 @@ void App_Statusbar::onOpen() {
 void App_Statusbar::onTick() {
     GBatch_t batch = graphics.beginBatch(APP_VIEWPORT);
 
+    /*
+        Left Side
+    */
+
     time_t now;
     time(&now);
 
     struct tm current_time;
     localtime_r(&now, &current_time);
 
-    char timeBuffer[8];
-    sprintf(timeBuffer, "%02d:%02d  ", current_time.tm_hour, current_time.tm_min);
+    char timeBuffer[9];
+    sprintf(timeBuffer, " %02d:%02d  ", current_time.tm_hour, current_time.tm_min);
 
     batch.drawFilledString(STATUSBAR_SPACING, BAR_HEIGHT / 2, timeBuffer, TFT_WHITE, TFT_BLACK, 2, ML_DATUM);
 
+    // Notifications
+
+    if (current_notification_cursor > 0) {
+        batch.drawImage(&notification_sprite, STATUSBAR_SPACING + 70, 0);
+
+        notification_sprite.scroll(-2);
+        current_notification_cursor -= 2;
+    } else {
+        Notification_t current_notification;
+        if (notifications.popNotification(&current_notification)) {
+            current_notification_cursor = notification_sprite.textWidth(current_notification.message);
+            
+            notification_sprite.drawString(current_notification.message, 0, STATUSBAR_HEIGHT / 2);
+            vPortFree(current_notification.message);
+        }
+    }
+
+    /*
+        Right Side
+    */ 
+
     int32_t x = tft.width() - STATUSBAR_SPACING;
 
-    x -= ICON_BATTERY_WIDTH;
+    /*x -= ICON_BATTERY_WIDTH;
 
     float battery = 0.6;
-    uint32_t batteryColor = battery > 0.8 ? TFT_GREEN : battery > 0.5 ? TFT_ORANGE : battery > 0.2 ? TFT_YELLOW : TFT_RED;
-    batch.fillRectangle(x, (BAR_HEIGHT - ICON_BATTERY_HEIGHT) / 2, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT * (1 - battery), TFT_BLACK);
-    batch.fillRectangle(x, (BAR_HEIGHT - ICON_BATTERY_HEIGHT) / 2 + ICON_BATTERY_HEIGHT * (1 - battery), ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT * battery, batteryColor);
-    batch.drawRectangle(x, (BAR_HEIGHT - ICON_BATTERY_HEIGHT) / 2, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT, TFT_WHITE);
+    
+    if (abs(battery - last_battery) > 0.01) {
+        last_battery = battery;
+        
+        uint32_t batteryColor = battery > 0.8 ? TFT_GREEN : battery > 0.5 ? TFT_ORANGE : battery > 0.2 ? TFT_YELLOW : TFT_RED;
+        batch.fillRectangle(x, (BAR_HEIGHT - ICON_BATTERY_HEIGHT) / 2, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT * (1 - battery), TFT_BLACK);
+        batch.fillRectangle(x, (BAR_HEIGHT - ICON_BATTERY_HEIGHT) / 2 + ICON_BATTERY_HEIGHT * (1 - battery), ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT * battery, batteryColor);
+        batch.drawRectangle(x, (BAR_HEIGHT - ICON_BATTERY_HEIGHT) / 2, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT, TFT_WHITE);
+    }*/
 
     x -= STATUSBAR_SPACING;
 
@@ -68,7 +108,7 @@ void App_Statusbar::onTick() {
 
     graphics.endBatch(&batch);
 
-    vAppDelay(1000 / portTICK_PERIOD_MS);
+    vAppDelay(150 / portTICK_PERIOD_MS);
 }
 
 void App_Statusbar::onClose() {
