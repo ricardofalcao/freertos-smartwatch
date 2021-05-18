@@ -37,9 +37,9 @@ void App_Monitor::fillTasks() {
         qsort(statuses, uxArraySize, sizeof(TaskStatus_t), sort_desc);
 
         GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
-        batch.drawString(10, 10, "Task", TFT_BLACK, 1, TL_DATUM);
-        batch.drawString(160, 10, "CPU", TFT_BLACK, 1, TR_DATUM);
-        batch.drawString(200, 10, "MEM", TFT_BLACK, 1, TR_DATUM);
+        batch.drawString(10, 10, lang.get(MSG_MONITOR_TASK), TFT_BLACK, 1, TL_DATUM);
+        batch.drawString(160, 10, lang.get(MSG_MONITOR_CPU), TFT_BLACK, 1, TR_DATUM);
+        batch.drawString(200, 10, lang.get(MSG_MONITOR_MEM), TFT_BLACK, 1, TR_DATUM);
         graphics.endBatch(&batch);
 
         /* For each populated position in the pxTaskStatusArray array,

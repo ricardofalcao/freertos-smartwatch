@@ -18,20 +18,18 @@ typedef enum
     //Metronomer
     MSG_METRONOMER_NAME,
     MSG_METRONOMER_DESCRIPTION,
-    MSG_BPM,
+    MSG_METRONOME_BPM,
 
     //Clock
     MSG_CLOCK_NAME,
     MSG_CLOCK_DESCRIPTION,
-
-    //Alarm
-    MSG_ALARM_NAME,
-    MSG_ALARM_DESCRIPTION,
-
+    MSG_CLOCK_TYPE_ANALOG,
+    MSG_CLOCK_TYPE_DIGITAL,
+    
     //Drawer
     MSG_DRAWER_NAME,
     MSG_DRAWER_DESCRIPTION,
-
+    
     //Weather
     MSG_WEATHER_NAME,
     MSG_WEATHER_DESCRIPTION,
@@ -39,6 +37,9 @@ typedef enum
     //Monitor
     MSG_MONITOR_NAME,
     MSG_MONITOR_DESCRIPTION,
+    MSG_MONITOR_TASK,
+    MSG_MONITOR_CPU,
+    MSG_MONITOR_MEM,
 
     //Pong
     MSG_PONG_NAME,
@@ -52,6 +53,10 @@ typedef enum
     MSG_LANG_NAME,
     MSG_LANG_DESCRIPTION,
 
+    //Delayer
+    MSG_DELAYER_NAME,
+    MSG_DELAYER_DESCRIPTION,
+    MSG_DELAYER_TIMEOUT,
 
     MSG_NUM
 

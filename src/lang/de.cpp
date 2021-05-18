@@ -14,17 +14,15 @@ PROGMEM const char TTT_player1_win[] = "Player 1 wins!";
 PROGMEM const char TTT_player2_win[] = "Player 2 wins!";
 
 //Metronomer Text
-PROGMEM const char Metronomer_name[] = "Metronomer";
-PROGMEM const char Metronomer_description[] = "Time Marker";
-PROGMEM const char BPM[] = "BPM";
+PROGMEM const char Metronome_name[] = "Metronomer";
+PROGMEM const char Metronome_description[] = "Time Marker";
+PROGMEM const char Metronome_BPM[] = "BPM";
 
 //Clock Text
 PROGMEM const char Clock_name[] = "Clock";
 PROGMEM const char Clock_description[] = "Shows the current time";
-
-//Alarm Text
-PROGMEM const char Alarm_name[] = "Alarm";
-PROGMEM const char Alarm_description[] = "Schedules and event";
+PROGMEM const char Clock_type_analog[] = "Analog";
+PROGMEM const char Clock_type_digital[] = "Digital";
 
 //Drawer Text
 PROGMEM const char Drawer_name[] = "Drawer";
@@ -37,6 +35,9 @@ PROGMEM const char Weather_description[] = "Checks weather through API";
 //Monitor Text
 PROGMEM const char Monitor_name[] = "Monitor";
 PROGMEM const char Monitor_description[] = "Shows the currently active tasks";
+PROGMEM const char Monitor_Task[] = "Task";
+PROGMEM const char Monitor_CPU[] = "CPU";
+PROGMEM const char Monitor_Memory[] = "MEM";
 
 //Pong Text
 PROGMEM const char Pong_name[] = "Pong";
@@ -50,12 +51,19 @@ PROGMEM const char Statusbar_description[] = "Shows status and notifications";
 PROGMEM const char Lang_name[] = "Language";
 PROGMEM const char Lang_description[] = "Choose the OS language";
 
+//Delayer Lang
+PROGMEM const char Delayer_name[] = "Delayer";
+PROGMEM const char Delayer_description[] = "Counts time";
+PROGMEM const char Delayer_timeout[] = "Time Finished!";
+
+
 /*
 
 */
 
 PROGMEM const char * const messages [] = {
     //TicTacToe
+
     TTT_name,
     TTT_description,
     TTT_reset,
@@ -66,17 +74,15 @@ PROGMEM const char * const messages [] = {
     TTT_player2_win,
 
     //Metronomer
-    Metronomer_name,
-    Metronomer_description,
-    BPM,
+    Metronome_name,
+    Metronome_description,
+    Metronome_BPM,
 
     //Clock
     Clock_name,
     Clock_description,
-    
-    //Alarm
-    Alarm_name,
-    Alarm_description,
+    Clock_type_analog,
+    Clock_type_digital,
 
     //Drawer
     Drawer_name,
@@ -89,6 +95,9 @@ PROGMEM const char * const messages [] = {
     //Monitor
     Monitor_name,
     Monitor_description,
+    Monitor_Task,
+    Monitor_CPU,
+    Monitor_Memory,
 
     //Pong
     Pong_name,
@@ -100,8 +109,12 @@ PROGMEM const char * const messages [] = {
 
     //Lang
     Lang_name,
-    Lang_description
+    Lang_description,
 
+    //Delayer
+    Delayer_name,
+    Delayer_description,
+    Delayer_timeout
 };
 
 PROGMEM const Language_t LANG_DE = {

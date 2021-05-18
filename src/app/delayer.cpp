@@ -48,7 +48,7 @@
 #define STATE_PLAYING 1
 #define STATE_STOP 2
 
-App_Delayer::App_Delayer() : App(MSG_METRONOMER_NAME, MSG_METRONOMER_NAME)
+App_Delayer::App_Delayer() : App(MSG_DELAYER_NAME, MSG_DELAYER_DESCRIPTION)
 {
     priority = 4;
     stack_depth = 10240;
@@ -201,7 +201,7 @@ int App_Delayer::check_click_button(TouchData data)
 
 void App_Delayer::timeout_beep(note_t note, uint8_t octave)
 {
-    notifications.enqueueNotification("Timer finished!");
+    notifications.enqueueNotification(lang.get(MSG_DELAYER_TIMEOUT));
 
     if (xSemaphoreTake(pins.buzzer_mutex, portMAX_DELAY) == pdTRUE) {
         for(uint8_t i = 0;  i < BUZZ_CYCLES * BUZZ_HZ; i++) {

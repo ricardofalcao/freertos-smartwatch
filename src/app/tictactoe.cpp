@@ -23,6 +23,8 @@
 
 #define EVENT_DRAW_CELL 0x80
 
+#define EVENT_RESET     0x40
+
 /*
     place array IDs:
 
@@ -176,15 +178,11 @@ uint8_t App_TicTacToe::get_winner(uint8_t * layout)
     bool draw_check = true;
 
     for(int i = 0; i < 9; i++) {
-        if(places[i] != 0) {
+        if(places[i] == 0) {
             draw_check = false;
             break;
         }
     }
-
-    if(draw_check) {
-        return 3;
-    }  
 
     for(uint8_t i = 0; i < 8; i++) {
         uint8_t player = places[winPos[i][0]];
@@ -205,6 +203,10 @@ uint8_t App_TicTacToe::get_winner(uint8_t * layout)
             return player;
         }
     }
+
+    if(draw_check) {
+        return 3;
+    }  
 
     return 0;
 }
@@ -251,9 +253,9 @@ void App_TicTacToe::onOpen() {
         erase_cell(&batch, i);
     }
 
-    batch.drawString(batch.viewWidth() / 2, MARGIN_Y / 2, "Tic Tac Toe", TFT_BLACK, 3, MC_DATUM);
+    batch.drawString(batch.viewWidth() / 2, MARGIN_Y / 2, lang.get(MSG_TTT_NAME), TFT_BLACK, 3, MC_DATUM);
     batch.fillRectangle(10, batch.viewHeight() - 40 - 10, batch.viewWidth() - 2*10, 40, TFT_PURPLE);
-    batch.drawString(batch.viewWidth() / 2, batch.viewHeight() - 20 - 10 - 2, "RESET", TFT_WHITE, 3, MC_DATUM);
+    batch.drawString(batch.viewWidth() / 2, batch.viewHeight() - 20 - 10 - 2, lang.get(MSG_TTT_RESET), TFT_WHITE, 3, MC_DATUM);
 
     reset_touch_listener.x = 10;
     reset_touch_listener.y = batch.viewHeight() - 40 - 10;
@@ -264,7 +266,7 @@ void App_TicTacToe::onOpen() {
 }
 
 void App_TicTacToe::onTick() {
-    show_message("Player 1 your turn!");
+    show_message(lang.get(MSG_TTT_PLAYER1_NUM));
 
     int8_t play = get_queued_cell();
     if (play == -1) {
@@ -279,7 +281,7 @@ void App_TicTacToe::onTick() {
         return;
     }
 
-    show_message("Player 2 your turn!");
+    show_message(lang.get(MSG_TTT_PLAYER2_NUM));
 
     play = get_queued_cell();
     if (play == -1) {
@@ -343,26 +345,37 @@ bool App_TicTacToe::check_winner() {
 
     switch(win) {
         case STATE_DRAW: {
+            ended = true;
             //Serial.println("It's a draw!");
-            show_message("It's a draw");
-            return true;
+            show_message(lang.get(MSG_TTT_DRAW));
+            break;
         }
 
         case 2: {
             ended = true;
             //Serial.println("Player 2 wins!");
             print_winning_line(layout);
-            show_message("Player 2 wins!");
-            return true;
+            show_message(lang.get(MSG_TTT_PLAYER2_WIN));
+            break;
         }
         
         case 1: {
             ended = true;
             //Serial.println("Player 1 wins!");
             print_winning_line(layout);
-            show_message("Player 1 wins!");
-            return true;
+            show_message(lang.get(MSG_TTT_PLAYER1_WIN));
+            break;
         }
+    }
+    
+    if (ended) {
+        EventBits_t bits = xEventGroupWaitBits(event_group, EVENT_MINIMIZE | EVENT_RESET, pdFALSE, pdFALSE, portMAX_DELAY);
+
+        if (bits & EVENT_RESET) {
+            xEventGroupClearBits(event_group, EVENT_RESET);
+        }
+
+        return true;
     }
 
     return false;
@@ -386,6 +399,7 @@ bool App_TicTacToe::check_click_reset(TouchData data) {
         print_grid(&batch);
         graphics.endBatch(&batch);
 
+        xEventGroupSetBits(event_group, EVENT_RESET);
         return true;
     }
 

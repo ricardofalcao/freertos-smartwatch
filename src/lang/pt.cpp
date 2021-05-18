@@ -16,11 +16,13 @@ PROGMEM const char TTT_player2_win[] = "Vitória do Jogador 2!";
 //Metronomer Text
 PROGMEM const char Metronomer_name[] = "Metrónomo";
 PROGMEM const char Metronomer_description[] = "Marcador de tempo";
-PROGMEM const char BPM[] = "BPM";
+PROGMEM const char Metronome_BPM[] = "BPM";
 
 //Clock Text
 PROGMEM const char Clock_name[] = "Relógio";
 PROGMEM const char Clock_description[] = "Mostra o tempo atual";
+PROGMEM const char Clock_type_analog[] = "Analógico";
+PROGMEM const char Clock_type_digital[] = "Digital";
 
 //Alarm Text
 PROGMEM const char Alarm_name[] = "Alarme";
@@ -37,6 +39,9 @@ PROGMEM const char Weather_description[] = "Consulta a meteorologia através dum
 //Monitor Text
 PROGMEM const char Monitor_name[] = "Gestor";
 PROGMEM const char Monitor_description[] = "Gere as tarefas ativas no momento";
+PROGMEM const char Monitor_Task[] = "Tarefa";
+PROGMEM const char Monitor_CPU[] = "CPU";
+PROGMEM const char Monitor_Memory[] = "MEM";
 
 //Pong Text
 PROGMEM const char Pong_name[] = "Pong";
@@ -49,6 +54,11 @@ PROGMEM const char Statusbar_description[] = "Mostra o estado e notificações";
 //Lang Text
 PROGMEM const char Lang_name[] = "Língua";
 PROGMEM const char Lang_description[] = "Escolhe a língua do SO";
+
+//Delayer Lang
+PROGMEM const char Delayer_name[] = "Temporizador";
+PROGMEM const char Delayer_description[] = "Contagem decrescente";
+PROGMEM const char Delayer_timeout[] = "Acabou o Tempo!";
 
 /*
 
@@ -68,16 +78,14 @@ PROGMEM const char * const messages [] = {
     //Metronomer
     Metronomer_name,
     Metronomer_description,
-    BPM,
+    Metronome_BPM,
 
     //Clock
     Clock_name,
     Clock_description,
+    Clock_type_analog,
+    Clock_type_digital,
     
-    //Alarm
-    Alarm_name,
-    Alarm_description,
-
     //Drawer
     Drawer_name,
     Drawer_description,
@@ -89,6 +97,9 @@ PROGMEM const char * const messages [] = {
     //Monitor
     Monitor_name,
     Monitor_description,
+    Monitor_Task,
+    Monitor_CPU,
+    Monitor_Memory,
 
     //Pong
     Pong_name,
@@ -100,7 +111,12 @@ PROGMEM const char * const messages [] = {
 
     //Lang
     Lang_name,
-    Lang_description
+    Lang_description,
+    
+    //
+    Delayer_name,
+    Delayer_description,
+    Delayer_timeout
 
 };
 

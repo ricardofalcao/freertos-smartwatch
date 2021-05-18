@@ -84,7 +84,7 @@ void App_Metronome::print_button_down(GBatch_t * batch) {
 void App_Metronome::print_bpm(GBatch_t * batch) {
     batch->drawString(DEFAULT_VIEWPORT.width / 2, DEFAULT_VIEWPORT.height / 2, bpm_print_buffer, TFT_WHITE, 4, MC_DATUM);
     
-    sprintf(bpm_print_buffer, "%d BPM", bpm);
+    sprintf(bpm_print_buffer, "%d %s", bpm, lang.get(MSG_METRONOME_BPM));
     batch->drawString(DEFAULT_VIEWPORT.width / 2, DEFAULT_VIEWPORT.height / 2, bpm_print_buffer, TFT_BLACK, 4, MC_DATUM);
 }
 

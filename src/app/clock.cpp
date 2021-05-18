@@ -59,13 +59,13 @@ void App_Clock::draw_type_button(GBatch_t * batch) {
     switch (type) {
         case CLOCK_ANALOG: {
             batch->fillRoundedRectangle(BUTTON_MARGIN_X, BUTTON_MARGIN_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 5, TFT_ORANGE);
-            batch->drawString(BUTTON_MARGIN_X + BUTTON_WIDTH / 2, BUTTON_MARGIN_Y + BUTTON_HEIGHT / 2 - 2, "Analog", TFT_BLACK, 3, MC_DATUM);
+            batch->drawString(BUTTON_MARGIN_X + BUTTON_WIDTH / 2, BUTTON_MARGIN_Y + BUTTON_HEIGHT / 2 - 2, lang.get(MSG_CLOCK_TYPE_ANALOG) , TFT_BLACK, 3, MC_DATUM);
             break;
         }
 
         case CLOCK_DIGITAL: {
             batch->fillRoundedRectangle(BUTTON_MARGIN_X, BUTTON_MARGIN_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 5, TFT_GREEN);
-            batch->drawString(BUTTON_MARGIN_X + BUTTON_WIDTH / 2, BUTTON_MARGIN_Y + BUTTON_HEIGHT / 2 - 2, "Digital", TFT_BLACK, 3, MC_DATUM);
+            batch->drawString(BUTTON_MARGIN_X + BUTTON_WIDTH / 2, BUTTON_MARGIN_Y + BUTTON_HEIGHT / 2 - 2, lang.get(MSG_CLOCK_TYPE_DIGITAL) , TFT_BLACK, 3, MC_DATUM);
             break;
         }
     }

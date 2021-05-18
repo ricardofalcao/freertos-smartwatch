@@ -16,6 +16,8 @@
 #define SPACING_X   10
 #define SPACING_Y   20
 
+#define LINE_SPACE  3
+
 App_Lang::App_Lang() : App(MSG_LANG_NAME, MSG_LANG_DESCRIPTION) {
     priority = 3;
     touch_stack_depth = 10240;
@@ -108,13 +110,13 @@ void App_Lang::draw_langs(GBatch_t * batch) {
 
     int32_t y = MARGIN_Y;
     batch->drawImage(&icon_de, MARGIN_X, y);
-    batch->drawString(MARGIN_X + icon_de.width() + SPACING_X, y + icon_de.height() / 2 - 2, "German", active == &LANG_DE ? TFT_DARKGREEN : TFT_BLACK, 3, ML_DATUM);
+    batch->drawString(MARGIN_X + icon_de.width() + SPACING_X, y + icon_de.height() / 2 - 2, "German", active == &LANG_DE ? TFT_CYAN : TFT_BLACK, 3, ML_DATUM);
     y += icon_de.height() + SPACING_Y;
 
     batch->drawImage(&icon_en, MARGIN_X, y);
-    batch->drawString(MARGIN_X + icon_en.width() + SPACING_X, y + icon_en.height() / 2 - 2, "English", active == &LANG_EN ? TFT_DARKGREEN : TFT_BLACK, 3, ML_DATUM);
+    batch->drawString(MARGIN_X + icon_en.width() + SPACING_X, y + icon_en.height() / 2 - 2, "English", active == &LANG_EN ? TFT_CYAN : TFT_BLACK, 3, ML_DATUM);
     y += icon_en.height() + SPACING_Y;
 
     batch->drawImage(&icon_pt, MARGIN_X, y);
-    batch->drawString(MARGIN_X + icon_pt.width() + SPACING_X, y + icon_pt.height() / 2 - 2, "Português", active == &LANG_PT ? TFT_DARKGREEN : TFT_BLACK, 3, ML_DATUM);
+    batch->drawString(MARGIN_X + icon_pt.width() + SPACING_X, y + icon_pt.height() / 2 - 2, "Português", active == &LANG_PT ? TFT_CYAN : TFT_BLACK, 3, ML_DATUM);
 }

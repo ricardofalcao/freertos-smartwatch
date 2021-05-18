@@ -70,7 +70,7 @@ void App::open()
 		return;
 	}
 
-	const char * name_c = lang.get(name);
+	const char * name_c = LANG_EN.messages[name];
 	Serial.printf("[App] Start '%s' main task\n", name_c);
 
 	xTaskCreatePinnedToCore(
@@ -186,7 +186,7 @@ void App::vAppDelay(const TickType_t xTicksToDelay) {
 
 void App::startTouchTask()
 {
-	const char * name_c = lang.get(name);
+	const char * name_c = LANG_EN.messages[name];
 
 	char touchname_c[24];
 	sprintf(touchname_c, "%s-TOUCH", name_c);

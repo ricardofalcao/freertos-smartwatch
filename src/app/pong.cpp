@@ -98,7 +98,6 @@ App_Pong::App_Pong() : App(MSG_PONG_NAME, MSG_PONG_DESCRIPTION) {
 
  
 void App_Pong::onOpen() {
-    Serial.println("[Pong] OPEN");
 
     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
     batch.fillScreen(BACKGROUND_COLOR);
@@ -157,5 +156,4 @@ void App_Pong::onTick() {
 }
 
 void App_Pong::onClose() {
-    Serial.println("[Pong] Closed");
 }
