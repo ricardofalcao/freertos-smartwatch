@@ -7,6 +7,11 @@
 #define BACKGROUND_COLOR        TFT_BLACK
 #define GAME_COLOR              TFT_WHITE
 
+#define GAME_X_LEFT             35
+#define GAME_X_RIGHT            DEFAULT_VIEWPORT.width-35
+#define GAME_Y_DOWN             35
+#define GAME_Y_UP               DEFAULT_VIEWPORT.height-35
+
 #define MARGIN_Y                35
 #define MARGIN_X                35
 
@@ -19,14 +24,38 @@
 #define SPACE_BETWEEN_BARS      6
 #define DASHED_BARS_LENGTH      10
 
+#define SET_VELOCITY            1
+
 #define BALL_RADIUS             9
- 
 
 int bot_score = 0;
 int player_score = 0;
-/*
-    Graphics
-*/
+
+int bot_score;
+int player_score ;
+int end;
+int vx;
+int vy;
+int rcenter;
+float cx;      // circle position (set with mouse)
+float cy;
+float r;      // circle radius
+int nbotx;
+int size[2];
+
+void setup_game(){
+    r=BALL_RADIUS;
+    end=0;
+    vx=SET_VELOCITY;
+    vy=SET_VELOCITY;
+    nbotx=0;
+    size[1]=GAME_X_RIGHT-GAME_X_LEFT;
+    size[2]=GAME_Y_UP-GAME_Y_DOWN;
+    cx=size[1]/2+MARGIN_X;
+    cY=size[W]/2+MARGIN_Y;
+    
+
+}
 
 void App_Pong::print_top_bar(GBatch_t * batch, int previous_x, int new_x) {
     if (new_x == previous_x) {
@@ -82,13 +111,61 @@ void App_Pong::print_score(GBatch_t * batch, uint32_t color) {
 
 }
 
-void App_Pong::print_ball(GBatch_t * batch, int x_center, int y_center, uint32_t color) {
+void App_Pong::print_ball(GBatch_t * batch, int x_center, int y_center,int previous_x,int previous_y, uint32_t color) {
+    batch->fillRectangle(previous_x,previous_y,r, BACKGROUND_COLOR);
     batch->fillCircle(x_center, y_center, BALL_RADIUS, color);
 }
+bool circleRect(float cx, float cy, float radius, float rx, float ry, float rw, float rh) {
 
-/*
-    main
-*/
+  // temporary variables to set edges for testing
+  float testX = cx;
+  float testY = cy;
+
+  // which edge is closest?
+  if (cx < rx)         testX = rx;      // test left edge
+  else if (cx > rx+rw) testX = rx+rw;   // right edge
+  if (cy < ry)         testY = ry;      // top edge
+  else if (cy > ry+rh) testY = ry+rh;   // bottom edge
+
+  // get distance from closest edges
+  float distX = cx-testX;
+  float distY = cy-testY;
+  float distance = sqrt( (distX*distX) + (distY*distY) );
+
+  // if the distance is less than the radius, collision!
+  if (distance <= radius) {
+    return true;
+  }
+  return false;
+}
+
+void update_game(float cx, float cy, float r, float plx, float botx,int vx, int vy){
+    int cxa=cx;
+    int cya=cy;
+    cxa=cxa+vx;
+    cya=cya+vy;
+     if (cxa+r>size[1]+MARGIN_X || cxa-r<MARGIN_X){
+       
+        vx=-vx;
+        }
+  
+    bool colision_player=circleRect(cxa,cya,r,plx-BAR_HALF_LENGTH,BAR_HEIGHT,BAR_LENGTH,BAR_HEIGHT);
+    bool colision_bot=circleRect(cxa,cya,r,botx-BAR_HALF_LENGTH,BAR_HEIGHT,BAR_LENGTH,BAR_HEIGHT);
+    
+  
+    if(colision_bot==1 || colision_bot==1){
+        vy=-vy;    
+    }
+
+     cy=cy+vy;
+     cx=cx+vx;
+
+     if(cy-r>size[2] || cy+r<0)
+     end=1;
+
+     return;
+        
+}
 
 App_Pong::App_Pong() : App(MSG_PONG_NAME, MSG_PONG_DESCRIPTION) {
     priority = 3;
@@ -98,12 +175,15 @@ App_Pong::App_Pong() : App(MSG_PONG_NAME, MSG_PONG_DESCRIPTION) {
 
  
 void App_Pong::onOpen() {
-
+    bot_score=0;
+    player_score=0;
     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
     batch.fillScreen(BACKGROUND_COLOR);
     print_field_lines(&batch, GAME_COLOR);
     print_score(&batch, GAME_COLOR);
     graphics.endBatch(&batch);
+    setup_game();
+
 }
 
 float lerp(float a, float b, float x)
@@ -114,19 +194,12 @@ float lerp(float a, float b, float x)
 void App_Pong::onTick() {
     tick++;
 
-    /*
-        Game logic
-    */
+    if(end==1){
+        player_score=1;
+        setup_game();
+    }
 
-   int nballx, nbally;
-
-   // check colisions
-   // change velocity or win game
-   // add velocity to ball
-   // nballx = ballx + velocityx;
-   // nbally = bally + velocityy;
-
-    int nbotx = ((int) (sin(0.05 * tick) * (DEFAULT_VIEWPORT.width / 2 - BAR_LENGTH))) + DEFAULT_VIEWPORT.width / 2;
+    nbotx = ((int) (sin(0.05 * tick) * (DEFAULT_VIEWPORT.width / 2 - BAR_LENGTH))) + DEFAULT_VIEWPORT.width / 2;
 
     // Draw top bar
     GBatch_t batch = graphics.beginBatch(DEFAULT_VIEWPORT);
@@ -149,6 +222,11 @@ void App_Pong::onTick() {
     int iiplayerx = ceil(lerp(playerx, tplayerx, 0.3));
     print_bottom_bar(&batch, playerx, iiplayerx);
     playerx = iiplayerx;
+    int cxa=cx;
+    int cya=cy;
+
+    update_game(cx,cy,r,tplayerx,nbotx,vx,vy);
+    print_ball(&batch,cx,cy,cxa,cya,GAME_COLOR);
 
     graphics.endBatch(&batch);
 
