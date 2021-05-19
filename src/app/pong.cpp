@@ -50,7 +50,7 @@ void setup_game(){
     size[1]=GAME_X_RIGHT-GAME_X_LEFT;
     size[2]=GAME_Y_UP-GAME_Y_DOWN;
     cx=size[1]/2+MARGIN_X;
-    cy=size[1]/2+MARGIN_Y;
+    cy=size[2]/2+MARGIN_Y;
     
 
 }
