@@ -22,7 +22,7 @@ class App_Pong : public App {
     public:
         App_Pong();
 
-        void onOpen() override;   
+        void onOpen() override;    
 
         void onTick() override;   
 
@@ -35,7 +35,7 @@ class App_Pong : public App {
 
         void print_field_lines(GBatch_t * batch, uint32_t color);
 
-        void print_ball(GBatch_t * batch, int x_center, int y_center, uint32_t color);
+        void print_ball(GBatch_t * batch, int x_center, int y_center,int previous_x, int previous_y, uint32_t color);
 
         void print_score(GBatch_t * batch, uint32_t color);
 };

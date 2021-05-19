@@ -31,8 +31,6 @@
 int bot_score = 0;
 int player_score = 0;
 
-int bot_score;
-int player_score ;
 int end;
 int vx;
 int vy;
@@ -52,7 +50,7 @@ void setup_game(){
     size[1]=GAME_X_RIGHT-GAME_X_LEFT;
     size[2]=GAME_Y_UP-GAME_Y_DOWN;
     cx=size[1]/2+MARGIN_X;
-    cY=size[W]/2+MARGIN_Y;
+    cy=size[1]/2+MARGIN_Y;
     
 
 }
@@ -111,10 +109,11 @@ void App_Pong::print_score(GBatch_t * batch, uint32_t color) {
 
 }
 
-void App_Pong::print_ball(GBatch_t * batch, int x_center, int y_center,int previous_x,int previous_y, uint32_t color) {
-    batch->fillRectangle(previous_x,previous_y,r, BACKGROUND_COLOR);
+void App_Pong::print_ball(GBatch_t * batch, int x_center, int y_center,int previous_x, int previous_y, uint32_t color) {
+    batch->fillRectangle(previous_x,previous_y, r, r, BACKGROUND_COLOR);
     batch->fillCircle(x_center, y_center, BALL_RADIUS, color);
 }
+
 bool circleRect(float cx, float cy, float radius, float rx, float ry, float rw, float rh) {
 
   // temporary variables to set edges for testing
