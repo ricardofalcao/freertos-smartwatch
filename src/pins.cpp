@@ -23,8 +23,8 @@ void pins_task(void * pvParameters) {
 
     ledcAttachPin(BUZZER_PIN, 0);
 
-    pinMode(0, INPUT);
-    attachInterrupt(digitalPinToInterrupt(0), isr_click_home, FALLING);
+    pinMode(21, INPUT);
+    attachInterrupt(digitalPinToInterrupt(21), isr_click_home, FALLING);
 
     while(true) {
         vTaskDelay(portMAX_DELAY);

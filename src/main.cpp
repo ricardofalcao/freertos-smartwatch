@@ -104,6 +104,7 @@ void setup() {
   spi_mutex = xSemaphoreCreateMutex();
   Serial.println("[Main] Initializing TFT");
   tft.init();
+  tft.setRotation(2);
 
   xTaskCreatePinnedToCore(
       wifi_task,
