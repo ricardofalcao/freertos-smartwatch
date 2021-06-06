@@ -11,7 +11,9 @@ class App_weather : public App {
     public:
         App_weather();
 
-        void onOpen() override;   
+        void onOpen() override; 
+
+        void onTick() override;   
 
         void onClose() override;   
 

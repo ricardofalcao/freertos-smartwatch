@@ -5,6 +5,7 @@
 #include <SPIFFS.h>
 
 #include <WiFi.h>
+#include <ArduinoOTA.h>
 
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
@@ -29,8 +30,8 @@
 
 #include "lang/lang.h"
 
-#define WIFI_NETWORK "Pass"
-#define WIFI_PASS "12345678c"
+#define WIFI_NETWORK "Ricardo9T"
+#define WIFI_PASS "testeteste123"
 
 Touch touch;
 Graphics graphics;
@@ -61,9 +62,11 @@ App_Pong pong_app;
 void wifi_task(void * pvParameters)  {
   static bool wifi_connected = false;
 
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
   while(true) {
     if (WiFi.status() == WL_CONNECTED) {
       vTaskDelay(1000 / portTICK_PERIOD_MS);
+
       continue;
     }
 
@@ -77,14 +80,14 @@ void wifi_task(void * pvParameters)  {
 
     unsigned long startAttemptTime = millis();
 
-    while (WiFi.status() != WL_CONNECTED && (millis() - startAttemptTime) < 20000){
+    while (WiFi.status() != WL_CONNECTED && (millis() - startAttemptTime) < 10000){
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
     if (WiFi.status() == WL_CONNECTED) {
       wifi_connected = true;
 
-      Serial.println("[WiFi] Connected!");
+      Serial.printf("[WiFi] Connected! IP: %s\n", WiFi.localIP().toString().c_str());
       notifications.enqueueNotification("Connected to WiFi!");
 
       esp_Wsync_time();
@@ -97,6 +100,8 @@ void setup() {
 
   Serial.begin(115200);
 
+  Serial.printf("[Main] SysTick Period: %d ms\n", portTICK_PERIOD_MS);
+
   Serial.println("[Main] Initializing SPIFFS");
   // check file system exists
   SPIFFS.begin(true);
@@ -106,7 +111,7 @@ void setup() {
   tft.init();
   //tft.setRotation(2);
 
-  /*xTaskCreatePinnedToCore(
+  xTaskCreatePinnedToCore(
       wifi_task,
       "WiFi",
       4096,
@@ -114,10 +119,10 @@ void setup() {
       1,
       NULL,
       0
-  );*/
+  );
 
-  Serial.println("[Main] Calibration Touch");
-  touch.calibrate();
+  ledcSetup(4, 5000, 8);
+  ledcAttachPin(27, 4);
 
   Serial.println("[Main] Calibration Touch");
   touch.calibrate();
@@ -135,16 +140,13 @@ void setup() {
   drawer_app.addApp(&tictactoe_app);
   drawer_app.addApp(&metronome_app);
   drawer_app.addApp(&pong_app);
-  drawer_app.addApp(&weather_app);
   drawer_app.addApp(&delayer_app);
   
   statusbar_app.open();
   drawer_app.open();
+  weather_app.open();
 
   vTaskDelay(500 / portTICK_PERIOD_MS);
-
-  ledcSetup(4, 5000, 8);
-  ledcAttachPin(27, 4);
   
   for(int i = 255; i >= 0; i -= 20) {
     ledcWrite(4, i);

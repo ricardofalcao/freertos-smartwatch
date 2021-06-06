@@ -1,64 +1,63 @@
 #include "lang/lang.h"
 
 
-//English
+//German
 
 //TicTacToe Text 
 PROGMEM const char TTT_name[] = "TicTacToe";
-PROGMEM const char TTT_description[] = "Let's play a game!";
-PROGMEM const char TTT_reset[] = "Reset";
-PROGMEM const char TTT_player1_turn[] = "Player 1 your turn!";
-PROGMEM const char TTT_player2_turn[] = "Player 2 your turn!";
-PROGMEM const char TTT_draw[] = "It's a draw";
-PROGMEM const char TTT_player1_win[] = "Player 1 wins!";
-PROGMEM const char TTT_player2_win[] = "Player 2 wins!";
+PROGMEM const char TTT_description[] = "Lass uns ein Spiel spielen!";
+PROGMEM const char TTT_reset[] = "Neu Start";
+PROGMEM const char TTT_player1_turn[] = "Soieler 1 an der Reihe!";
+PROGMEM const char TTT_player2_turn[] = "Spieler 2 an der Reihe!";
+PROGMEM const char TTT_draw[] = "Unenschieden!";
+PROGMEM const char TTT_player1_win[] = "Spieler 1 gewinnt!";
+PROGMEM const char TTT_player2_win[] = "Spieler 2 gewinnt!";
 
 //Metronomer Text
-PROGMEM const char Metronome_name[] = "Metronomer";
-PROGMEM const char Metronome_description[] = "Time Marker";
+PROGMEM const char Metronome_name[] = "Metronom";
+PROGMEM const char Metronome_description[] = "Zeit Marker";
 PROGMEM const char Metronome_BPM[] = "BPM";
 
 //Clock Text
-PROGMEM const char Clock_name[] = "Clock";
-PROGMEM const char Clock_description[] = "Shows the current time";
+PROGMEM const char Clock_name[] = "Uhr";
+PROGMEM const char Clock_description[] = "Actuelle Uhrzeit";
 PROGMEM const char Clock_type_analog[] = "Analog";
 PROGMEM const char Clock_type_digital[] = "Digital";
 
 //Drawer Text
 PROGMEM const char Drawer_name[] = "Drawer";
-PROGMEM const char Drawer_description[] = "Shows all installed apps";
+PROGMEM const char Drawer_description[] = "Alle installierten Apps anzeigen";
 
 //Weather Text
-PROGMEM const char Weather_name[] = "Weather";
-PROGMEM const char Weather_description[] = "Checks weather through API";
+PROGMEM const char Weather_name[] = "Wetter";
+PROGMEM const char Weather_description[] = "Wetter überprüfen mit API";
 
 //Monitor Text
 PROGMEM const char Monitor_name[] = "Monitor";
-PROGMEM const char Monitor_description[] = "Shows the currently active tasks";
+PROGMEM const char Monitor_description[] = "Aktive Tasks anzeigen";
 PROGMEM const char Monitor_Task[] = "Task";
 PROGMEM const char Monitor_CPU[] = "CPU";
 PROGMEM const char Monitor_Memory[] = "MEM";
 
 //Pong Text
 PROGMEM const char Pong_name[] = "Pong";
-PROGMEM const char Pong_description[] = "Classic game Pong";
+PROGMEM const char Pong_description[] = "Klassisches Pong Spiel";
 
 //Statusbar Text
-PROGMEM const char Statusbar_name[] = "Statusbar";
-PROGMEM const char Statusbar_description[] = "Shows status and notifications";
+PROGMEM const char Statusbar_name[] = "Statusanzeige";
+PROGMEM const char Statusbar_description[] = "Status und Benachrichtigungen anzeigen";
 
 //Lang Text
-PROGMEM const char Lang_name[] = "Language";
-PROGMEM const char Lang_description[] = "Choose the OS language";
+PROGMEM const char Lang_name[] = "Sprache";
+PROGMEM const char Lang_description[] = "Auswahl der OS Sprache";
 
 //Delayer Lang
 PROGMEM const char Delayer_name[] = "Delayer";
-PROGMEM const char Delayer_description[] = "Counts time";
-PROGMEM const char Delayer_timeout[] = "Time Finished!";
+PROGMEM const char Delayer_description[] = "Misst die Zeit";
+PROGMEM const char Delayer_timeout[] = "Messung erfolgreich!";
 
 
 /*
-
 */
 
 PROGMEM const char * const messages [] = {

@@ -23,7 +23,7 @@ void pins_task(void * pvParameters) {
 
     ledcAttachPin(BUZZER_PIN, 0);
 
-    pinMode(21, INPUT);
+    pinMode(21, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(21), isr_click_home, FALLING);
 
     while(true) {

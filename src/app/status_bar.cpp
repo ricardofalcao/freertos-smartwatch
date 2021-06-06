@@ -16,12 +16,13 @@
 #define ICON_BATTERY_WIDTH      16
 #define ICON_BATTERY_HEIGHT     (BAR_HEIGHT - 8)
 
-#define NOTIFICATION_WIDTH      100
+#define NOTIFICATION_WIDTH      80
 
 App_Statusbar::App_Statusbar() : App(MSG_STATUSBAR_NAME, MSG_STATUSBAR_DESCRIPTION) {
-    priority = 2;
+    priority = 4;
     stack_depth = 4096;
-    minimized = true;
+    
+    disableTouch = true;
 
     icon_wifi.setColorDepth(4);
 
@@ -31,10 +32,12 @@ App_Statusbar::App_Statusbar() : App(MSG_STATUSBAR_NAME, MSG_STATUSBAR_DESCRIPTI
     notification_sprite.setTextSize(1);
     notification_sprite.setTextColor(TFT_WHITE, TFT_BLACK);
     notification_sprite.setTextDatum(ML_DATUM);
-    notification_sprite.createSprite(NOTIFICATION_WIDTH * 3, STATUSBAR_HEIGHT);
+    notification_sprite.createSprite(NOTIFICATION_WIDTH * 2, STATUSBAR_HEIGHT);
 }
 
 void App_Statusbar::onOpen() {
+    minimized = true;
+
     icon_wifi.createSprite(ICON_STATUSBAR_WIFI_WIDTH, ICON_STATUSBAR_WIFI_HEIGHT);
     icon_wifi.pushImage(0, 0, ICON_STATUSBAR_WIFI_WIDTH, ICON_STATUSBAR_WIFI_HEIGHT, (uint16_t *) icon_statusbar_wifi);
     icon_wifi.createPalette(icon_statusbar_wifi_palette, 16);
@@ -57,25 +60,32 @@ void App_Statusbar::onTick() {
     struct tm current_time;
     localtime_r(&now, &current_time);
 
-    char timeBuffer[9];
-    sprintf(timeBuffer, " %02d:%02d  ", current_time.tm_hour, current_time.tm_min);
+    static bool hour_init = false;
+    if (!hour_init || current_time.tm_hour != last_time.tm_hour || current_time.tm_min != last_time.tm_min) {
+        hour_init = true;
+        
+        char timeBuffer[9];
+        sprintf(timeBuffer, " %02d:%02d  ", current_time.tm_hour, current_time.tm_min);
 
-    batch.drawFilledString(STATUSBAR_SPACING, BAR_HEIGHT / 2 - 2, timeBuffer, TFT_WHITE, TFT_BLACK, 2, ML_DATUM);
+        batch.drawFilledString(STATUSBAR_SPACING, BAR_HEIGHT / 2 - 2, timeBuffer, TFT_WHITE, TFT_BLACK, 2, ML_DATUM);
+    }
+
+    last_time = current_time;
 
     // Notifications
 
     if (current_notification_cursor > 0) {
         batch.drawImage(&notification_sprite, STATUSBAR_SPACING + 70, 0);
 
-        notification_sprite.scroll(-2);
-        current_notification_cursor -= 2;
+        notification_sprite.scroll(-3);
+        current_notification_cursor = max(0, current_notification_cursor - 3);
     } else {
         Notification_t current_notification;
         if (notifications.popNotification(&current_notification)) {
             if (current_notification.message != NULL) {
                 current_notification_cursor = notification_sprite.textWidth(current_notification.message);
             
-                notification_sprite.drawString(current_notification.message, 0, STATUSBAR_HEIGHT / 2);
+                notification_sprite.drawString(current_notification.message, 0, STATUSBAR_HEIGHT / 2 - 2);
                 vPortFree(current_notification.message);
             }
         }
@@ -103,15 +113,25 @@ void App_Statusbar::onTick() {
     x -= STATUSBAR_SPACING;
 
     x -= ICON_STATUSBAR_WIFI_WIDTH;
-    batch.drawImage(&icon_wifi, x, (BAR_HEIGHT - ICON_STATUSBAR_WIFI_HEIGHT) / 2);
-    if (WiFi.status() != WL_CONNECTED) {
+    
+    static bool wifi_connected = true;
+    if (wifi_connected && WiFi.status() != WL_CONNECTED) {
+        wifi_connected = false;
+
+        batch.drawImage(&icon_wifi, x, (BAR_HEIGHT - ICON_STATUSBAR_WIFI_HEIGHT) / 2);
         batch.drawLine(x + 4, (BAR_HEIGHT - ICON_STATUSBAR_WIFI_HEIGHT) / 2 + 4, x + ICON_STATUSBAR_WIFI_WIDTH - 4, (BAR_HEIGHT + ICON_STATUSBAR_WIFI_HEIGHT) / 2 - 4, TFT_RED, 2);
+    } else if (!wifi_connected && WiFi.status() == WL_CONNECTED) {
+        wifi_connected = true;
+        
+        batch.drawImage(&icon_wifi, x, (BAR_HEIGHT - ICON_STATUSBAR_WIFI_HEIGHT) / 2);
     }
+
     x -= STATUSBAR_SPACING;
 
     graphics.endBatch(&batch);
 
-    vAppDelay(150 / portTICK_PERIOD_MS);
+    vAppDelay(100 / portTICK_PERIOD_MS);
+    
 }
 
 void App_Statusbar::onClose() {

@@ -107,7 +107,7 @@ void App_Pong::print_ball(GBatch_t * batch, int x_center, int y_center, int prev
 
 
 App_Pong::App_Pong() : App(MSG_PONG_NAME, MSG_PONG_DESCRIPTION) {
-    priority = 3;
+    priority = 5;
     stack_depth = 4096;
     canMinimize = false;
 }
@@ -276,7 +276,6 @@ void App_Pong::onTick() {
                 print_score(&batch, GAME_COLOR);
                 print_middle_lines(&batch, GAME_COLOR);
                 graphics.endBatch(&batch);
-            Serial.print(1);
             }
 
             tick++;

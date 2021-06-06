@@ -5,8 +5,9 @@
 #define MAXIMUM_TASKS   20
 
 App_Monitor::App_Monitor() : App(MSG_MONITOR_NAME, MSG_MONITOR_DESCRIPTION) {
-    priority = 3;
+    priority = 2;
     stack_depth = 10240;
+    disableTouch = true;
 }
 
 // qsort requires you to create a sort function
@@ -62,23 +63,26 @@ void App_Monitor::fillTasks() {
 
             uint32_t color = ulStatsAsPercentage > 50 ? TFT_RED : ulStatsAsPercentage > 25 ? TFT_ORANGE : TFT_DARKGREY;
 
-            char nameBuffer[24] = {' '};
-            strcpy(nameBuffer, statuses[x].pcTaskName);
+            char nameBuffer[24];
+            memset(nameBuffer, ' ', 24);
+
+            strncpy(nameBuffer, statuses[x].pcTaskName, strlen(statuses[x].pcTaskName));
+            nameBuffer[23] = '\0';
 
             batch.drawFilledString(10, y, nameBuffer, color, TFT_WHITE, 1, TL_DATUM);
 
-            char buffer[8] = {' '};
+            char buffer[8];
 
             if (ulStatsAsPercentage > 0UL) {
-                sprintf(buffer, "%d %%", ulStatsAsPercentage);
+                sprintf(buffer, " %d %% ", ulStatsAsPercentage);
             } else {
-                sprintf(buffer, "<1 %%");
+                sprintf(buffer, " <1 %% ");
             }
             
             batch.drawFilledString(160, y, buffer, color, TFT_WHITE, 1, TR_DATUM);
 
-            char buffer2[8] = {' '};
-            sprintf(buffer2, "%d", statuses[x].usStackHighWaterMark);
+            char buffer2[8];
+            sprintf(buffer2, " %d ", statuses[x].usStackHighWaterMark);
             batch.drawFilledString(200, y, buffer2, color, TFT_WHITE, 1, TR_DATUM);
             graphics.endBatch(&batch);
         }
@@ -100,7 +104,7 @@ void App_Monitor::onResume() {
 void App_Monitor::onTick() {
     fillTasks();
 
-    vAppDelay(1000 / portTICK_PERIOD_MS);
+    vAppDelay(2000 / portTICK_PERIOD_MS);
 }
 
 void App_Monitor::onClose() {

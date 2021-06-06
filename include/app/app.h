@@ -30,6 +30,8 @@ class App {
         bool running = false;
         
         EventGroupHandle_t event_group;
+        
+        bool disableTouch = false;
 
     protected:
         bool canMinimize = true;

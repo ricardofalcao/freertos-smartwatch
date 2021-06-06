@@ -26,7 +26,10 @@ void _run_app_task(void *pvParameters)
 	c->minimized = false;
 
 	c->onOpen();
-	c->startTouchTask();
+	
+	if (!c->disableTouch) {
+		c->startTouchTask();
+	}
 
 	while (true)
 	{
@@ -96,7 +99,10 @@ void App::minimize()
 	Serial.printf("[App] Minimizing '%s'\n", name_c);
 	this->minimized = true;
 	this->onMinimize();
-	vTaskDelete(touch_task_handle);
+	
+	if (!disableTouch) {
+		vTaskDelete(touch_task_handle);
+	}
 }
 
 void App::resume()
@@ -120,7 +126,11 @@ bool App::close()
 	Serial.printf("[App] Closing '%s'\n", name_c);
 	this->running = false;
 	this->onClose();
-	vTaskDelete(touch_task_handle);
+	
+	if (!disableTouch) {
+		vTaskDelete(touch_task_handle);
+	}
+
 	vTaskDelete(task_handle);
 	return true;
 }
@@ -154,10 +164,9 @@ EventBits_t App::vAppConditionalDelay(const TickType_t xTicksToDelay, EventBits_
 	}
 
 	TickType_t xNowWakeTime = xTaskGetTickCount();
-	TickType_t delayTicks = xTicksToDelay - (xNowWakeTime - xLastWakeTime);
-	
-	if (delayTicks > 0) {
-		return vAppConditionalDelay(delayTicks, additional_bits);
+
+	if (xNowWakeTime - xLastWakeTime < xTicksToDelay) {
+		return vAppConditionalDelay(xTicksToDelay - (xNowWakeTime - xLastWakeTime), additional_bits);
 	}
 
 	return 0;
@@ -177,10 +186,9 @@ void App::vAppDelay(const TickType_t xTicksToDelay) {
 	}
 
 	TickType_t xNowWakeTime = xTaskGetTickCount();
-	TickType_t delayTicks = xTicksToDelay - (xNowWakeTime - xLastWakeTime);
-	
-	if (delayTicks > 0) {
-		vAppDelay(delayTicks);
+
+	if (xNowWakeTime - xLastWakeTime < xTicksToDelay) {
+		vAppDelay(xTicksToDelay - (xNowWakeTime - xLastWakeTime));
 	}
 }
 

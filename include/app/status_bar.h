@@ -13,6 +13,7 @@ class App_Statusbar : public App {
         int16_t current_notification_cursor = 0;
         TFT_eSprite notification_sprite = TFT_eSprite(&tft);
         
+        struct tm last_time;
         float last_battery;
 
     public:

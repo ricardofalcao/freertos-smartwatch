@@ -207,15 +207,11 @@ void App_Delayer::timeout_beep(note_t note, uint8_t octave)
         for(uint8_t i = 0;  i < BUZZ_CYCLES * BUZZ_HZ; i++) {
             ledcWriteNote(0, note, octave);
             
-            if (vAppConditionalDelay(BUZZ_DURATION_MS / portTICK_RATE_MS, EVENT_STOP_DELAYER | EVENT_PAUSE_DELAYER)) {
-                break;
-            }
+            vTaskDelay(BUZZ_DURATION_MS / portTICK_RATE_MS);
 
             ledcWrite(0, 0);
 
-            if (vAppConditionalDelay((1000 / BUZZ_HZ - BUZZ_DURATION_MS) / portTICK_RATE_MS, EVENT_STOP_DELAYER | EVENT_PAUSE_DELAYER)) {
-                break;
-            }
+            vTaskDelay((1000 / BUZZ_HZ - BUZZ_DURATION_MS) / portTICK_RATE_MS);
         }
 
         vAppConditionalDelay(250 / portTICK_RATE_MS, EVENT_STOP_DELAYER | EVENT_PAUSE_DELAYER);

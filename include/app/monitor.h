@@ -6,7 +6,7 @@
 #include "touch.h"
 #include "app/app.h"
 
-#define MONITOR_TASKS_LENGTH 20
+#define MONITOR_TASKS_LENGTH 30
 
 class App_Monitor : public App {
     private:

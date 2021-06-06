@@ -7,7 +7,7 @@
 //#define TOUCH_DEBUG
 
 #define ALWAYS_CALIBRATE    false
-#define CALIBRATION_FILE    "/TouchCal"
+#define CALIBRATION_FILE    "/TouchCali"
 
 #define PRESSED_BIT         0x01
 #define RELEASED_BIT        0x02
@@ -59,6 +59,7 @@ void Touch::calibrate() {
 
     tft.setTextFont(1);
     tft.println();
+    ledcWrite(4, 255);
 
     tft.calibrateTouch(calData, TFT_MAGENTA, TFT_BLACK, 15);
 

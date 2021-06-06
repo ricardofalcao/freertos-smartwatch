@@ -142,7 +142,7 @@ void Graphics::begin() {
       "Graphics",
       10240 * 4,
       this,
-      tskIDLE_PRIORITY + 1,
+      tskIDLE_PRIORITY + 3,
       NULL,
       0
   );
